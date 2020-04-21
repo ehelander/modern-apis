@@ -1,0 +1,127 @@
+# [Best Practices for Designing a Pragmatic RESTful API](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api)
+
+- [An API is a user interface for a developer - so put some effort into making it pleasant](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#requirements)
+- [Use RESTful URLs and actions](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#restful)
+  - Resources should be nouns that make sense from the perspective of the API consumer.
+  - Simplest approach: Consistently use plural nouns.
+  - If a resource can only exist within another resource, nest it.
+  - Try to map actions to REST verbs. But do what makes sense and document it.
+- [SSL everywhere - all the time](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#ssl)
+  - Do not redirect non-SSL access requests to their SSL counterparts. Throw an error instead.
+- [An API is only as good as its documentation - so have great documentation](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#docs)
+  - Don't use PDFs or require the developer to sign in.
+  - Make the docs copyable/pastable.
+  - Use links or CURL examples.
+  - Don't break a published API without notice. Include deprecations schedules (e.g., blog & mailing list).
+- [Version via the URL, not via headers](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#versioning)
+  - Always use versioning.
+  - Include the API version in the URL to facilitate explorability.
+  - Consider specifying minor sub-versions via headers.
+- [Use query parameters for advanced filtering, sorting & searching](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#advanced-queries)
+  - Keep base resource URLs as lean as possible.
+  - Filtering
+    - Use a unique query parameter for each field that allows filtering.
+  - Sorting
+    - Use a generic `sort` parameter for specifying sorting rules.
+    - Accommodate complex sorting by allowing a comma-separated list or prefixing `-`.
+  - Searching
+    - If full-text search (e.g., via ElasticSearch or Lucene) is available, provide a query parameter such as `q`.
+  - Consider adding common query aliases.
+    - `GET /tickets?state=closed&sort=-updated_at` &rarr; `GET /tickets/recently_closed`
+- [Provide a way to limit which fields are returned from the API](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#limiting-fields)
+  - Provide a `fields` query parameter whereby a user can specify a comma-separated list of desired fields.
+- [Return something useful from POST, PATCH & PUT requests](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#useful-post-responses)
+  - Remove the need to hit the API again after an update to get the updated resource.
+  - When a POST creates a resource, return a `201` and include a [location header](https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.30) that points to the new resource.
+- [HATEOAS isn't practical just yet](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#hateoas)
+  - Although the Web operates in a HATEOAS-like manner, we're probably not ready for that with APIs yet.
+    - Standards and tooling aren't ready for it yet.
+  - Instead:
+    - Assume the user has access to the documentation.
+    - Include resource identifiers in the output so consumers can use these to access resources.
+    - Long-term, consumers would benefit from storing resource IDs (stable across versions) rather than URLs (since URLs will change with versions).
+- [Use JSON where possible, XML only if you have to](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#json-responses)
+  - If you *must* support XML, use a URL extension (`.json` or `.xml`) to specify the media type.
+- [You should use camelCase with JSON, but snake_case is 20% easier to read](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#snake-vs-camel)
+  - JSON entails following JavaScript naming conventions: using camelCase for field names.
+    - Though if client libraries are built to support various languages, use the conventions of those languages (e.g., snake_case for python, camelCase for Java).
+    - Note, though, a [study indicating that snake_case is 20% easier to read than camelCase](http://ieeexplore.ieee.org/xpl/articleDetails.jsp?tp=&arnumber=5521745).
+- [Pretty print by default & ensure gzip is supported](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#pretty-print-gzip)
+  - The benefit of pretty printing outweighs the extra cost of data transfer (for whitespace).
+    - Using gzip more than makes up for this cost.
+  - If necessary, a `?pretty=true` query parameter could be included.
+- [Don't use response envelopes by default](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#envelope)
+  - Standards (such as [CORS](https://www.w3.org/TR/cors/) and [Link header from RFC 5988](https://tools.ietf.org/html/rfc5988#page-6)) are making envelopes unnecessary.
+  - The most future-proof approach is to avoid envelopes except when truly needed.
+    - Exceptions:
+      - If the API needs to support cross-domain requests over JSONP.
+        - JSONP requests include an additional query parameter (e.g., `callback` or `jsonp`); if present, switch to envelope mode and include otherwise-HTTP-headers as JSON fields.
+      - If the client is incapable of working with HTTP headers.
+        - Add a `?envelope=true` query parameter.
+- [Consider using JSON for POST, PUT and PATCH request bodies](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#json-requests)
+  - Many APIs use URL encoding in request bodies.
+    - But it does not support data types. As a result, the API ends up parsing integers and booleans out of strings.
+    - And it does not support hierarchical structures.
+  - If possible, use JSON-encoded POST, PUT, and PATCH requests.
+    - Require that `Content-Type` be set to `application/json` or throw a 415: Unsupported Media Type.
+- [Paginate using Link headers](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#pagination)
+  - Envelope-based APIs often include pagination data.
+  - With the [Link header introduced by RFC 5988](http://tools.ietf.org/html/rfc5988#page-6), the API can return ready-made links so the consumer does not have to construct them.
+  - Use a custom HTTP header such as `X-Total-Count` to send a count.
+- [Provide a way to autoload related resource representations](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#autoloading)
+  - E.g., use an `embed` or `expand` query parameter to load related resource alongside the originally-requested resource.
+  - Note that it violates some RESTful principles.
+  - Beware of complexity.
+- [Provide a way to override the HTTP method](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#method-override)
+  - Some HTTP clients only support GET and POST.
+  - One popular convention: Accept a `X-HTTP-Method-Override` request header with a string value containing `PUT`, `PATCH`, or `DELETE`.
+    - This should only be used for `POST` requests, since a `GET` should never change data on the server.
+- [Provide useful response headers for rate limiting](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#rate-limiting)
+  - Before a user receives a `429 Too Many Requests` response, notify the consumer of their limits.
+  - One approach:
+    - `X-Rate-Limit-Limit`: Requests allowed in current period
+    - `X-Rate-Limit-Remaining`: Remaining requests in current period
+    - `X-Rate-Limit-Reset`: Remaining seconds in current period (not Unix timestamp)
+- [Use token based authentication, transported over OAuth2 where delegation is needed](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#authentication)
+  - A RESTful API should be stateless.
+    - Request authentication should not depend on cookies or sessions.
+    - Each request should come with authentication credentials.
+  - By using SSL, the authentication credentials can be simplified to a randomly-generated access token delivered in the user name field of HTTP basic auth.
+    - If the user receives a `401 Unauthorized` while exploring via browser, a popup will request credentials.
+  - When this is not practical (i.e., when a user is not able to copy a token from an admin interface), use OAuth 2.
+    - Since JSONP requests cannot send HTTP basic auth or bearer tokens, an `access_token` query parameter can be used (though this is likely to end up in logs).
+- [Include response headers that facilitate caching](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#caching)
+  - 2 approaches to utilize HTTP's built-in caching:
+    - ETag
+      - Include an HTTP header ETag with a hash or checksum of the representation.
+        - If an inbound HTTP request contains an `If-None-Match` header with a matching ETag value, the API should return a `304 Not Modified`.
+    - Last-Modified
+      - This works similarly to an ETag, but uses timestamps. A response `Last-Modified` header is validated against `If-Modified-Since`.
+- [Define a consumable error payload](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#errors)
+  - API errors generally fall into:
+    - 400s
+      - Client issues
+      - These should all come with consumable JSON error representations.
+    - 500s
+      - Server issues
+      - As much as possible, these should also come with consumable JSON error representations.
+  - Error bodies should include the following:
+    - Helpful error message
+    - Unique error code (hat can be looked up in logs)
+    - Description
+  - Validation errors (for PUT, PATCH, and POST) requests should provide a field-by-field breakdown in an `errors` array.
+- [Effectively use HTTP Status codes](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#http-status)
+  - Most important:
+    - `200 OK`
+    - `201 Created`
+    - `204 No Content`
+    - `304 Not Modified`
+    - `400 Bad Request`
+    - `401 Unauthorized`
+    - `403 Forbidden`
+    - `404 Not Found`
+    - `405 Method Not Allowed`
+    - `410 Gone`
+    - `415 Unsupported Media Type`
+    - `422 Unprocessable Entity`
+    - `429 Too Many Requests`
