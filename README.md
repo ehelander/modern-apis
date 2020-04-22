@@ -7,7 +7,7 @@
 - [Best Practices for Designing a Pragmatic RESTful API](introduction/best-practices-for-designing-a-pragmatic-restful-api/best-practices-for-designing-a-pragmatic-restful-api.md)
 - [HTTP Status Codes Explained: A Simple Guide to Response Codes](introduction/http-status-codes-explained/http-status-codes-explained.md)
 - [S.O.L.I.D. Development Principles](introduction/solid-development-principles/solid-development-principles.md)
-- The Practical Test Pyramid
+- [The Practical Test Pyramid](introduction/the-practical-test-pyramid/the-practical-test-pyramid.md)
 
 ## Frameworks
 
