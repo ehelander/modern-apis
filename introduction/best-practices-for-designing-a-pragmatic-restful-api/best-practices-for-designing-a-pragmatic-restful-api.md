@@ -1,4 +1,4 @@
-# [Best Practices for Designing a Pragmatic RESTful API](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api)
+# [Best Practices for Designing a Pragmatic RESTful API](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api) (Vinay Sahni)
 
 - [An API is a user interface for a developer - so put some effort into making it pleasant](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#requirements)
 - [Use RESTful URLs and actions](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#restful)

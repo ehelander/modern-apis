@@ -1,6 +1,5 @@
-# [Securing Your API Endpoints - A Practical Authentication Guide](https://app.pluralsight.com/player?course=codemash-session-40&author=codemash-conference&name=7532cc0a-3125-4f64-a025-b59c60844644&clip=0&mode=live)
+# [Securing Your API Endpoints - A Practical Authentication Guide](https://app.pluralsight.com/player?course=codemash-session-40&author=codemash-conference&name=7532cc0a-3125-4f64-a025-b59c60844644&clip=0&mode=live) (Seth Petry-Johnson, CodeMash 2020)
 
-- Seth Petry-Johnson, CodeMash 2020
 - Goal: Provide a straightforward guide to authentication with APIs.
 - Identity vs. Authentication vs. Authorization
   - Identity: User data
