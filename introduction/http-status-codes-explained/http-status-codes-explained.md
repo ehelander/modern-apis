@@ -1,0 +1,75 @@
+# [HTTP Status Codes Explained: A Simple Guide to Response Codes](https://www.clickminded.com/http-status-codes/) (Tommy Griffith)
+
+- Blocks of HTTP status codes:
+  - 1xx
+    - Informational requests
+  - 2xx
+    - Successful requests
+  - 3xx
+    - Redirects
+  - 4xx
+    - Client errors
+  - 5xx
+    - Server errors
+- 1xx
+  - Information requests
+    - The server hasn't completed the request and is still processing.
+  - Noteworthy 1xx codes
+    - 100 Continue
+    - 101 Switching Protocol
+    - 103 Checkpoints
+- 2xx
+  - Successful requests
+    - Everything happened as planned.
+  - Noteworthy 2xx codes
+    - 200 OK
+      - Most common
+      - Good news
+    - 201 Created
+    - 202 Accepted
+    - 205 Reset Content
+    - 206 Partial Content
+- 3xx
+  - When you request an address and are sent somewhere else.
+  - Noteworthy 3xx codes
+    - 301 Moved Permanently
+      - Colloquially: 301 Redirects
+      - Good news: Link equity was passed to the new URL.
+    - 302 Response Found
+      - Bad news: Link equity was not passed to the new URL.
+      - Usually used temporarily.
+      - Usually better to use 301s.
+    - 304 Not Modified
+      - Used with an `If-Modified-Since` header.
+      - Can be a major optimization with large sites.
+    - 305 Use Proxy
+    - 307 Temporary Redirect
+- 4xx
+  - Client errors
+    - The page wasn't found; there's something wrong with the request.
+  - Noteworthy 4xx codes
+    - 400 Bad Request
+    - 401 Unauthorized
+      - Credentials are not working.
+    - 403 Forbidden
+      - Similar to 401, but more explicit: You do not have access to this resource.
+    - 404 Not Found
+      - The requested URL does not exist.
+      - Consider creating a user-friendly 404 page.
+      - When changing old (important) pages, use 301s instead.
+    - 408 Request Timeout
+    - 410 Gone
+      - Like a 404, but more explicit.
+      - Usually best to stick with 404.
+    - 429 Too Many Requests
+      - Colloquially: Rate limiting
+- 5xx
+  - The client made a good request, but the server didn't complete it.
+  - Noteworthy 5xx codes
+    - 500 Internal Server Error
+      - Ambiguous server error
+    - 502 Bad Gateway
+    - 503 Service Unavailable
+      - An expected server error.
+    - 504 Gateway Timeout
+      - Server did not receive a response quickly enough from another server it was making a request to.
