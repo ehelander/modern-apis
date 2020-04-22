@@ -1,0 +1,27 @@
+# [S.O.L.I.D: The First 5 Principles of Object Oriented Design](https://scotch.io/bar-talk/s-o-l-i-d-the-first-five-principles-of-object-oriented-design) (Samuel Oloruntoba, 2015-03-18)
+
+- SOLID
+  - Acronym for the first five object-oriented design (OOD) principles, by Robert C. Martin (Uncle Bob).
+    - **S**ingle-responsibility principle
+    - **O**pen-closed principle
+    - **L**iskov substitution principle
+    - **I**nterface segregation principle
+    - **D**ependency inversion principle
+  - Goal: Develop software that's easy to maintain & extend.
+- Single-responsibility principle (SRP)
+  - **A class should have one and only one reason to change, meaning that a class should have only one job.**
+  - The class should not know about the details of objects it's interacting with.
+- Open-closed principle (OCP)
+  - **Objects or entities should be open for extension, but closed for modification.**
+  - A class should be easily able to be extended, without needing to modify the class itself.
+  - Include methods in the objects themselves which are then invoked by the class in question.
+    - Use interfaces to ensure objects have the expected method(s).
+- Liskov substitution principle (LSP)
+  - **Let q(x) be a property provable about objects of x of type T. Then q(y) should be provable for objects y of type S where S is a subtype of T.**
+    - Every subclass/derived class should be able to be substituted for its base/parent class.
+- Interface segregation principle (ISP)
+  - **A client should never be forced to implement an interface that it doesn't use or clients shouldn't be forced to depend on methods they do not use.**
+- Dependency inversion principle (DIP)
+  - **Entities must depend on abstractions not on concretions. It states that the high level module must not depend on the low level module, but they should depend on abstractions.**
+    - Facilitates decoupling.
+      - Use interfaces so the high-level modules can depend on abstractions.
