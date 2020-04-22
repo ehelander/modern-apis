@@ -11,6 +11,14 @@
 
 ## Frameworks
 
+- Spring: The Big Picture
+- Spring Framework: Spring Fundamentals
+- Spring Framework: Spring Data JPA
+- GraphQL: The Big Picture
+- Building Scalable APIs with GraphQL
+- Serverless Computing: The Big Picture
+- Using the Serverless Framework with Node.js on AWS
+
 ## Data
 
 ## Languages
@@ -18,3 +26,4 @@
 ## Testing Frameworks
 
 ## Containers
+ 
