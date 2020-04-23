@@ -95,36 +95,171 @@
 
 ### [Where Can I Learn More About Spring Boot?](https://app.pluralsight.com/course-player?clipId=71cdae66-5c74-47de-9301-be28d4cb1e5d)
 
-- Creating Your First Spring Boot Application (Dan Bunker)
-- Spring Boot: Efficient Development, Configuration, and Deployment (Dustin Schultz)
+- Pluralsight: Creating Your First Spring Boot Application (Dan Bunker)
+- Pluralsight: Spring Boot: Efficient Development, Configuration, and Deployment (Dustin Schultz)
 
 ### [Summary](https://app.pluralsight.com/course-player?clipId=bb6b3070-10fb-4f2e-8f7a-bc03fdeeea68)
 
 ## Understanding Spring's Foundations: The Spring Framework
 
-### The Spring Framework Is a Software Framework
+### [The Spring Framework Is a Software Framework](https://app.pluralsight.com/course-player?clipId=1beb64bd-4860-4ca7-99c5-9c787e17c2a3)
 
-### This Is Where It All Began
+- Software framework
+  - "A universal, reusable software environment that provides particular functionality as part of a larger software platform to facilitate development of software applications, products and solutions" (Wikipedia)
+    - A universal, reusable software environment
+      - Serves as the support upon which applications are built
+    - provides particular functionality
+      - Spring provides functionality for web development, data access, etc.
+    - part of a larger software platform
+      - Spring Framework is part of Java
+    - facilitate development of software applications, products and solutions
+      - Makes application development easier
 
-### The Six Key Areas of the Spring Framework
+### [This Is Where It All Began](https://app.pluralsight.com/course-player?clipId=09498b72-2347-4d7c-8729-b7422056821a)
 
-### Spring Core
+- Enterprise Java Development was complex. The Spring Framework has grown and evolved.
+  - Not only dit it simplify development, but it became the foundation for Spring projects.
 
-### Spring Web Overview
+### [The Six Key Areas of the Spring Framework](https://app.pluralsight.com/course-player?clipId=54f5df34-f9d4-4410-8beb-c1e17dce11e2)
 
-### Spring Web MVC
+- Spring is modular, with 6 key areas
+  - Core
+  - Web
+  - AOP
+  - Data Access
+  - Integration
+  - Testing
 
-### Spring Webflux
+### [Spring Core](https://app.pluralsight.com/course-player?clipId=6c4515ea-5f0d-4fa9-9ec3-55cb0a6540a6)
 
-### Spring AOP
+- The most important piece: The foundational module.
+- Provides
+  - Internationalization
+  - Validation
+  - Data binding
+  - Type conversion
+  - Dependency injection
+    - Objects don't exist in isolation: they often depend on other objects.
+    - 2 approaches to fulfilling dependencies
+      1. Object fulfills its own dependencies
+         - Limitations
+           - The object and its dependencies become tightly coupled.
+      2. Object declares what it depends on (and something else fulfills the dependency)
+         - More flexible: Loose coupling between object and dependencies.
+         - Dependency injection
+         - Spring Core is a dependency injection container, creating and managing objects and their dependencies.
+    - Spring Core is the glue of the application.
 
-### Spring Data Access
+### [Spring Web Overview](https://app.pluralsight.com/course-player?clipId=d9406e11-d4f0-4488-b13b-772a4f784f55)
 
-### Spring Integration
+- Spring Web is a framework for handling web requests.
+- 2 ways of handling web requests:
+  1. Spring Web MVC
+  2. Spring Web Webflux
 
-### Spring Testing
+### [Spring Web MVC](https://app.pluralsight.com/course-player?clipId=aaee9963-7a6c-4f22-bb8e-f943e928f4b2)
 
-### Summary
+- Java servlet API
+  - "A servlet is an object that receives a request and generates a response based on that request." (Wikipedia)
+  - It's a low-level API
+    - Hard to use
+    - Less productive
+    - Often leads to poor design
+- Spring Web MVC provides a higher-level API
+  - Easier
+  - More productive
+  - Easier to follow proper design principles
+- MVC
+  - Pluralsight: Introduction Spring MVC 4 (Bryan Hansen)
+
+### [Spring Webflux](https://app.pluralsight.com/course-player?clipId=02373c77-5197-4d67-88cd-18506363173a)
+
+- Reactive programming
+  - A declarative programming paradigm concerned with data streams and the propagation of changes
+  - Key idea: React to change, rather than wait for change
+- Different way of handling web requests
+  - Asynchronous execution (no blocking/waiting) &rarr; better resource utilization
+- Pluralsight: Spring WebFlux: Getting Started (Esteban Herrera)
+
+### [Spring AOP](https://app.pluralsight.com/course-player?clipId=52fcac99-8587-446c-a2af-ffa8b6831911)
+
+- Aspect-Oriented Programming
+  - "A programming paradigm that aims to increase modularity by allowing the separation of cross-cutting concerns." (Wikipedia)
+- Spring AOP
+  - An implementation of AOP inside Spring.
+  - 2 main uses:
+    - Implement certain features within Spring
+    - Valuable tool for developers to ues when handling cross-cutting concerns
+  - E.g., rather than needing to check if the user has the correct permissions: `@PreAuthorize("hasRole('admin')")`
+- Pluralsight: Aspect Oriented Programming (AOP) using Spring AOP and AspectJ (Eberhard Wolff)
+
+### [Spring Data Access](https://app.pluralsight.com/course-player?clipId=e083bcdd-a5a3-417c-aa76-f83b3dbe13e2)
+
+- With standard JDBC, there's a lot of boilerplate code for retrieving data.
+  - Spring Data Access example:
+
+    ```java
+    int cnt = new JdbcTemplate(ds).queryForInt("SELECT COUNT(*) FROM foo");
+    ```
+
+- (Atomic) database transactions are easy with Spring Data Access
+  - Spring Data Access example:
+
+    ```java
+    @Transactional
+    public void operation() {
+      // queries, updates, etc.
+    }
+    ```
+
+- Exception translation
+  - Different vendors use different exceptions
+    - E.g., takes database-specific codes and translates them into a well-known exception (e.g., `DataIntegrityViolationException`)
+- Makes testing easier
+  - Since Spring manages the configuration/setup for how the application accesses data, it's easy to swap this out with test data.
+
+### [Spring Integration](https://app.pluralsight.com/course-player?clipId=2cdaf81c-ab3e-4fa9-b591-898b2602af88)
+
+- How do you expose operations to other systems? How do you invoke operations on other systems? (RMI: Remote Method Invocation; Messaging Systems; Web Services)
+  - Spring makes it easy to expose and invoke web services.
+
+    ```java
+    // @RestController Denotes that this is a REST service
+    @RestController
+    public class AccountController {
+
+      // @GetMapping Denotes the path that is sued to invoke this operation
+      @GetMapping("/account/{id}")
+      public Account
+        // @PathVariable Indicates this is a placeholder
+        find(@PathVariable int id) {
+          // look up account by id
+        }
+    }
+    ```
+
+  - `RestTemplate` abstracts away details of dealing with a web service (connecting to the web service, sending a command, handling the response)
+
+    ```java
+    restTemplate.getForObject("http://foo.com/account/123", Account.class);
+    ```
+
+### [Spring Testing](https://app.pluralsight.com/course-player?clipId=b956e09c-8b52-484f-a193-f734bfad162b)
+
+- Spring Testing focuses on unit tests and integration tests
+- Unit testing
+  - Explicit support for unit testing in Spring is minimal. Most of the benefit comes from using dependency injection.
+    - Testing codes that has no dependencies is easy to test.
+    - But dependencies cause testing challenges. When testing code with dependency injection, the developer is forced to declare dependencies. When testing, the dependencies can be replaced with mocks.
+      - Spring includes several built-in mocks.
+- Integration testing
+  - Spring pieces the parts of the application together.
+    - Support for common testing scenarios
+      - Data access
+      - Web apps
+    - Support for cleaning up after tests
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=da90852f-f596-488b-9bf2-bf38b4d7f8c4)
 
 ## Exploring Other Spring Projects
 
