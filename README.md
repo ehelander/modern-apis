@@ -11,7 +11,7 @@
 
 ## Frameworks
 
-- Spring: The Big Picture
+- [Spring: The Big Picture](frameworks/spring-the-big-picture/spring-the-big-picture.md)
 - Spring Framework: Spring Fundamentals
 - Spring Framework: Spring Data JPA
 - GraphQL: The Big Picture

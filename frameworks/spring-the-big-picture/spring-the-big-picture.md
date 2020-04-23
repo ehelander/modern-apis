@@ -52,8 +52,100 @@
 
 ## Getting to Know Spring with Spring Boot
 
+### [Spring Boot Makes Spring Both Quick and Easy](https://app.pluralsight.com/course-player?clipId=8dcd8deb-e2ff-4822-ada1-b482355559cb)
+
+- Spring Boot makes getting started with Spring quick & easy.
+  - But without sacrificing features: It's fully-featured and heavily used in production environments.
+
+### [Understanding Spring Boot's Key Features](https://app.pluralsight.com/course-player?clipId=5af675a4-d0ca-4327-b30f-7c36c7cbe1b4)
+
+- Spring Boot can be used for both web- and non-web-based applications.
+- Spring Boot is built on top of the Spring framework.
+- Notable features
+  - Auto-configuration
+  - Standalone
+  - Opinionated
+
+### [Intelligent Auto-configurations](https://app.pluralsight.com/course-player?clipId=d97f2b1c-ad6c-4acc-aa79-c61dbaef76c8)
+
+- A best-guess configuration, based on dependencies that have been added.
+  - Contextual aware; smart
+- Setting up auto-configuration:
+  - `@EnableAutoConfiguration` annotation
+
+### [Standalone Applications that "Just Run"](https://app.pluralsight.com/course-player?clipId=8132190b-3076-4630-989e-681617a4b6c3)
+
+- "Spring Boot makes it easy to create stand-alone, production-grade, Spring-based applications that you can 'just run'."
+  - Vs. typical Java web application:
+    - Package application
+    - Choose/download webserver
+    - Configure webserver
+    - Deploy application
+    - Start webserver
+- Spring Boot:
+  - Package & run: `java -jar my-application.jar`
+
+### [An Opinionated View of Spring](https://app.pluralsight.com/course-player?clipId=f9bed16b-4aca-43bb-aad4-4d59d98b618a)
+
+- Building Java applications entails an overwhelming number of choices.
+- Spring boot "favors convention over configuration and is designed to get you up and running as quickly as possible"
+- Example:
+  - Spring Initializer: [https://start.spring.io](https://start.spring.io)
+    - Create & download a fully-functional Spring Boot application based on dependencies
+
+### [Where Can I Learn More About Spring Boot?](https://app.pluralsight.com/course-player?clipId=71cdae66-5c74-47de-9301-be28d4cb1e5d)
+
+- Creating Your First Spring Boot Application (Dan Bunker)
+- Spring Boot: Efficient Development, Configuration, and Deployment (Dustin Schultz)
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=bb6b3070-10fb-4f2e-8f7a-bc03fdeeea68)
+
 ## Understanding Spring's Foundations: The Spring Framework
+
+### The Spring Framework Is a Software Framework
+
+### This Is Where It All Began
+
+### The Six Key Areas of the Spring Framework
+
+### Spring Core
+
+### Spring Web Overview
+
+### Spring Web MVC
+
+### Spring Webflux
+
+### Spring AOP
+
+### Spring Data Access
+
+### Spring Integration
+
+### Spring Testing
+
+### Summary
 
 ## Exploring Other Spring Projects
 
+### The Spring Projects We'll Be Exploring
+
+### Spring Data Project
+
+### Spring Cloud Project
+
+### Spring Security Project
+
+### Summary
+
 ## Is Spring a Good Fit?
+
+### Is Spring a Good Fit for What I'm Doing?
+
+### The Advantages of Using Spring
+
+### The Disadvantages of Using Spring
+
+### Making the Decision
+
+### Summary
