@@ -1,7 +1,7 @@
 # [The Practical Test Pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) (Ham Vocke, 2018-02-26)
 
 - The Test Pyramid
-  - From Mike Cohn in *Succeeding with Agile*
+  - From Mike Cohn in _Succeeding with Agile_
     - ![the-test-pyramid](2020-04-22-11-36-50.png)
     - May be a bit simplistic/misleading.
   - 2 important take-aways:
@@ -10,7 +10,7 @@
   - Avoid the Test Ice Cream Cone: Nightmarish to maintain, prohibitively slow to run.
 - Unit tests
   - Unit tests ensure the unit (subject under test) works as intended.
-    - Definition of a *unit* depends on the context.
+    - Definition of a _unit_ depends on the context.
   - Typically the greatest number of tests.
   - Types
     - Solitary unit tests
@@ -79,7 +79,7 @@
   - "UI" tests often refer to testing a GUI (just one type of UI).
   - In Mike Cohn's terminology, UI tests and end-to-end tests are equivalent.
     - However, this is likely a conflation, since the UI can be tested in a non-end-to-end manner.
-  - UI tests tend to test *behavior* well, but are largely unable to determine if something 'looks good'.
+  - UI tests tend to test _behavior_ well, but are largely unable to determine if something 'looks good'.
     - Behavior: [Selenium](http://docs.seleniumhq.org/)
     - Design (screenshot comparison): [Galen](http://galenframework.com/)
 - End-to-End Tests
@@ -90,12 +90,12 @@
   - Who's in charge of writing these tests, since they likely span multiple microservice teams?
     - Having a centralized QA team is an anti-pattern.
     - Perhaps a quality guild?
-  - Only include a *bare minimum* of end-to-end tests, focusing on the critical path(s) your users are likely to take.
+  - Only include a _bare minimum_ of end-to-end tests, focusing on the critical path(s) your users are likely to take.
   - Both Chromium and Firefox offer headless modes.
   - [REST-assured](https://github.com/rest-assured/rest-assured)
 - Acceptance Tests
   - Sometimes referred to as functional tests.
-  - Goal: Ensure software works correctly from a *user's* perspective (rather than from a technical perspective).
+  - Goal: Ensure software works correctly from a _user's_ perspective (rather than from a technical perspective).
 - Exploratory Testing
   - Exploratory testing is manual testing that embraces the tester's freedom and creativity to discover quality issues in a running system.
 - Putting tests in your deployment pipeline

@@ -199,6 +199,7 @@
 ### [Spring Data Access](https://app.pluralsight.com/course-player?clipId=e083bcdd-a5a3-417c-aa76-f83b3dbe13e2)
 
 - With standard JDBC, there's a lot of boilerplate code for retrieving data.
+
   - Spring Data Access example:
 
     ```java
@@ -206,6 +207,7 @@
     ```
 
 - (Atomic) database transactions are easy with Spring Data Access
+
   - Spring Data Access example:
 
     ```java
@@ -224,6 +226,7 @@
 ### [Spring Integration](https://app.pluralsight.com/course-player?clipId=2cdaf81c-ab3e-4fa9-b591-898b2602af88)
 
 - How do you expose operations to other systems? How do you invoke operations on other systems? (RMI: Remote Method Invocation; Messaging Systems; Web Services)
+
   - Spring makes it easy to expose and invoke web services.
 
     ```java

@@ -86,7 +86,7 @@
 
 - In a basic GraphQL query, it is not possible to query for the same field with different arguments.
   - Aliases allow this: You can rename the result of a field.
-  - Before the field name, include `alias: `.
+  - Before the field name, include `alias:`.
 
 ### [Queries - Fragments](https://app.pluralsight.com/course-player?clipId=8f441397-bdff-41a7-8d3e-dd37de5d54d3)
 
@@ -95,17 +95,16 @@
 
 ```graphql
 fragment fragmentName on Type {
-    field1
-    field2
+  field1
+  field2
 }
 ```
 
 ```graphql
 {
-    field {
-        ...fragmentName
-    }
-
+  field {
+    ...fragmentName
+  }
 }
 ```
 
@@ -113,7 +112,7 @@ fragment fragmentName on Type {
 
 ```gql
 query queryName {
-    fieldName
+  fieldName
 }
 ```
 
@@ -123,13 +122,13 @@ query queryName {
 
 ```gql
 query someQuery($isSomething: Boolean!) {
-    field(arg: $isSomething)
+  field(arg: $isSomething)
 }
 ```
 
 ```json
 {
-    "isSomething": true
+  "isSomething": true
 }
 ```
 
@@ -141,21 +140,21 @@ query someQuery($isSomething: Boolean!) {
 
 ```gql
 mutation changeSomething($input: InputType!) {
-    someMutation(input: $input) {
-        first
-        nested {
-            second
-        }
+  someMutation(input: $input) {
+    first
+    nested {
+      second
     }
+  }
 }
 ```
 
 ```json
 {
-    "input": {
-        "first": "Some thing",
-        "second": "Some other thing"
-    }
+  "input": {
+    "first": "Some thing",
+    "second": "Some other thing"
+  }
 }
 ```
 

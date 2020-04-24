@@ -41,7 +41,7 @@
     - Include resource identifiers in the output so consumers can use these to access resources.
     - Long-term, consumers would benefit from storing resource IDs (stable across versions) rather than URLs (since URLs will change with versions).
 - [Use JSON where possible, XML only if you have to](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#json-responses)
-  - If you *must* support XML, use a URL extension (`.json` or `.xml`) to specify the media type.
+  - If you _must_ support XML, use a URL extension (`.json` or `.xml`) to specify the media type.
 - [You should use camelCase with JSON, but snake_case is 20% easier to read](https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api#snake-vs-camel)
   - JSON entails following JavaScript naming conventions: using camelCase for field names.
     - Though if client libraries are built to support various languages, use the conventions of those languages (e.g., snake_case for python, camelCase for Java).

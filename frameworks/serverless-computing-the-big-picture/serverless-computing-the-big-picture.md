@@ -69,14 +69,14 @@
   - When nothing's happening, you pay nothing.
     - When something does happen, you have fine-grained billing visibility.
 
-| Serverless | Serverful |
-| - | - |
-| Program runs based on defined event | Program runs continuously until stopped |
-| Program state kept in storage | Program state kept anywhere |
-| Max memory size of ~3 GB | Max memory size > 10 TB |
-| Maximum run time measured in minutes | No limit on run time |
-| OS and machine selected by provider | OS and instance selected by user |
-| Provider responsible for scaling | User responsible for scaling |
+| Serverless                           | Serverful                               |
+| ------------------------------------ | --------------------------------------- |
+| Program runs based on defined event  | Program runs continuously until stopped |
+| Program state kept in storage        | Program state kept anywhere             |
+| Max memory size of ~3 GB             | Max memory size > 10 TB                 |
+| Maximum run time measured in minutes | No limit on run time                    |
+| OS and machine selected by provider  | OS and instance selected by user        |
+| Provider responsible for scaling     | User responsible for scaling            |
 
 ### [Challenges with Serverless Computing]()
 

@@ -10,6 +10,7 @@
   - Authorization: Is this request permitted?
     - How we validate the identity's permission do to the request.
 - Authentication, in order of increasing complexity
+
   - Built-in to webserver
     - Overview
       - These can work for simple use cases, though they lack flexibility and can involve sending credentials over the network.
@@ -28,7 +29,7 @@
         - The server receives these, parses them, and uses them to authenticate.
         - Encoded does _not_ mean encrypted. So they're essentially sent as plain text.
         - You must use TLS. And you're only as secure as the network's encryption.
-        - Note that this uses the `Authorization` header, even though we're dealing with *authentication* (who).
+        - Note that this uses the `Authorization` header, even though we're dealing with _authentication_ (who).
         - With Active Directory, it's supported out of the box with IIS.
         - Easily authenticate against a custom database with a small amount of custom code.
         - Drawbacks:
@@ -50,11 +51,13 @@
           - In order for this to work, it prevents a password with strong encryption: The server needs to be able to access the plaintext password (rather than using a salted, hashed, one-way encrypted password).
         - So no one really uses digest.
   - Custom
+
     - Overview
       - Allows more flexibility.
     - Types
+
       - API keys
-        - it's generally more secure and flexible to use something *other than* the primary account credentials.
+        - it's generally more secure and flexible to use something _other than_ the primary account credentials.
         - There's no specific standard as to what constitutes an API key.
           - Needs to be unique and difficult to brute force.
         - They must be assigned (not chosen) so they're unique.
@@ -65,8 +68,8 @@
             - Must use TLS (because it's being passed as plain text).
             - Easy to pass as a query string. Generally, better to send as a header (because headers don't tend to show up in log files or error reports). And a header can't be leaked by accident (e.g., by copying the link).
             - Tradeoff:
-              - You can *either* have secure storage of the API keys in your database *or* the ability to show users a list of their keys. Not both.
-                - So they should be salted/hashed when stored. So then you can't show the keys to the user. If you *do* show the users their keys, considering an expiration policy.
+              - You can _either_ have secure storage of the API keys in your database _or_ the ability to show users a list of their keys. Not both.
+                - So they should be salted/hashed when stored. So then you can't show the keys to the user. If you _do_ show the users their keys, considering an expiration policy.
           - Cryptographic keys (HMAC)
             - Basically a custom version of digest authentication: Using the key to sign the request.
             - The client sends the signature (request + secret, hashed via SHA1 or SHA256) in a header.
@@ -89,6 +92,7 @@
               - How does the client come to know the key in the first place, without exposing it?
                 - Anything you expose to JavaScript is basically open for inspection. So you can't store it in the client.
       - JWT
+
         - JWT are an open, industry standard for securely representing claims between two parties.
           - Claim: Some piece of data
           - Once the claims are generated, the server can cryptographically sign these (creating a token), give the token to the browser, and the browser can then send the token with every request.
@@ -100,21 +104,23 @@
           - Upon receiving a request, the token extracts the claims, recomputes the signature, and verifies that the token matches.
           - Only the server knows the secret key. The client just stores the token and passes it back with each request.
         - Format: `<header>.<payload>.<signature>`
+
           - Header indicates the type fo token and the hashing algorithm was used. Part of the JWT standard is that the client is able to use the hashing algorithm. This is also one of the reasons why some security experts don't like JWT.
 
             ```json
             {
-                "alg": "HS256",
-                "typ": "JWT"
+              "alg": "HS256",
+              "typ": "JWT"
             }
             ```
 
         - Payload: The claims you're making.
           - If you use the registered claims, they're more interoperable (and can be used for third-party systems, without needing to publish the schema).
         - Signature: Calculated by combining the header and payload together and running these through the hash.
+
       - JWT tokens are self-contained and stateless.
         - The claim indicates whether the user can do the request. If the server validates the claim, the server doesn't need to look up the user's permissions. Removing this lookup step can help performance.
-        - Note that the token is *encoded*, not *encrypted*. So it could be unencoded. Claims are visible to the client.
+        - Note that the token is _encoded_, not _encrypted_. So it could be unencoded. Claims are visible to the client.
         - Don't put tokens with sensitive data into LocalStorage!
           - ![storing-jws-on-the-js-client](img/2020-04-21-14-08-41.png)
             - LocalStorage
@@ -125,6 +131,7 @@
             - HttpOnly secure cookie:
               - Safe from XSS.
               - But it can only be used for server-side authentication and authorization.
+
   - OAuth
     - Overview
       - OAuth was designed to solve the problem of delegated authorization in a three-party scenario.
@@ -135,11 +142,11 @@
             - Resource owner (owns the content)
             - Service provider (hosting the content)
             - Client (accesses the content)
-          - OAuth allows the resource owner to authorize the client to make an *authorized* but *not authenticated* request to the service provider.
+          - OAuth allows the resource owner to authorize the client to make an _authorized_ but _not authenticated_ request to the service provider.
           - ![oauth-authentication-flow](img/2020-04-21-14-15-41.png)
         - 2 versions of OAuth. It's not universally accepted that the new version is better.
       - OAuth is a standard for delegating authorization.
-        - OAuth is *not an **authentication** protocol*. It should not be used to figure out *who* is making a request.
+        - OAuth is _not an **authentication** protocol_. It should not be used to figure out _who_ is making a request.
           - OAuth tokens do not indicate anything about the user's identity. It can only tell us whether the request is allowed.
           - What if the token lets you call an API that returns identity information? Is this sufficient for authentication? No, there's no guarantee regarding the identity of who made that request.
             - So an interceptor would reuse the token (and identity information) it had gotten earlier.
@@ -161,7 +168,7 @@
           - No ability to verify the message's integrity.
             - Though TLS can provide this, as long as it's not cracked.
           - Drawbacks
-            - A *framework*, not a *protocol*.
+            - A _framework_, not a _protocol_.
               - To support a wide range of workflows, this is left up to the implementer.
               - 1.0 and 2.0 are not interoperable. 2.0 can be implemented differently from case-to-case.
             - Eran Hammer (former lead author of OAuth working group: withdrew his name from the spec prior to publishing 2.0):
@@ -182,6 +189,7 @@
       - WS-Security
         - The king of complexity.
         - If you need enterprise-grade API security, pay someone to help you.
+
 - What should you use?
   - It depends.
     - Client certificates
@@ -212,10 +220,10 @@
       - Avoids complexity of signing.
       - But less interoperable.
     - OAuth 2.0 + OpenID Connect
-      - When you want to *authenticate* against third-party data.
+      - When you want to _authenticate_ against third-party data.
     - SAML or WS-Security
       - Only if you need it.
 - 3 key take-aways:
   1. Use API keys as **bearer tokens** (easier) or to **sign requests** (more secure)
-  2. **JSON Web Tokens** are a secure, statelsss way to share *non-sensitive data*. Careful about XSS/CRSF!
+  2. **JSON Web Tokens** are a secure, statelsss way to share _non-sensitive data_. Careful about XSS/CRSF!
   3. **OAuth is for authorization, not authentication.** Use OpenID Connect if you need both.

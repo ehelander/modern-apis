@@ -1,0 +1,23 @@
+{
+  "name": "modern-apis",
+  "version": "1.0.0",
+  "description": "## Introduction",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write **/*.md",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ehelander/modern-apis.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ehelander/modern-apis/issues"
+  },
+  "homepage": "https://github.com/ehelander/modern-apis#readme",
+  "dependencies": {
+    "prettier": "^2.0.5"
+  }
+}
