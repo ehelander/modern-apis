@@ -14,7 +14,7 @@
 - [Spring: The Big Picture](frameworks/spring-the-big-picture/spring-the-big-picture.md)
 - Spring Framework: Spring Fundamentals
 - Spring Framework: Spring Data JPA
-- GraphQL: The Big Picture
+- [GraphQL: The Big Picture](frameworks/graphql-the-big-picture/graphql-the-big-picture.md)
 - Building Scalable APIs with GraphQL
 - Serverless Computing: The Big Picture
 - Using the Serverless Framework with Node.js on AWS
@@ -26,4 +26,3 @@
 ## Testing Frameworks
 
 ## Containers
- 
