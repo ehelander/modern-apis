@@ -95,8 +95,9 @@
 
 ### [Where Can I Learn More About Spring Boot?](https://app.pluralsight.com/course-player?clipId=71cdae66-5c74-47de-9301-be28d4cb1e5d)
 
-- Pluralsight: Creating Your First Spring Boot Application (Dan Bunker)
-- Pluralsight: Spring Boot: Efficient Development, Configuration, and Deployment (Dustin Schultz)
+- Pluralsight
+  - Creating Your First Spring Boot Application (Dan Bunker)
+  - Spring Boot: Efficient Development, Configuration, and Deployment (Dustin Schultz)
 
 ### [Summary](https://app.pluralsight.com/course-player?clipId=bb6b3070-10fb-4f2e-8f7a-bc03fdeeea68)
 
@@ -169,8 +170,8 @@
   - Easier
   - More productive
   - Easier to follow proper design principles
-- MVC
-  - Pluralsight: Introduction Spring MVC 4 (Bryan Hansen)
+- Pluralsight
+  - Introduction Spring MVC 4 (Bryan Hansen)
 
 ### [Spring Webflux](https://app.pluralsight.com/course-player?clipId=02373c77-5197-4d67-88cd-18506363173a)
 
@@ -179,7 +180,8 @@
   - Key idea: React to change, rather than wait for change
 - Different way of handling web requests
   - Asynchronous execution (no blocking/waiting) &rarr; better resource utilization
-- Pluralsight: Spring WebFlux: Getting Started (Esteban Herrera)
+- Pluralsight
+  - Spring WebFlux: Getting Started (Esteban Herrera)
 
 ### [Spring AOP](https://app.pluralsight.com/course-player?clipId=52fcac99-8587-446c-a2af-ffa8b6831911)
 
@@ -191,7 +193,8 @@
     - Implement certain features within Spring
     - Valuable tool for developers to ues when handling cross-cutting concerns
   - E.g., rather than needing to check if the user has the correct permissions: `@PreAuthorize("hasRole('admin')")`
-- Pluralsight: Aspect Oriented Programming (AOP) using Spring AOP and AspectJ (Eberhard Wolff)
+- Pluralsight
+  - Aspect Oriented Programming (AOP) using Spring AOP and AspectJ (Eberhard Wolff)
 
 ### [Spring Data Access](https://app.pluralsight.com/course-player?clipId=e083bcdd-a5a3-417c-aa76-f83b3dbe13e2)
 
@@ -263,24 +266,96 @@
 
 ## Exploring Other Spring Projects
 
-### The Spring Projects We'll Be Exploring
+### [The Spring Projects We'll Be Exploring](https://app.pluralsight.com/course-player?clipId=11f3be2d-2069-4d0e-be03-c1148a7665dc)
 
-### Spring Data Project
+- [spring.io/projects](spring.io/projects]
+  - More than 20 projects
 
-### Spring Cloud Project
+### [Spring Data Project](https://app.pluralsight.com/course-player?clipId=221cb942-c780-46a1-9184-9d2f4f21b953)
 
-### Spring Security Project
+- [https://projects.spring.io/spring-data](https://projects.spring.io/spring-data)
+- Mission: To provide a familiar and consistent, Spring-based programming model for data access while still retaining the special traits of the underlying data store.
+- Spring Data Project vs. Spring Framework's Data Access support
+  - Spring Data Project adds new ways of interacting with RDBMSs, as well as supporting different types of databases.
+  - The Spring Data Project is an umbrella project, with a host of 'main' and 'community' modules.
+  - Note 'quick start' examples.
+- Pluralsight
+  - Getting Started with Spring Data JPA (Dan Bunker)
+  - Getting Started with Spring Data REST (Dan Bunker)
 
-### Summary
+### [Spring Cloud Project](https://app.pluralsight.com/course-player?clipId=58bccd71-c2fb-4348-a397-b5e52df18411)
+
+- [https://projects.spring.io/spring-cloud](https://projects.spring.io/spring-cloud)
+- Built on top of Spring Boot.
+- Makes building distributed systems easier (e.g., microservices).
+  - These architectures run into well-known problems, that have well-known solutions.
+    - Distributed/versioning configuration
+    - Service registration and discovery
+    - Routing
+    - Service-to-service calls
+    - Load balancing
+    - Circuit breakers
+    - Global locks
+    - Leadership election and cluster state
+    - Distributed messaging
+  - `@EnableDiscoveryClient`
+    - Service can find other service and be discovered by other services.
+  - An umbrella project with sub-projects.
+- Pluralsight
+  - Spring Cloud Fundamentals (Dustin Schultz)
+
+### [Spring Security Project](https://app.pluralsight.com/course-player?clipId=46ebf0b9-6d49-4a59-85c6-0b7029606a87)
+
+- [https://projects.spring.io/spring-security](https://projects.spring.io/spring-security)
+- Handles authentication & authorization.
+- Also helps protect against common attacks (XSS, clickjacking, CSRF, etc.)
+- Note 'getting started' guides.
+- `@EnableWebSecurity`
+  - Sets up the application to handle secure web requests.
+  - Can then configure which paths are allowed, which require authorization, and define a login page.
+- Pluralsight
+  - Spring Security Fundamentals (Bryan Hansen)
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=1f459a10-7e35-4511-b889-6bd9e3ce3bc7)
 
 ## Is Spring a Good Fit?
 
-### Is Spring a Good Fit for What I'm Doing?
+### [Is Spring a Good Fit for What I'm Doing?](https://app.pluralsight.com/course-player?clipId=32aa052d-1763-4aff-bd3d-5438f687d4d8)
 
-### The Advantages of Using Spring
+### [The Advantages of Using Spring](https://app.pluralsight.com/course-player?clipId=dfa4ef3e-dfc2-4c22-b9a1-d814039a3840)
 
-### The Disadvantages of Using Spring
+- Spring is rock-solid & well-engineered
+- Spring has stood the test of time
+- Spring has a huge community
+- Spring is well-liked by developers
+  - [https://insights.stackoverflow.com/survey/2019](https://insights.stackoverflow.com/survey/2019)
+    - ![stackoverflow-developer-survey_used](2020-04-24-10-14-23.png)
+    - ![stackoverflow-developer-survey_loved](2020-04-24-10-12-54.png)
+- Spring has a large talent pool, and lots of open positions
+- Spring has a wealth of knowledge (articles, books, videos)
+- Spring is very actively developed.
+- Spring has substantial built-in IDE support & plugins.
+- Spring scales
 
-### Making the Decision
+### [The Disadvantages of Using Spring](https://app.pluralsight.com/course-player?clipId=c295fbb3-8124-45d0-9d57-f03bf96b5800)
 
-### Summary
+- Spring can have "too much magic"
+  - Not necessarily intuitive
+- Spring can have a steep learning curve
+- Spring can increase the size of your final deliverable
+  - A bit bloated
+- Spring can be hard to debug
+  - Spring hides a lot of details, which can make troubleshooting difficult.
+- Spring adds some memory overhead.
+- Spring complexity has grown over time.
+  - It started out with the goal to reduce complexity, but it has become complex itself (&rarr; Spring Boot).
+- Spring can be too configurable.
+- Spring is "big".
+  - It's not small framework. It's best for long-running, complex applications.
+- Spring community projects are hit or miss.
+
+### [Making the Decision](https://app.pluralsight.com/course-player?clipId=81b5594a-2e16-4771-9154-1313d938092b)
+
+- As always, "It depends."
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=dcbaddbc-6c80-4862-af6b-f57df4a8ef5b)
