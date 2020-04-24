@@ -78,17 +78,17 @@
   - [https://developer.github.com/v4/explorer](https://developer.github.com/v4/explorer)
   - In explorer, hit `crtl` + `space` to view options.
 
-### [Queries = Arguments](https://app.pluralsight.com/course-player?clipId=24e151e3-3ed0-476f-a979-1549b7143f21)
+### [Queries - Arguments](https://app.pluralsight.com/course-player?clipId=24e151e3-3ed0-476f-a979-1549b7143f21)
 
 - Every field and nested object can receive its own set of arguments.
 
-### [Queries = Aliases](https://app.pluralsight.com/course-player?clipId=d205713c-fab6-4df8-b7d3-b4a37d747ad9)
+### [Queries - Aliases](https://app.pluralsight.com/course-player?clipId=d205713c-fab6-4df8-b7d3-b4a37d747ad9)
 
 - In a basic GraphQL query, it is not possible to query for the same field with different arguments.
   - Aliases allow this: You can rename the result of a field.
   - Before the field name, include `alias: `.
 
-### [Queries = Fragments](https://app.pluralsight.com/course-player?clipId=8f441397-bdff-41a7-8d3e-dd37de5d54d3)
+### [Queries - Fragments](https://app.pluralsight.com/course-player?clipId=8f441397-bdff-41a7-8d3e-dd37de5d54d3)
 
 - Fragments are GraphQL's reusable units, not altogether unlike functions.
   - Sets of fields that can be reused.
@@ -117,7 +117,7 @@ query queryName {
 }
 ```
 
-### [Queries = Variables](https://app.pluralsight.com/course-player?clipId=bbba55e8-4a03-476b-8572-9748a84dca51)
+### [Queries - Variables](https://app.pluralsight.com/course-player?clipId=bbba55e8-4a03-476b-8572-9748a84dca51)
 
 - Variables facilitate passing dynamic values as arguments.
 
