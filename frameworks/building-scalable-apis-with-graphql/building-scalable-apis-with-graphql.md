@@ -332,12 +332,65 @@ node database/loadTestMongoData.js
   ```txt
   mongo
   show dbs
-  show collections
   use contests
+  show collections
   db.contests.find().pretty()
   ```
 
-### [Your First GraphQL Schema]()
+### [Your First GraphQL Schema](https://app.pluralsight.com/course-player?clipId=b4ac5a35-55e8-497c-879b-adf8bd675e0f)
+
+- Hello world.
+
+```sh
+mkdir schema && touch schema/index.js
+```
+
+- `schema/index.js`:
+
+```js
+const { GraphQLSchema, GraphQLObjectType, GraphQLString } = require("graphql");
+
+// All the fields we define here will be available at the top-level query selection scope.
+const RootQueryType = new GraphQLObjectType({
+  name: "RootQueryType",
+
+  fields: {
+    hello: {
+      type: GraphQLString,
+      resolve: () => "world",
+    },
+  },
+});
+
+const ncSchema = new GraphQLSchema({
+  query: RootQueryType,
+  // mutation:
+});
+
+module.exports = ncSchema;
+```
+
+- `lib/index.js`:
+
+```js
+const { nodeEnv } = require("./util");
+console.log(`Running in ${nodeEnv} mode...`);
+
+// Read the query from the command line arguments.
+const query = process.argv[2];
+
+const ncSchema = require("../schema");
+const { graphql } = require("graphql");
+
+// Execute and run the query against the defined server schema.
+graphql(ncSchema, query).then((result) => {
+  console.log(result);
+});
+```
+
+- Run `npm i graphql`
+- Run `node lib/index.js {hello}`
+  - Response: `{ data: [Object: null prototype] { hello: 'world' } }`
 
 ### [Setting up a GraphQL HTTP Endpoint]()
 
