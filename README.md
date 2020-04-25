@@ -15,7 +15,7 @@
 - Spring Framework: Spring Fundamentals
 - Spring Framework: Spring Data JPA
 - [GraphQL: The Big Picture](frameworks/graphql-the-big-picture/graphql-the-big-picture.md)
-- Building Scalable APIs with GraphQL
+- [Building Scalable APIs with GraphQL](frameworks/building-scalable-apis-with-graphql/building-scalable-apis-with-graphql.md)
 - [Serverless Computing: The Big Picture](frameworks/serverless-computing-the-big-picture/serverless-computing-the-big-picture.md)
 - Using the Serverless Framework with Node.js on AWS
 
