@@ -237,7 +237,42 @@ mutation AddResource($input: CreateLinkInput!) {
 
 ## GraphQL Runtime
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=d657ca37-412f-4f62-8bc1-dcf550087578)
+
+- Prerequesites:
+
+  - PostgreSQL ([postgres-brew.md](https://gist.github.com/ibraheem4/ce5ccd3e4d7a65589ce84f2a3b7c23a3))
+
+    ```sh
+    brew install postgresql
+    brew services start postgresql
+    ```
+
+  - MongoDB ([Wiring up to MongoDB](https://github.com/ehelander/modern-apis/blob/master/introduction/restful-web-services-with-nodejs-and-express/README.md#wiring-up-to-mongodb))
+
+    ```sh
+    brew tap mongodb/brew
+    brew install mongodb-community@4.2
+    brew services start mongodb-community@4.2
+    ```
+
+  - Node
+
+    ```sh
+    # See note regarding brew: https://stackoverflow.com/a/50266406
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+    export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+    nvm install --lts
+    ```
+
+- Clone `name-contests` repo
+
+  ```sh
+  git clone https://github.com/jscomplete/name-contests
+  cd name-contests/
+  git checkout m3-02
+  ```
 
 ### [Loading Some Test Data]()
 
