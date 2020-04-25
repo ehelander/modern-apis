@@ -241,11 +241,13 @@ mutation AddResource($input: CreateLinkInput!) {
 
 - Prerequesites:
 
-  - PostgreSQL ([postgres-brew.md](https://gist.github.com/ibraheem4/ce5ccd3e4d7a65589ce84f2a3b7c23a3))
+  - PostgreSQL ([postgres-brew.md](https://gist.github.com/ibraheem4/ce5ccd3e4d7a65589ce84f2a3b7c23a3); [Getting Started with PostgreSQL on Mac OSX](https://www.codementor.io/@engineerapart/getting-started-with-postgresql-on-mac-osx-are8jcopb))
 
     ```sh
     brew install postgresql
+    ln -sfv /usr/local/opt/postgresql/*.plist ~/Library/LaunchAgents
     brew services start postgresql
+    psql postgres
     ```
 
   - MongoDB ([Wiring up to MongoDB](https://github.com/ehelander/modern-apis/blob/master/introduction/restful-web-services-with-nodejs-and-express/README.md#wiring-up-to-mongodb))
@@ -265,6 +267,8 @@ mutation AddResource($input: CreateLinkInput!) {
     nvm install --lts
     ```
 
+### [Loading Some Test Data](https://app.pluralsight.com/course-player?clipId=540cc1c3-650f-4336-9987-d3fad8c59992)
+
 - Clone `name-contests` repo
 
   ```sh
@@ -273,7 +277,65 @@ mutation AddResource($input: CreateLinkInput!) {
   git checkout m3-02
   ```
 
-### [Loading Some Test Data]()
+- Run `npm i`
+- `package.json`:
+  - `nodemon` will help us monitor the node process for changes while we develop our server.
+  - Our starting point is `lib/index`. Currently, this is just an empty file that logs the environment.
+    - Run `node lib/index.js`. Should see `Running in development mode...`
+- `util.js`
+  - We'll put generic utility functions here. Currently, it only exposes `nodeEnv`.
+- `config/`
+  - `mongo.js`
+  - `pg.js`
+- `database/`
+  - `loadTestMongoData.js`
+    - Collections:
+    - `users`
+  - `test-pg-data.js`
+    - Tables:
+      - `users`
+      - `contests`
+      - `names`
+      - `votes`
+- Test `psql` and `mongod`, and `mongo`
+- Create `contests` table; verify it's empty
+
+  ```txt
+  createdb contests
+  psql contests
+  \dt
+  \q
+  ```
+
+- Load test data into `contests` database. (Note that script can be used for resetting data.)
+
+  ```sh
+  psql contests < database/test-pg-data.sql
+  ```
+
+- Connect to `contests` db; verify tables exist and that tables contain data
+
+  ```txt
+  psql contests
+  \dt
+  select * from users;
+  ```
+
+- Load Mongo data
+
+```sh
+node database/loadTestMongoData.js
+```
+
+- Verify Mongo data loaded:
+
+  ```txt
+  mongo
+  show dbs
+  show collections
+  use contests
+  db.contests.find().pretty()
+  ```
 
 ### [Your First GraphQL Schema]()
 
