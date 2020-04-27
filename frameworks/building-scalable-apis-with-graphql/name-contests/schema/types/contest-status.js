@@ -1,11 +1,11 @@
-const { GraphQLEnumType } = require("graphql");
+const { GraphQLEnumType } = require('graphql');
 
 module.exports = new GraphQLEnumType({
-  name: "ContestStatusType",
+  name: 'ContestStatusType',
 
   values: {
-    DRAFT: { value: "draft" },
-    PUBLISHED: { value: "published" },
-    ARCHIVED: { value: "archived" },
+    DRAFT: { value: 'draft' },
+    PUBLISHED: { value: 'published' },
+    ARCHIVED: { value: 'archived' },
   },
 });

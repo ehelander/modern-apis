@@ -3,12 +3,12 @@ const {
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
-} = require("graphql");
+} = require('graphql');
 
-const ContestStatusType = require("./contest-status");
+const ContestStatusType = require('./contest-status');
 
 module.exports = new GraphQLObjectType({
-  name: "ContestType",
+  name: 'ContestType',
 
   fields: {
     id: { type: GraphQLID },

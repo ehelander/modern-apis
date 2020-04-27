@@ -1,24 +1,24 @@
-const { nodeEnv } = require("./util");
+const { nodeEnv } = require('./util');
 console.log(`Running in ${nodeEnv} mode...`);
 
-const pg = require("pg");
-const pgConfig = require("../config/pg")[nodeEnv];
+const pg = require('pg');
+const pgConfig = require('../config/pg')[nodeEnv];
 const pgPool = new pg.Pool(pgConfig);
 
-const app = require("express")();
+const app = require('express')();
 
-const ncSchema = require("../schema");
-const graphqlHTTP = require("express-graphql");
+const ncSchema = require('../schema');
+const graphqlHTTP = require('express-graphql');
 
-const { MongoClient } = require("mongodb");
-const assert = require("assert");
-const mConfig = require("../config/mongo")[nodeEnv];
+const { MongoClient } = require('mongodb');
+const assert = require('assert');
+const mConfig = require('../config/mongo')[nodeEnv];
 
 MongoClient.connect(mConfig.url, (err, mPool) => {
   assert.equal(err, null);
 
   app.use(
-    "/graphql",
+    '/graphql',
     graphqlHTTP({
       schema: ncSchema,
       graphiql: true,
@@ -26,7 +26,7 @@ MongoClient.connect(mConfig.url, (err, mPool) => {
         pgPool,
         mPool,
       },
-    })
+    }),
   );
 });
 

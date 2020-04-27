@@ -352,16 +352,16 @@ mkdir schema && touch schema/index.js
     GraphQLSchema,
     GraphQLObjectType,
     GraphQLString,
-  } = require("graphql");
+  } = require('graphql');
 
   // All the fields we define here will be available at the top-level query selection scope.
   const RootQueryType = new GraphQLObjectType({
-    name: "RootQueryType",
+    name: 'RootQueryType',
 
     fields: {
       hello: {
         type: GraphQLString,
-        resolve: () => "world",
+        resolve: () => 'world',
       },
     },
   });
@@ -377,14 +377,14 @@ mkdir schema && touch schema/index.js
 - `lib/index.js`:
 
   ```js
-  const { nodeEnv } = require("./util");
+  const { nodeEnv } = require('./util');
   console.log(`Running in ${nodeEnv} mode...`);
 
   // Read the query from the command line arguments.
   const query = process.argv[2];
 
-  const ncSchema = require("../schema");
-  const { graphql } = require("graphql");
+  const ncSchema = require('../schema');
+  const { graphql } = require('graphql');
 
   // Execute and run the query against the defined server schema.
   graphql(ncSchema, query).then((result) => {
@@ -402,19 +402,19 @@ mkdir schema && touch schema/index.js
 - Add an HTTP endpoint in `lib/index.js`:
 
   ```js
-  const { nodeEnv } = require("./util");
+  const { nodeEnv } = require('./util');
   console.log(`Running in ${nodeEnv} mode...`);
 
   // Create an Express app to provide an HTTP endpoint.
-  const app = require("express")();
+  const app = require('express')();
 
   // Users will be sending queries as HTTP requests, not as command line arguments.
   // const query = process.argv[2];
 
-  const ncSchema = require("../schema");
+  const ncSchema = require('../schema');
   // const { graphql } = require("graphql");
   // Import a helper library to for handling an HTTP request, processing it according to our schema, and responding to the user.
-  const graphqlHTTP = require("express-graphql");
+  const graphqlHTTP = require('express-graphql');
 
   // We won't execute the query here, but in response to the endpoint being called.
   // graphql(ncSchema, query).then((result) => {
@@ -423,11 +423,11 @@ mkdir schema && touch schema/index.js
 
   // We define an endpoint route via middleware: `.use(path, function)`
   app.use(
-    "/graphql",
+    '/graphql',
     graphqlHTTP({
       schema: ncSchema,
       graphiql: true, // Gives us the GraphiQL editor on our local server. Strongly recommended for dev servers.
-    })
+    }),
   );
 
   // Retrieve the port from our env, with a fallback to 3000.
@@ -467,16 +467,17 @@ mkdir schema && touch schema/index.js
     GraphQLSchema,
     GraphQLObjectType,
     GraphQLString,
-  } = require("graphql");
+  } = require('graphql');
 
   const RootQueryType = new GraphQLObjectType({
-    name: "RootQueryType",
+    name: 'RootQueryType',
 
     fields: {
       hello: {
         type: GraphQLString,
-        description: "The *mandatory* hello world example. GraphQL style.",
-        resolve: () => "world",
+        description:
+          'The *mandatory* hello world example. GraphQL style.',
+        resolve: () => 'world',
       },
     },
   });
@@ -560,25 +561,25 @@ mkdir schema && touch schema/index.js
 - In `lib/index.js`:
 
   ```js
-  const { nodeEnv } = require("./util");
+  const { nodeEnv } = require('./util');
   console.log(`Running in ${nodeEnv} mode...`);
 
   // Import the Node PostgreSQL driver.
-  const pg = require("pg");
+  const pg = require('pg');
   // Create a connection pool using the configuration object for the current environment.
-  const pgConfig = require("../config/pg")[nodeEnv];
+  const pgConfig = require('../config/pg')[nodeEnv];
   // Create a pgPool object based on the configuration object.
   // We want this to be available throughout the app so that any resolvers that need to access PostgreSQL can use it.
   // Use the context object, which is passed to all resolver functions as the third argument.
   const pgPool = new pg.Pool(pgConfig);
 
-  const app = require("express")();
+  const app = require('express')();
 
-  const ncSchema = require("../schema");
-  const graphqlHTTP = require("express-graphql");
+  const ncSchema = require('../schema');
+  const graphqlHTTP = require('express-graphql');
 
   app.use(
-    "/graphql",
+    '/graphql',
     graphqlHTTP({
       schema: ncSchema,
       graphiql: true,
@@ -586,7 +587,7 @@ mkdir schema && touch schema/index.js
       context: {
         pgPool,
       },
-    })
+    }),
   );
 
   const PORT = process.env.PORT || 3000;
@@ -603,18 +604,18 @@ mkdir schema && touch schema/index.js
     GraphQLObjectType,
     GraphQLSchema,
     GraphQLString,
-  } = require("graphql");
+  } = require('graphql');
 
-  const pgdb = require("../database/pgdb");
-  const MeType = require("./types/me");
+  const pgdb = require('../database/pgdb');
+  const MeType = require('./types/me');
 
   const RootQueryType = new GraphQLObjectType({
-    name: "RootQueryType",
+    name: 'RootQueryType',
 
     fields: {
       me: {
         type: MeType,
-        description: "The current user identified by an API key.",
+        description: 'The current user identified by an API key.',
         args: {
           key: { type: new GraphQLNonNull(GraphQLString) },
         },
@@ -651,7 +652,7 @@ mkdir schema && touch schema/index.js
         select * from users
         where api_key = $1
         `,
-            [apiKey]
+            [apiKey],
           )
           .then((res) => {
             // The query returns a promise that resolves to an object that _has information about_ the rows returned. Chain a `.then()` to return just the row (or no rows).
@@ -699,12 +700,12 @@ mkdir schema && touch schema/index.js
       GraphQLNonNull,
       GraphQLObjectType,
       GraphQLString,
-    } = require("graphql");
+    } = require('graphql');
 
-    const { fromSnakeCase } = require("../../lib/util");
+    const { fromSnakeCase } = require('../../lib/util');
 
     module.exports = new GraphQLObjectType({
-      name: "MeType",
+      name: 'MeType',
 
       fields: {
         id: { type: GraphQLID },
@@ -759,14 +760,14 @@ mkdir schema && touch schema/index.js
 
     ```js
     module.exports = {
-      nodeEnv: process.env.NODE_ENV || "development",
+      nodeEnv: process.env.NODE_ENV || 'development',
     };
     ```
 
   - `database/pgdb.js`
 
   ```js
-  const humps = require("humps");
+  const humps = require('humps');
 
   module.exports = (pgPool) => {
     return {
@@ -778,7 +779,7 @@ mkdir schema && touch schema/index.js
           FROM    users
           WHERE   api_key = $1
         `,
-            [apiKey]
+            [apiKey],
           )
           .then((res) => {
             return humps.camelizeKeys(res.rows[0]);
@@ -796,10 +797,10 @@ mkdir schema && touch schema/index.js
       GraphQLNonNull,
       GraphQLObjectType,
       GraphQLString,
-    } = require("graphql");
+    } = require('graphql');
 
     module.exports = new GraphQLObjectType({
-      name: "MeType",
+      name: 'MeType',
 
       fields: {
         id: { type: GraphQLID },
@@ -817,7 +818,7 @@ mkdir schema && touch schema/index.js
 
   ```js
   // ...
-  const ContestType = require("./contest");
+  const ContestType = require('./contest');
   // ...
 
   module.exports = new GraphQLObjectType({
@@ -837,12 +838,12 @@ mkdir schema && touch schema/index.js
 - Create `contest.js`: `touch schema/types/contest.js`:
 
   ```js
-  const { GraphQLObjectType } = require("graphql");
+  const { GraphQLObjectType } = require('graphql');
 
-  const ContestStatusType = require("./contest-status-type");
+  const ContestStatusType = require('./contest-status-type');
 
   module.exports = new GraphQLObjectType({
-    name: "ContestType",
+    name: 'ContestType',
 
     fields: {
       id: { type: GraphQLID },
@@ -858,15 +859,15 @@ mkdir schema && touch schema/index.js
 - Create `schema/types/contest-status.js`: `touch schema/types/contest-status.js`
 
   ```js
-  const { GraphQLEnumType } = require("graphql");
+  const { GraphQLEnumType } = require('graphql');
 
   module.exports = new GraphQLEnumType({
-    name: "ContestStatusType",
+    name: 'ContestStatusType',
 
     values: {
-      DRAFT: { value: "draft" },
-      PUBLISHED: { value: "published" },
-      ARCHIVED: { value: "archived" },
+      DRAFT: { value: 'draft' },
+      PUBLISHED: { value: 'published' },
+      ARCHIVED: { value: 'archived' },
     },
   });
   ```
@@ -875,8 +876,8 @@ mkdir schema && touch schema/index.js
 
   ```js
   // ...
-  const pgdb = require("../../database/pgdb");
-  const ContestType = require("./contest");
+  const pgdb = require('../../database/pgdb');
+  const ContestType = require('./contest');
   // ...
 
   module.exports = new GraphQLObjectType({
@@ -951,24 +952,24 @@ mkdir schema && touch schema/index.js
 - Prepare `lib/index.js`:
 
   ```js
-  const { nodeEnv } = require("./util");
+  const { nodeEnv } = require('./util');
   console.log(`Running in ${nodeEnv} mode...`);
 
-  const pg = require("pg");
-  const pgConfig = require("../config/pg")[nodeEnv];
+  const pg = require('pg');
+  const pgConfig = require('../config/pg')[nodeEnv];
   const pgPool = new pg.Pool(pgConfig);
 
-  const app = require("express")();
+  const app = require('express')();
 
-  const ncSchema = require("../schema");
-  const graphqlHTTP = require("express-graphql");
+  const ncSchema = require('../schema');
+  const graphqlHTTP = require('express-graphql');
 
   // Import the Node driver.
-  const { MongoClient } = require("mongodb");
+  const { MongoClient } = require('mongodb');
   // Import assert (part of the Node library).
-  const assert = require("assert");
+  const assert = require('assert');
   // Create a Mongo config object, based on our nodeEnv.
-  const mConfig = require("../config/mongo")[nodeEnv];
+  const mConfig = require('../config/mongo')[nodeEnv];
 
   // Connect to the MongoClient.
   MongoClient.connect(mConfig.url, (err, mPool) => {
@@ -976,7 +977,7 @@ mkdir schema && touch schema/index.js
     assert.equal(err, null);
 
     app.use(
-      "/graphql",
+      '/graphql',
       graphqlHTTP({
         schema: ncSchema,
         graphiql: true,
@@ -984,7 +985,7 @@ mkdir schema && touch schema/index.js
           pgPool,
           mPool,
         },
-      })
+      }),
     );
   });
 
@@ -1002,7 +1003,7 @@ mkdir schema && touch schema/index.js
       // Parameterize the `countsField` so that we can use the same function for contestCount, namesCount, votesCount.
       getCounts(user, countsField) {
         return mPool
-          .collection("users")
+          .collection('users')
           .findOne({ userId: user.id })
           .then((userCounts) => userCounts[countsField]);
       },
@@ -1016,10 +1017,10 @@ mkdir schema && touch schema/index.js
 
   ```js
   // ...
-  const mdb = require("../../database/mdb");
+  const mdb = require('../../database/mdb');
   // ...
   module.exports = new GraphQLObjectType({
-    name: "MeType",
+    name: 'MeType',
 
     fields: {
       // ...

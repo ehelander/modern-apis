@@ -5,14 +5,14 @@ const {
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
-} = require("graphql");
+} = require('graphql');
 
-const pgdb = require("../../database/pgdb");
-const mdb = require("../../database/mdb");
-const ContestType = require("./contest");
+const pgdb = require('../../database/pgdb');
+const mdb = require('../../database/mdb');
+const ContestType = require('./contest');
 
 module.exports = new GraphQLObjectType({
-  name: "MeType",
+  name: 'MeType',
 
   fields: {
     id: { type: GraphQLID },
