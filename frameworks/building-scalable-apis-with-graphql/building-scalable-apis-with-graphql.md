@@ -392,7 +392,97 @@ graphql(ncSchema, query).then((result) => {
 - Run `node lib/index.js {hello}`
   - Response: `{ data: [Object: null prototype] { hello: 'world' } }`
 
-### [Setting up a GraphQL HTTP Endpoint]()
+### [Setting up a GraphQL HTTP Endpoint](https://app.pluralsight.com/course-player?clipId=b67849d8-b4fb-4d3a-b0b5-e0a48f666a8a)
+
+- Branch for current lesson: `git checkout m3-04`.
+- Add an HTTP endpoint in `lib/index.js`:
+
+  ```js
+  const { nodeEnv } = require("./util");
+  console.log(`Running in ${nodeEnv} mode...`);
+
+  // Create an Express app to provide an HTTP endpoint.
+  const app = require("express")();
+
+  // Users will be sending queries as HTTP requests, not as command line arguments.
+  // const query = process.argv[2];
+
+  const ncSchema = require("../schema");
+  <!-- const { graphql } = require("graphql"); -->
+  // Import a helper library to for handling an HTTP request, processing it according to our schema, and responding to the user.
+  const graphqlHTTP = require("express-graphql");
+
+  // We won't execute the query here, but in response to the endpoint being called.
+  // graphql(ncSchema, query).then((result) => {
+  //   console.log(result);
+  // });
+
+  // We define an endpoint route via middleware: `.use(path, function)`
+  app.use(
+    "/graphql",
+    graphqlHTTP({
+      schema: ncSchema,
+      graphiql: true, // Gives us the GraphiQL editor on our local server. Strongly recommended for dev servers.
+    })
+  );
+
+  // Retrieve the port from our env, with a fallback to 3000.
+  const PORT = process.env.PORT || 3000;
+  // Listen on the specified port.
+  app.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}.`);
+  });
+  ```
+
+- Install new dependencies: `npm i express express-graphql && npm i -D nodemon`
+- Run `node lib/index.js`.
+- Navigate to `localhost:3000/graphql`.
+
+  - Should see GraphiQL editor.
+  - Submit query:
+
+    ```gql
+    {
+      hello
+    }
+    ```
+
+- We'll be making a lot of changes in our `schema`. We can use `nodemon` to avoid needing to manually restart our app with every change.
+  - Install
+  - Add script to package.json: `"dev": "nodemon --exec node lib/index.js"`
+- Documentation explorer in GraphiQL.
+  - Note: Only a `RootQueryType`.
+  - `Search Schema` for `hello`. Click `hello`.
+- Add a description in `schema/index.js`.
+
+  - Can use Markdown.
+  - `description` is optional, but it's a best practice to always include it.
+
+  ```js
+  const {
+    GraphQLSchema,
+    GraphQLObjectType,
+    GraphQLString,
+  } = require("graphql");
+
+  const RootQueryType = new GraphQLObjectType({
+    name: "RootQueryType",
+
+    fields: {
+      hello: {
+        type: GraphQLString,
+        description: "The *mandatory* hello world example. GraphQL style.",
+        resolve: () => "world",
+      },
+    },
+  });
+
+  const ncSchema = new GraphQLSchema({
+    query: RootQueryType,
+  });
+
+  module.exports = ncSchema;
+  ```
 
 ### [Defining Custom GraphQL Types]()
 
