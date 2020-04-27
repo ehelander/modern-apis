@@ -334,7 +334,7 @@ node database/loadTestMongoData.js
   show dbs
   use contests
   show collections
-  db.contests.find().pretty()
+  db.users.find().pretty()
   ```
 
 ### [Your First GraphQL Schema](https://app.pluralsight.com/course-player?clipId=b4ac5a35-55e8-497c-879b-adf8bd675e0f)
@@ -931,9 +931,121 @@ mkdir schema && touch schema/index.js
   }
   ```
 
-### [Reading Counts from MongoDB]()
+### [Reading Counts from MongoDB](https://app.pluralsight.com/course-player?clipId=c48f8ff3-6aed-4a9f-a32b-595b08638275)
 
-### [Summary]()
+- We want to be able to retrieve the following:
+
+  ```gql
+  query MyContests {
+    me(key: "4242") {
+      id
+      email
+      fullName
+      contestsCount
+      namesCount
+      votesCount
+    }
+  }
+  ```
+
+- Prepare `lib/index.js`:
+
+  ```js
+  const { nodeEnv } = require("./util");
+  console.log(`Running in ${nodeEnv} mode...`);
+
+  const pg = require("pg");
+  const pgConfig = require("../config/pg")[nodeEnv];
+  const pgPool = new pg.Pool(pgConfig);
+
+  const app = require("express")();
+
+  const ncSchema = require("../schema");
+  const graphqlHTTP = require("express-graphql");
+
+  // Import the Node driver.
+  const { MongoClient } = require("mongodb");
+  // Import assert (part of the Node library).
+  const assert = require("assert");
+  // Create a Mongo config object, based on our nodeEnv.
+  const mConfig = require("../config/mongo")[nodeEnv];
+
+  // Connect to the MongoClient.
+  MongoClient.connect(mConfig.url, (err, mPool) => {
+    // Throw an error if Mongo encounters an error.
+    assert.equal(err, null);
+
+    app.use(
+      "/graphql",
+      graphqlHTTP({
+        schema: ncSchema,
+        graphiql: true,
+        context: {
+          pgPool,
+          mPool,
+        },
+      })
+    );
+  });
+
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}.`);
+  });
+  ```
+
+- Create `mdb.js`: `touch database/mdb.js`:
+
+  ```js
+  module.export = (mPool) => {
+    return {
+      // Parameterize the `countsField` so that we can use the same function for contestCount, namesCount, votesCount.
+      getCounts(user, countsField) {
+        return mPool
+          .collection("users")
+          .findOne({ userId: user.id })
+          .then((userCounts) => userCounts[countsField]);
+      },
+    };
+  };
+  ```
+
+- In `schema/types/me.js`:
+
+  - Note, however, that we're making 3 separate connections to Mongo. This can be a major challenge in GraphQL. We'll address this in the next module.
+
+  ```js
+  // ...
+  const mdb = require("../../database/mdb");
+  // ...
+  module.exports = new GraphQLObjectType({
+    name: "MeType",
+
+    fields: {
+      // ...
+      contestsCount: {
+        type: GraphQLInt,
+        resolve(obj, args, { mPool }, { fieldName }) {
+          return mdb(mPool).getCounts(obj, fieldName);
+        },
+      },
+      namesCount: {
+        type: GraphQLInt,
+        resolve(obj, args, { mPool }, { fieldName }) {
+          return mdb(mPool).getCounts(obj, fieldName);
+        },
+      },
+      votesCount: {
+        type: GraphQLInt,
+        resolve(obj, args, { mPool }, { fieldName }) {
+          return mdb(mPool).getCounts(obj, fieldName);
+        },
+      },
+    },
+  });
+  ```
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=ef0ac007-7e27-42d0-a2f9-10e54778671d)
 
 ## Data Loader and GraphQL Mutations
 
