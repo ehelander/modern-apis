@@ -774,7 +774,7 @@ mkdir schema && touch schema/index.js
         return pgPool
           .query(
             `
-          SELECT  * 
+          SELECT  *
           FROM    users
           WHERE   api_key = $1
         `,
@@ -811,7 +811,125 @@ mkdir schema && touch schema/index.js
     });
     ```
 
-### [Modeling a One-to-many Relationship]()
+### [Modeling a One-to-many Relationship](https://app.pluralsight.com/course-player?clipId=bb7348eb-9bc1-4003-98e8-dcd9798c12a9)
+
+- Add a nested property inside of `me` to list all the contests created by the current user.
+
+  ```js
+  // ...
+  const ContestType = require("./contest");
+  // ...
+
+  module.exports = new GraphQLObjectType({
+    // ...
+    fields: {
+      // ...
+      contests: {
+        type: new GraphQLList(ContestType),
+        resolve() {
+          // Read contests from database.
+        },
+      },
+    },
+  });
+  ```
+
+- Create `contest.js`: `touch schema/types/contest.js`:
+
+  ```js
+  const { GraphQLObjectType } = require("graphql");
+
+  const ContestStatusType = require("./contest-status-type");
+
+  module.exports = new GraphQLObjectType({
+    name: "ContestType",
+
+    fields: {
+      id: { type: GraphQLID },
+      code: { type: new GraphQLNonNull(GraphQLString) },
+      title: { type: new GraphQLNonNull(GraphQLString) },
+      description: { type: GraphQLString },
+      status: { type: new GraphQLNonNull(ContestStatusType) },
+      createdAt: { type: new GraphQLNonNull(GraphQLString) },
+    },
+  });
+  ```
+
+- Create `schema/types/contest-status.js`: `touch schema/types/contest-status.js`
+
+  ```js
+  const { GraphQLEnumType } = require("graphql");
+
+  module.exports = new GraphQLEnumType({
+    name: "ContestStatusType",
+
+    values: {
+      DRAFT: { value: "draft" },
+      PUBLISHED: { value: "published" },
+      ARCHIVED: { value: "archived" },
+    },
+  });
+  ```
+
+- In `schema/types/me.js`:
+
+  ```js
+  // ...
+  const pgdb = require("../../database/pgdb");
+  const ContestType = require("./contest");
+  // ...
+
+  module.exports = new GraphQLObjectType({
+    // ...
+    fields: {
+      // ...
+      contests: {
+        type: new GraphQLList(ContestType),
+        resolve(obj, args, { pgPool }) {
+          return pgdb(pgPool).getContests(obj);
+        },
+      },
+    },
+  });
+  ```
+
+- In `database/pgdb.js`:
+
+  ```js
+  module.exports = pgPool => {
+    // ...
+    getContests(user) {
+      return pgPool.query(`
+        SELECT  *
+        FROM    contests
+        WHERE   created_by = $1
+      `, [user.id]).then(res => {
+        // `camelizeKeys` works for arrays.
+        return humps.camelizeKeys(res.rows);
+      })
+    }
+  }
+  ```
+
+- The following query should return a list of contests:
+
+  ```gql
+  query MyContests {
+    me(key: "4242") {
+      id
+      email
+      fullName
+      contests {
+        id
+        code
+        title
+        description
+        status
+        createdAt
+      }
+    }
+  }
+  ```
 
 ### [Reading Counts from MongoDB]()
 

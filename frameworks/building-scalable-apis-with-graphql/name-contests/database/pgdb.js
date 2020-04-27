@@ -16,5 +16,20 @@ module.exports = (pgPool) => {
           return humps.camelizeKeys(res.rows[0]);
         });
     },
+
+    getContests(user) {
+      return pgPool
+        .query(
+          `
+        SELECT  *
+        FROM    contests
+        WHERE   created_by = $1
+      `,
+          [user.id]
+        )
+        .then((res) => {
+          return humps.camelizeKeys(res.rows);
+        });
+    },
   };
 };
