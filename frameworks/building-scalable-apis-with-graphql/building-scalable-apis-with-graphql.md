@@ -484,7 +484,72 @@ graphql(ncSchema, query).then((result) => {
   module.exports = ncSchema;
   ```
 
-### [Defining Custom GraphQL Types]()
+### [Defining Custom GraphQL Types](https://app.pluralsight.com/course-player?clipId=a8e7f5f7-ca64-4127-80c1-6f58d763f161)
+
+- PostgreSQL data model:
+  - ![postgresql-data-model](2020-04-27-13-28-11.png)
+- We want to be able to look up a user (`email`) by `api_key`:
+
+  ```gql
+  {
+    me(key: "4242") {
+      email
+    }
+  }
+  ```
+
+- Change our `RootQueryType` to support the query above:
+
+```js
+const { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } = require("graphql");
+
+// Import MeType.
+const MeType = require('./types/me');
+
+const RootQueryType = new GraphQLObjectType({
+  name: "RootQueryType",
+
+  fields: {
+    me: {
+      type: MeType,
+      description: "The current user identified by an API key.",
+      args: {
+        // Use the GraphQLNonNull type modifier helper to make this a required argument.
+        key: { type: new GraphQLNonNull(GraphQLString)}
+      }
+      resolve: () => {
+        // Read user information from database.
+      },
+    },
+  },
+});
+
+const ncSchema = new GraphQLSchema({
+  query: RootQueryType,
+});
+
+module.exports = ncSchema;
+```
+
+- Create `schema/types/me`: `mkdir types && touch types/me.js`
+
+```js
+const {
+  GraphQLID
+  GraphQLNonNull
+  GraphQLObjectType,
+  GraphQLString
+} = require('graphql');
+
+module.exports = new GraphQLObjectType({
+  name: 'MeType',
+
+  fields: {
+    id: { type: GraphQLID },
+    email: { type: GraphQLNonNull(GraphQLString) }
+  }
+})
+```
 
 ### [Using the Context Object]()
 
