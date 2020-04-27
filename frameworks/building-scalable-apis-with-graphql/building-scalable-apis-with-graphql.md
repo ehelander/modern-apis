@@ -347,46 +347,50 @@ mkdir schema && touch schema/index.js
 
 - `schema/index.js`:
 
-```js
-const { GraphQLSchema, GraphQLObjectType, GraphQLString } = require("graphql");
+  ```js
+  const {
+    GraphQLSchema,
+    GraphQLObjectType,
+    GraphQLString,
+  } = require("graphql");
 
-// All the fields we define here will be available at the top-level query selection scope.
-const RootQueryType = new GraphQLObjectType({
-  name: "RootQueryType",
+  // All the fields we define here will be available at the top-level query selection scope.
+  const RootQueryType = new GraphQLObjectType({
+    name: "RootQueryType",
 
-  fields: {
-    hello: {
-      type: GraphQLString,
-      resolve: () => "world",
+    fields: {
+      hello: {
+        type: GraphQLString,
+        resolve: () => "world",
+      },
     },
-  },
-});
+  });
 
-const ncSchema = new GraphQLSchema({
-  query: RootQueryType,
-  // mutation:
-});
+  const ncSchema = new GraphQLSchema({
+    query: RootQueryType,
+    // mutation:
+  });
 
-module.exports = ncSchema;
-```
+  module.exports = ncSchema;
+  ```
 
 - `lib/index.js`:
 
-```js
-const { nodeEnv } = require("./util");
-console.log(`Running in ${nodeEnv} mode...`);
+  ```js
+  const { nodeEnv } = require("./util");
+  console.log(`Running in ${nodeEnv} mode...`);
 
-// Read the query from the command line arguments.
-const query = process.argv[2];
+  // Read the query from the command line arguments.
+  const query = process.argv[2];
 
-const ncSchema = require("../schema");
-const { graphql } = require("graphql");
+  const ncSchema = require("../schema");
+  const { graphql } = require("graphql");
 
-// Execute and run the query against the defined server schema.
-graphql(ncSchema, query).then((result) => {
-  console.log(result);
-});
-```
+  // Execute and run the query against the defined server schema.
+  graphql(ncSchema, query).then((result) => {
+    console.log(result);
+  });
+  ```
 
 - Run `npm i graphql`
 - Run `node lib/index.js {hello}`
@@ -408,7 +412,7 @@ graphql(ncSchema, query).then((result) => {
   // const query = process.argv[2];
 
   const ncSchema = require("../schema");
-  <!-- const { graphql } = require("graphql"); -->
+  // const { graphql } = require("graphql");
   // Import a helper library to for handling an HTTP request, processing it according to our schema, and responding to the user.
   const graphqlHTTP = require("express-graphql");
 
@@ -500,252 +504,312 @@ graphql(ncSchema, query).then((result) => {
 
 - Change our `RootQueryType` to support the query above:
 
-```js
-const { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } = require("graphql");
+  ```js
+  const { GraphQLNonNull, GraphQLObjectType, GraphQLSchema, GraphQLString } = require("graphql");
 
-// Import MeType.
-const MeType = require('./types/me');
+  // Import MeType.
+  const MeType = require('./types/me');
 
-const RootQueryType = new GraphQLObjectType({
-  name: "RootQueryType",
+  const RootQueryType = new GraphQLObjectType({
+    name: "RootQueryType",
 
-  fields: {
-    me: {
-      type: MeType,
-      description: "The current user identified by an API key.",
-      args: {
-        // Use the GraphQLNonNull type modifier helper to make this a required argument.
-        key: { type: new GraphQLNonNull(GraphQLString)}
-      }
-      resolve: () => {
-        // Read user information from database.
+    fields: {
+      me: {
+        type: MeType,
+        description: "The current user identified by an API key.",
+        args: {
+          // Use the GraphQLNonNull type modifier helper to make this a required argument.
+          key: { type: new GraphQLNonNull(GraphQLString)}
+        }
+        resolve: () => {
+          // Read user information from database.
+        },
       },
     },
-  },
-});
+  });
 
-const ncSchema = new GraphQLSchema({
-  query: RootQueryType,
-});
+  const ncSchema = new GraphQLSchema({
+    query: RootQueryType,
+  });
 
-module.exports = ncSchema;
-```
+  module.exports = ncSchema;
+  ```
 
 - Create `schema/types/me`: `mkdir types && touch types/me.js`
 
-```js
-const {
-  GraphQLID
-  GraphQLNonNull
-  GraphQLObjectType,
-  GraphQLString
-} = require('graphql');
+  ```js
+  const {
+    GraphQLID
+    GraphQLNonNull
+    GraphQLObjectType,
+    GraphQLString
+  } = require('graphql');
 
-module.exports = new GraphQLObjectType({
-  name: 'MeType',
+  module.exports = new GraphQLObjectType({
+    name: 'MeType',
 
-  fields: {
-    id: { type: GraphQLID },
-    email: { type: GraphQLNonNull(GraphQLString) }
-  }
-})
-```
+    fields: {
+      id: { type: GraphQLID },
+      email: { type: GraphQLNonNull(GraphQLString) }
+    }
+  })
+  ```
 
 ### [Using the Context Object](https://app.pluralsight.com/course-player?clipId=fb352117-8ba5-4fbb-8952-bec6d279e19d)
 
 - In `lib/index.js`:
 
-```js
-const { nodeEnv } = require("./util");
-console.log(`Running in ${nodeEnv} mode...`);
+  ```js
+  const { nodeEnv } = require("./util");
+  console.log(`Running in ${nodeEnv} mode...`);
 
-// Import the Node PostgreSQL driver.
-const pg = require("pg");
-// Create a connection pool using the configuration object for the current environment.
-const pgConfig = require("../config/pg")[nodeEnv];
-// Create a pgPool object based on the configuration object.
-// We want this to be available throughout the app so that any resolvers that need to access PostgreSQL can use it.
-// Use the context object, which is passed to all resolver functions as the third argument.
-const pgPool = new pg.Pool(pgConfig);
+  // Import the Node PostgreSQL driver.
+  const pg = require("pg");
+  // Create a connection pool using the configuration object for the current environment.
+  const pgConfig = require("../config/pg")[nodeEnv];
+  // Create a pgPool object based on the configuration object.
+  // We want this to be available throughout the app so that any resolvers that need to access PostgreSQL can use it.
+  // Use the context object, which is passed to all resolver functions as the third argument.
+  const pgPool = new pg.Pool(pgConfig);
 
-const app = require("express")();
+  const app = require("express")();
 
-const ncSchema = require("../schema");
-const graphqlHTTP = require("express-graphql");
+  const ncSchema = require("../schema");
+  const graphqlHTTP = require("express-graphql");
 
-app.use(
-  "/graphql",
-  graphqlHTTP({
-    schema: ncSchema,
-    graphiql: true,
-    // Global context object
-    context: {
-      pgPool,
-    },
-  })
-);
+  app.use(
+    "/graphql",
+    graphqlHTTP({
+      schema: ncSchema,
+      graphiql: true,
+      // Global context object
+      context: {
+        pgPool,
+      },
+    })
+  );
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}.`);
-});
-```
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}.`);
+  });
+  ```
 
 - In `schema/index.js`:
 
-```js
-const {
-  GraphQLNonNull,
-  GraphQLObjectType,
-  GraphQLSchema,
-  GraphQLString,
-} = require("graphql");
+  ```js
+  const {
+    GraphQLNonNull,
+    GraphQLObjectType,
+    GraphQLSchema,
+    GraphQLString,
+  } = require("graphql");
 
-const pgdb = require("../database/pgdb");
-const MeType = require("./types/me");
+  const pgdb = require("../database/pgdb");
+  const MeType = require("./types/me");
 
-const RootQueryType = new GraphQLObjectType({
-  name: "RootQueryType",
+  const RootQueryType = new GraphQLObjectType({
+    name: "RootQueryType",
 
-  fields: {
-    me: {
-      type: MeType,
-      description: "The current user identified by an API key.",
-      args: {
-        key: { type: new GraphQLNonNull(GraphQLString) },
-      },
-      /*
-        Arguments:
-          obj:  The parent object we're representing. (Null for a root field.)
-          args: The value of the field args passed in from the user.
-          ctx:  Context object. Can be passed down from the executor.
-      */
-      resolve: (obj, args, { pgPool }) => {
-        return pgdb(pgPool).getUser(args.key);
+    fields: {
+      me: {
+        type: MeType,
+        description: "The current user identified by an API key.",
+        args: {
+          key: { type: new GraphQLNonNull(GraphQLString) },
+        },
+        /*
+          Arguments:
+            obj:  The parent object we're representing. (Null for a root field.)
+            args: The value of the field args passed in from the user.
+            ctx:  Context object. Can be passed down from the executor.
+        */
+        resolve: (obj, args, { pgPool }) => {
+          return pgdb(pgPool).getUser(args.key);
+        },
       },
     },
-  },
-});
+  });
 
-const ncSchema = new GraphQLSchema({
-  query: RootQueryType,
-});
+  const ncSchema = new GraphQLSchema({
+    query: RootQueryType,
+  });
 
-module.exports = ncSchema;
-```
+  module.exports = ncSchema;
+  ```
 
 - Create `pgdb.js`: `touch database/pgdb.js`:
 
-```js
-module.exports = (pgPool) => {
-  return {
-    // Note that retrieving the user data from the database is an asynchronous operation. As long as return a promise that will resolve to the expected object, GraphQL resolvers are ok with that. The pg Node driver we're using returns promises for all of its objects.
-    getUser(apiKey) {
-      return pgPool
-        .query(
-          `
-      select * from users
-      where api_key = $1
-      `,
-          [apiKey]
-        )
-        .then((res) => {
-          // The query returns a promise that resolves to an object that _has information about_ the rows returned. Chain a `.then()` to return just the row (or no rows).
-          return res.rows[0];
-        });
-    },
+  ```js
+  module.exports = (pgPool) => {
+    return {
+      // Note that retrieving the user data from the database is an asynchronous operation. As long as return a promise that will resolve to the expected object, GraphQL resolvers are ok with that. The pg Node driver we're using returns promises for all of its objects.
+      getUser(apiKey) {
+        return pgPool
+          .query(
+            `
+        select * from users
+        where api_key = $1
+        `,
+            [apiKey]
+          )
+          .then((res) => {
+            // The query returns a promise that resolves to an object that _has information about_ the rows returned. Chain a `.then()` to return just the row (or no rows).
+            return res.rows[0];
+          });
+      },
+    };
   };
-};
-```
+  ```
 
 ### [Reusable Field Definitions](https://app.pluralsight.com/course-player?clipId=34f28657-b509-4bb5-80be-93281913c4aa)
 
 - In `schema/types/me.js`:
 
-```js
-const {
-  GraphQLID,
-  GraphQLNonNull,
-  GraphQLObjectType,
-  GraphQLString,
-} = require("graphql");
+  ```js
+  const {
+    GraphQLID,
+    GraphQLNonNull,
+    GraphQLObjectType,
+    GraphQLString,
+  } = require("graphql");
 
-module.exports = new GraphQLObjectType({
-  name: "MeType",
+  module.exports = new GraphQLObjectType({
+    name: "MeType",
 
-  fields: {
-    id: { type: GraphQLID },
-    firstName: {
-      type: GraphQLString,
-      // We can force it to resolve to the snake_case field. Without specifying this, it currently returns `null` due to the camelCase/snake_case mismatch.
-      resolve: obj => obj.first_name
-    }
-    email: { type: GraphQLNonNull(GraphQLString) },
-  },
-});
-```
+    fields: {
+      id: { type: GraphQLID },
+      firstName: {
+        type: GraphQLString,
+        // We can force it to resolve to the snake_case field. Without specifying this, it currently returns `null` due to the camelCase/snake_case mismatch.
+        resolve: obj => obj.first_name
+      }
+      email: { type: GraphQLNonNull(GraphQLString) },
+    },
+  });
+  ```
 
 - Option 1: Use a `fromSnakeCase()` helper function.
+
   - `schema/types/me.js`:
 
-```js
-const {
-  GraphQLID,
-  GraphQLNonNull,
-  GraphQLObjectType,
-  GraphQLString,
-} = require("graphql");
+    ```js
+    const {
+      GraphQLID,
+      GraphQLNonNull,
+      GraphQLObjectType,
+      GraphQLString,
+    } = require("graphql");
 
-const { fromSnakeCase } = require("../../lib/util");
+    const { fromSnakeCase } = require("../../lib/util");
 
-module.exports = new GraphQLObjectType({
-  name: "MeType",
+    module.exports = new GraphQLObjectType({
+      name: "MeType",
 
-  fields: {
-    id: { type: GraphQLID },
-    firstName: fromSnakeCase(GraphQLString),
-    lastName: fromSnakeCase(GraphQLString),
-    email: { type: GraphQLNonNull(GraphQLString) },
-    createdAt: fromSnakeCase(GraphQLString),
-  },
-});
-```
+      fields: {
+        id: { type: GraphQLID },
+        firstName: fromSnakeCase(GraphQLString),
+        lastName: fromSnakeCase(GraphQLString),
+        email: { type: GraphQLNonNull(GraphQLString) },
+        createdAt: fromSnakeCase(GraphQLString),
+      },
+    });
+    ```
 
-- `lib/util.js`:
+  - `lib/util.js`:
 
-```js
-const humps = require('humps');
+    ```js
+    const humps = require('humps');
 
-module.exports = {
-  nodeEnv: process.env.NODE_ENV || 'development'
+    module.exports = {
+      nodeEnv: process.env.NODE_ENV || 'development'
 
-  fromSnakeCase(GraphQLType) {
-    return {
-      type: GraphQLType,
-      // The fourth (optional) argument includes information about the current execution state.
-      resolve: (obj, args, ctx, { fieldName }) {
-        return obj[humps.decamelize(fieldName)]
+      fromSnakeCase(GraphQLType) {
+        return {
+          type: GraphQLType,
+          // The fourth (optional) argument includes information about the current execution state.
+          resolve: (obj, args, ctx, { fieldName }) {
+            return obj[humps.decamelize(fieldName)]
+          }
+        }
+      }
+    };
+    ```
+
+  - Now we should be able to query for the following:
+
+    ```gql
+    {
+      me(key: "4242") {
+        id
+        email
+        firstName
+        lastName
+        createdAt
       }
     }
-  }
-};
-```
+    ```
 
-- Now we should be able to query for the following:
+### [camelCase allTheThings](https://app.pluralsight.com/course-player?clipId=b2b7bb93-f618-4842-98b8-e0da429addd4)
 
-```gql
-{
-  me(key: "4242") {
-    id
-    email
-    firstName
-    lastName
-    createdAt
-  }
-}
-```
+- Option 1 worked, but it's a bit fragile.
+- Option 2: Camelize every field retrieved from the database.
 
-### [camelCase allTheThings]()
+  - Revert `lib/util.js`:
+
+    ```js
+    module.exports = {
+      nodeEnv: process.env.NODE_ENV || "development",
+    };
+    ```
+
+  - `database/pgdb.js`
+
+  ```js
+  const humps = require("humps");
+
+  module.exports = (pgPool) => {
+    return {
+      getUser(apiKey) {
+        return pgPool
+          .query(
+            `
+          SELECT  * 
+          FROM    users
+          WHERE   api_key = $1
+        `,
+            [apiKey]
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows[0]);
+          });
+      },
+    };
+  };
+  ```
+
+  - `schema/types/me.js`:
+
+    ```js
+    const {
+      GraphQLID,
+      GraphQLNonNull,
+      GraphQLObjectType,
+      GraphQLString,
+    } = require("graphql");
+
+    module.exports = new GraphQLObjectType({
+      name: "MeType",
+
+      fields: {
+        id: { type: GraphQLID },
+        firstName: { type: GraphQLString },
+        lastName: { type: GraphQLString },
+        email: { type: GraphQLNonNull(GraphQLString) },
+        createdAt: { type: GraphQLString },
+      },
+    });
+    ```
 
 ### [Modeling a One-to-many Relationship]()
 
