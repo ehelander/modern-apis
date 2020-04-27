@@ -1,6 +1,10 @@
 const { nodeEnv } = require("./util");
 console.log(`Running in ${nodeEnv} mode...`);
 
+const pg = require("pg");
+const pgConfig = require("../config/pg")[nodeEnv];
+const pgPool = new pg.Pool(pgConfig);
+
 const app = require("express")();
 
 const ncSchema = require("../schema");
@@ -11,6 +15,9 @@ app.use(
   graphqlHTTP({
     schema: ncSchema,
     graphiql: true,
+    context: {
+      pgPool,
+    },
   })
 );
 

@@ -551,7 +551,112 @@ module.exports = new GraphQLObjectType({
 })
 ```
 
-### [Using the Context Object]()
+### [Using the Context Object](https://app.pluralsight.com/course-player?clipId=fb352117-8ba5-4fbb-8952-bec6d279e19d)
+
+- In `lib/index.js`:
+
+```js
+const { nodeEnv } = require("./util");
+console.log(`Running in ${nodeEnv} mode...`);
+
+// Import the Node PostgreSQL driver.
+const pg = require("pg");
+// Create a connection pool using the configuration object for the current environment.
+const pgConfig = require("../config/pg")[nodeEnv];
+// Create a pgPool object based on the configuration object.
+// We want this to be available throughout the app so that any resolvers that need to access PostgreSQL can use it.
+// Use the context object, which is passed to all resolver functions as the third argument.
+const pgPool = new pg.Pool(pgConfig);
+
+const app = require("express")();
+
+const ncSchema = require("../schema");
+const graphqlHTTP = require("express-graphql");
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: ncSchema,
+    graphiql: true,
+    // Global context object
+    context: {
+      pgPool,
+    },
+  })
+);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}.`);
+});
+```
+
+- In `schema/index.js`:
+
+```js
+const {
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLSchema,
+  GraphQLString,
+} = require("graphql");
+
+const pgdb = require("../database/pgdb");
+const MeType = require("./types/me");
+
+const RootQueryType = new GraphQLObjectType({
+  name: "RootQueryType",
+
+  fields: {
+    me: {
+      type: MeType,
+      description: "The current user identified by an API key.",
+      args: {
+        key: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      /*
+        Arguments:
+          obj:  The parent object we're representing. (Null for a root field.)
+          args: The value of the field args passed in from the user.
+          ctx:  Context object. Can be passed down from the executor.
+      */
+      resolve: (obj, args, { pgPool }) => {
+        return pgdb(pgPool).getUser(args.key);
+      },
+    },
+  },
+});
+
+const ncSchema = new GraphQLSchema({
+  query: RootQueryType,
+});
+
+module.exports = ncSchema;
+```
+
+- Create `pgdb.js`: `touch database/pgdb.js`:
+
+```js
+module.exports = (pgPool) => {
+  return {
+    // Note that retrieving the user data from the database is an asynchronous operation. As long as return a promise that will resolve to the expected object, GraphQL resolvers are ok with that. The pg Node driver we're using returns promises for all of its objects.
+    getUser(apiKey) {
+      return pgPool
+        .query(
+          `
+      select * from users
+      where api_key = $1
+      `,
+          [apiKey]
+        )
+        .then((res) => {
+          // The query returns a promise that resolves to an object that _has information about_ the rows returned. Chain a `.then()` to return just the row (or no rows).
+          return res.rows[0];
+        });
+    },
+  };
+};
+```
 
 ### [Reusable Field Definitions]()
 
