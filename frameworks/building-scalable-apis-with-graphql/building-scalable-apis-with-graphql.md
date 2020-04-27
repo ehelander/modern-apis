@@ -658,7 +658,92 @@ module.exports = (pgPool) => {
 };
 ```
 
-### [Reusable Field Definitions]()
+### [Reusable Field Definitions](https://app.pluralsight.com/course-player?clipId=34f28657-b509-4bb5-80be-93281913c4aa)
+
+- In `schema/types/me.js`:
+
+```js
+const {
+  GraphQLID,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLString,
+} = require("graphql");
+
+module.exports = new GraphQLObjectType({
+  name: "MeType",
+
+  fields: {
+    id: { type: GraphQLID },
+    firstName: {
+      type: GraphQLString,
+      // We can force it to resolve to the snake_case field. Without specifying this, it currently returns `null` due to the camelCase/snake_case mismatch.
+      resolve: obj => obj.first_name
+    }
+    email: { type: GraphQLNonNull(GraphQLString) },
+  },
+});
+```
+
+- Option 1: Use a `fromSnakeCase()` helper function.
+  - `schema/types/me.js`:
+
+```js
+const {
+  GraphQLID,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLString,
+} = require("graphql");
+
+const { fromSnakeCase } = require("../../lib/util");
+
+module.exports = new GraphQLObjectType({
+  name: "MeType",
+
+  fields: {
+    id: { type: GraphQLID },
+    firstName: fromSnakeCase(GraphQLString),
+    lastName: fromSnakeCase(GraphQLString),
+    email: { type: GraphQLNonNull(GraphQLString) },
+    createdAt: fromSnakeCase(GraphQLString),
+  },
+});
+```
+
+- `lib/util.js`:
+
+```js
+const humps = require('humps');
+
+module.exports = {
+  nodeEnv: process.env.NODE_ENV || 'development'
+
+  fromSnakeCase(GraphQLType) {
+    return {
+      type: GraphQLType,
+      // The fourth (optional) argument includes information about the current execution state.
+      resolve: (obj, args, ctx, { fieldName }) {
+        return obj[humps.decamelize(fieldName)]
+      }
+    }
+  }
+};
+```
+
+- Now we should be able to query for the following:
+
+```gql
+{
+  me(key: "4242") {
+    id
+    email
+    firstName
+    lastName
+    createdAt
+  }
+}
+```
 
 ### [camelCase allTheThings]()
 
