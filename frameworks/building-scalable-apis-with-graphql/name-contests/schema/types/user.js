@@ -10,9 +10,9 @@ const {
 const ContestType = require('./contest');
 
 module.exports = new GraphQLObjectType({
-  name: 'UserType',
+  name: 'User',
 
-  fields: {
+  fields: () => ({
     id: { type: GraphQLID },
     firstName: { type: GraphQLString },
     lastName: { type: GraphQLString },
@@ -52,5 +52,5 @@ module.exports = new GraphQLObjectType({
           .then((res) => res[fieldName]);
       },
     },
-  },
+  }),
 });

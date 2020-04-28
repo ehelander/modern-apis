@@ -10,13 +10,13 @@ const NameType = require('../types/name');
 const NameInputType = new GraphQLInputObjectType({
   name: 'NameInput',
 
-  fields: {
+  fields: () => ({
     apiKey: { type: new GraphQLNonNull(GraphQLString) },
 
     contestId: { type: new GraphQLNonNull(GraphQLString) },
     label: { type: new GraphQLNonNull(GraphQLString) },
     description: { type: GraphQLString },
-  },
+  }),
 });
 
 module.exports = {

@@ -10,12 +10,12 @@ const ContestType = require('../types/contest');
 const ContestInputType = new GraphQLInputObjectType({
   name: 'ContestInput',
 
-  fields: {
+  fields: () => ({
     apiKey: { type: new GraphQLNonNull(GraphQLString) },
 
     title: { type: new GraphQLNonNull(GraphQLString) },
     description: { type: GraphQLString },
-  },
+  }),
 });
 
 module.exports = {

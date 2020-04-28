@@ -2799,6 +2799,10 @@ mkdir schema && touch schema/index.js
   }
   ```
 
-### [Working with Unions]()
+### [Working with Unions](https://app.pluralsight.com/course-player?clipId=6f3b96d4-98c4-4706-b1ff-f2059356fd7c)
+
+- A few cleanup tasks:
+  - Converting all `fields` into functions
+  - Renaming type `name`s consistent (without a `Type` suffix).
 
 ### [Summary]()

@@ -10,9 +10,9 @@ const NameType = require('./name');
 const ContestStatusType = require('./contest-status');
 
 module.exports = new GraphQLObjectType({
-  name: 'ContestType',
+  name: 'Contest',
 
-  fields: {
+  fields: () => ({
     id: { type: GraphQLID },
     code: { type: new GraphQLNonNull(GraphQLString) },
     title: { type: new GraphQLNonNull(GraphQLString) },
@@ -25,5 +25,5 @@ module.exports = new GraphQLObjectType({
         return loaders.namesForContestIds.load(obj.id);
       },
     },
-  },
+  }),
 });
