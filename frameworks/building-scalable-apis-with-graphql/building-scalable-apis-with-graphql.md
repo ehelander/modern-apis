@@ -2483,244 +2483,249 @@ mkdir schema && touch schema/index.js
 - We want to give a user with a valid API key the ability to create a new naming contest.
 - Define our `RootMutationType` in `schema/index.js`:
 
-```js
-const {
-  GraphQLNonNull,
-  GraphQLObjectType,
-  GraphQLSchema,
-  GraphQLString,
-} = require('graphql');
+  ```js
+  const {
+    GraphQLNonNull,
+    GraphQLObjectType,
+    GraphQLSchema,
+    GraphQLString,
+  } = require('graphql');
 
-const MeType = require('./types/user');
+  const MeType = require('./types/user');
 
-const RootQueryType = new GraphQLObjectType({
-  name: 'RootQueryType',
+  const RootQueryType = new GraphQLObjectType({
+    name: 'RootQueryType',
 
-  fields: {
-    me: {
-      type: MeType,
-      description: 'The current user identified by an API key.',
-      args: {
-        key: { type: new GraphQLNonNull(GraphQLString) },
-      },
-      resolve: (obj, args, { loaders }) => {
-        return loaders.usersByApiKeys.load(args.key);
+    fields: {
+      me: {
+        type: MeType,
+        description: 'The current user identified by an API key.',
+        args: {
+          key: { type: new GraphQLNonNull(GraphQLString) },
+        },
+        resolve: (obj, args, { loaders }) => {
+          return loaders.usersByApiKeys.load(args.key);
+        },
       },
     },
-  },
-});
+  });
 
-const AddContestMutation = require('./mutations/add-contest');
+  const AddContestMutation = require('./mutations/add-contest');
 
-const RootMutationType = new GraphQLObjectType({
-  name: 'Root MutationType',
+  const RootMutationType = new GraphQLObjectType({
+    name: 'Root MutationType',
 
-  fields: () => ({
-    AddContest: AddContestMutation,
-    // AddName: AddNameMutation
-  }),
-});
+    fields: () => ({
+      AddContest: AddContestMutation,
+      // AddName: AddNameMutation
+    }),
+  });
 
-const ncSchema = new GraphQLSchema({
-  query: RootQueryType,
-  mutation: RootMutationTYpe,
-});
+  const ncSchema = new GraphQLSchema({
+    query: RootQueryType,
+    mutation: RootMutationTYpe,
+  });
 
-module.exports = ncSchema;
-```
+  module.exports = ncSchema;
+  ```
 
 - Create `add-contest.js`: `mkdir schema/mutations && touch schema/mutations/add-contest.js`:
 
-```js
-const {
-  GraphQLInputObjectType, // A new helper. Similar to ObjectType, but with some restrictions to make it suitable for handling input.
-  GraphQLNonNull,
-  GraphQLString,
-} = require('graphql');
+  ```js
+  const {
+    GraphQLInputObjectType, // A new helper. Similar to ObjectType, but with some restrictions to make it suitable for handling input.
+    GraphQLNonNull,
+    GraphQLString,
+  } = require('graphql');
 
-// Note that we're not using DataLoader here; DataLoader is only for database reads, not writes.
-const pgdb = require('../../database/pgdb');
-const ContestType = require('../types/contest');
+  // Note that we're not using DataLoader here; DataLoader is only for database reads, not writes.
+  const pgdb = require('../../database/pgdb');
+  const ContestType = require('../types/contest');
 
-const ContestInputType = new GraphQLInputObjectType({
-  name: 'ContestInput',
+  const ContestInputType = new GraphQLInputObjectType({
+    name: 'ContestInput',
 
-  // List all the values we need from the user in order to be able to create a contest.
-  fields: {
-    // Identify the user.
-    apiKey: { type: new GraphQLNonNull(GraphQLString) },
+    // List all the values we need from the user in order to be able to create a contest.
+    fields: {
+      // Identify the user.
+      apiKey: { type: new GraphQLNonNull(GraphQLString) },
 
-    title: { type: new GraphQLNonNull(GraphQLString) },
-    description: { type: GraphQLString },
-  },
-});
-
-module.exports = {
-  // The type we want to enable the users to read after they've done their mutation. Should match the resolved value from `resolve()`.
-  type: ContestType,
-  // Where we define the arguments for a GraphQL mutation.
-  args: {
-    input: {
-      type: new GraphQLNonNull(ContestInputType),
+      title: { type: new GraphQLNonNull(GraphQLString) },
+      description: { type: GraphQLString },
     },
-  },
-  resolve(obj, { input }, { pgPool }) {
-    /*
-      In mutations, resolve() does 2 operations:
-      - Persist the contest to the database.
-      - Resolve a newly-persisted contest.
-    */
-    return pgdb(pgPool).addNewContest(input);
-  },
-};
-```
+  });
+
+  module.exports = {
+    // The type we want to enable the users to read after they've done their mutation. Should match the resolved value from `resolve()`.
+    type: ContestType,
+    // Where we define the arguments for a GraphQL mutation.
+    args: {
+      input: {
+        type: new GraphQLNonNull(ContestInputType),
+      },
+    },
+    resolve(obj, { input }, { pgPool }) {
+      /*
+        In mutations, resolve() does 2 operations:
+        - Persist the contest to the database.
+        - Resolve a newly-persisted contest.
+      */
+      return pgdb(pgPool).addNewContest(input);
+    },
+  };
+  ```
 
 - Add a setter to `database/pgdb.js`:
 
-```js
-const { orderedFor } = require('../lib/util');
-const humps = require('humps');
-const { slug } = require('../lib/util');
+  ```js
+  const { orderedFor } = require('../lib/util');
+  const humps = require('humps');
+  const { slug } = require('../lib/util');
 
-module.exports = (pgPool) => {
-  return {
-    getUsersByIds(userIds) {
-      return pgPool
-        .query(
-          `
-        SELECT  *
-        FROM    users
-        WHERE   id = ANY($1)
-      `,
-          [userIds],
-        )
-        .then((res) => {
-          return orderedFor(res.rows, userIds, 'id', true);
-        });
-    },
-
-    getUsersByApiKeys(apiKeys) {
-      return pgPool
-        .query(
-          `
-        SELECT  * 
-        FROM    users
-        WHERE   api_key = ANY($1)
-      `,
-          [apiKeys],
-        )
-        .then((res) => {
-          return orderedFor(res.rows, apiKeys, 'apiKey', true);
-        });
-    },
-
-    getContestsForUserIds(userIds) {
-      return pgPool
-        .query(
-          `
-        SELECT  *
-        FROM    contests
-        WHERE   created_by = ANY($1)
-      `,
-          [userIds],
-        )
-        .then((res) => {
-          return orderedFor(res.rows, userIds, 'createdBy', false);
-        });
-    },
-
-    getNamesForContestIds(contestIds) {
-      return pgPool
-        .query(
-          `
+  module.exports = (pgPool) => {
+    return {
+      getUsersByIds(userIds) {
+        return pgPool
+          .query(
+            `
           SELECT  *
-          FROM    names
-          WHERE   contest_id = ANY($1)
+          FROM    users
+          WHERE   id = ANY($1)
         `,
-          [contestIds],
-        )
-        .then((res) => {
-          return orderedFor(res.rows, contestIds, 'contestId', false);
-        });
-    },
-
-    getTotalVotesByNameIds(nameIds) {
-      return pgPool
-        .query(
-          `
-        SELECT  name_id,
-                up,
-                down
-        FROM    total_votes_by_name
-        WHERE   name_id = ANY($1)
-      `,
-          [nameIds],
-        )
-        .then((res) => {
-          return orderedFor(res.rows, nameIds, 'nameId', true);
-        });
-    },
-
-    // Use PostgreSQL `returning` keyword to get a return value.
-    // If the `api_key` is not found, the operation will be rejected.
-    addNewContest({ apiKey, title, description }) {
-      return pgPool
-        .query(
-          `
-        INSERT INTO
-          contests(code, title, description, created_by)
-        VALUES
-          (
-            $1,
-            $2,
-            $3,
-            SELECT
-              id
-            FROM
-              users
-            WHERE
-              api_key = $4
+            [userIds],
           )
-        )
-        RETURNING *
-      `,
-          [slug(title), title, description, apiKey],
-        )
-        .then((res) => {
-          return humps.camelizeKeys(res.rows[0]);
-        });
-    },
+          .then((res) => {
+            return orderedFor(res.rows, userIds, 'id', true);
+          });
+      },
+
+      getUsersByApiKeys(apiKeys) {
+        return pgPool
+          .query(
+            `
+          SELECT  * 
+          FROM    users
+          WHERE   api_key = ANY($1)
+        `,
+            [apiKeys],
+          )
+          .then((res) => {
+            return orderedFor(res.rows, apiKeys, 'apiKey', true);
+          });
+      },
+
+      getContestsForUserIds(userIds) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    contests
+          WHERE   created_by = ANY($1)
+        `,
+            [userIds],
+          )
+          .then((res) => {
+            return orderedFor(res.rows, userIds, 'createdBy', false);
+          });
+      },
+
+      getNamesForContestIds(contestIds) {
+        return pgPool
+          .query(
+            `
+            SELECT  *
+            FROM    names
+            WHERE   contest_id = ANY($1)
+          `,
+            [contestIds],
+          )
+          .then((res) => {
+            return orderedFor(
+              res.rows,
+              contestIds,
+              'contestId',
+              false,
+            );
+          });
+      },
+
+      getTotalVotesByNameIds(nameIds) {
+        return pgPool
+          .query(
+            `
+          SELECT  name_id,
+                  up,
+                  down
+          FROM    total_votes_by_name
+          WHERE   name_id = ANY($1)
+        `,
+            [nameIds],
+          )
+          .then((res) => {
+            return orderedFor(res.rows, nameIds, 'nameId', true);
+          });
+      },
+
+      // Use PostgreSQL `returning` keyword to get a return value.
+      // If the `api_key` is not found, the operation will be rejected.
+      addNewContest({ apiKey, title, description }) {
+        return pgPool
+          .query(
+            `
+          INSERT INTO
+            contests(code, title, description, created_by)
+          VALUES
+            (
+              $1,
+              $2,
+              $3,
+              SELECT
+                id
+              FROM
+                users
+              WHERE
+                api_key = $4
+            )
+          )
+          RETURNING *
+        `,
+            [slug(title), title, description, apiKey],
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows[0]);
+          });
+      },
+    };
   };
-};
-```
+  ```
 
 - Add `slug()` to `lib/util.js`:
 
-```js
-const humps = require('humps');
-const _ = require('lodash');
+  ```js
+  const humps = require('humps');
+  const _ = require('lodash');
 
-module.exports = {
-  nodeEnv: process.env.NODE_ENV || 'development',
+  module.exports = {
+    nodeEnv: process.env.NODE_ENV || 'development',
 
-  orderedFor: (rows, collection, field, singleObject) => {
-    const data = humps.camelizeKeys(rows);
-    const inGroupsOfFields = _.groupBy(data, field);
-    return collection.map((element) => {
-      const elementArray = inGroupsOfFields[element];
-      if (elementArray) {
-        return singleObject ? elementArray[0] : elementArray;
-      }
-      return singleObject ? {} : [];
-    });
-  },
+    orderedFor: (rows, collection, field, singleObject) => {
+      const data = humps.camelizeKeys(rows);
+      const inGroupsOfFields = _.groupBy(data, field);
+      return collection.map((element) => {
+        const elementArray = inGroupsOfFields[element];
+        if (elementArray) {
+          return singleObject ? elementArray[0] : elementArray;
+        }
+        return singleObject ? {} : [];
+      });
+    },
 
-  slug: (str) => {
-    // Lower-case and replace all spaces and non-word characters with a dash.
-    return str.toLowerCase().replace(/[\s\W-]+/, '-');
-  },
-};
-```
+    slug: (str) => {
+      // Lower-case and replace all spaces and non-word characters with a dash.
+      return str.toLowerCase().replace(/[\s\W-]+/, '-');
+    },
+  };
+  ```
 
 - In the documentation explorer, we should see the new `RootMutationType`:
 
@@ -2729,70 +2734,70 @@ module.exports = {
 
 - Add a contest:
 
-```gql
-mutation AddNewContest($input: ContestInput!) {
-  AddContest(input: $input) {
-    id
-    code
-    title
-    description
-    status
+  ```gql
+  mutation AddNewContest($input: ContestInput!) {
+    AddContest(input: $input) {
+      id
+      code
+      title
+      description
+      status
+    }
   }
-}
-```
+  ```
 
-```json
-{
-  "input": {
-    "apiKey": "0000",
-    "title": "Course about GraphQL",
-    "description": "An advanced course about GraphQL"
+  ```json
+  {
+    "input": {
+      "apiKey": "0000",
+      "title": "Course about GraphQL",
+      "description": "An advanced course about GraphQL"
+    }
   }
-}
-```
+  ```
 
 - Add a `ProposeName` mutation to propose a name on a contest:
 
-```gql
-mutation ProposeName($input: NameInput!) {
-  AddName(input: $input) {
-    id
-    label
-    description
-    totalVotes {
-      up
-      down
-    }
-  }
-}
-```
-
-```json
-{
-  "input": {
-    "apiKey": "0000",
-    "contestId": "6",
-    "label": "GraphQL Deep Dive",
-    "description": "A deep dive into GraphQL"
-  }
-}
-```
-
-```json
-{
-  "data": {
-    "AddName": {
-      "id": "5",
-      "label": "GraphQL Deep Dive",
-      "description": "A deep dive into GraphQL",
-      "totalVotes": {
-        "up": 0,
-        "down": 0
+  ```gql
+  mutation ProposeName($input: NameInput!) {
+    AddName(input: $input) {
+      id
+      label
+      description
+      totalVotes {
+        up
+        down
       }
     }
   }
-}
-```
+  ```
+
+  ```json
+  {
+    "input": {
+      "apiKey": "0000",
+      "contestId": "4",
+      "label": "GraphQL Deep Dive",
+      "description": "A deep dive into GraphQL"
+    }
+  }
+  ```
+
+  ```json
+  {
+    "data": {
+      "AddName": {
+        "id": "7",
+        "label": "GraphQL Deep Dive",
+        "description": "A deep dive into GraphQL",
+        "totalVotes": {
+          "up": 0,
+          "down": 0
+        }
+      }
+    }
+  }
+  ```
 
 ### [Working with Unions]()
 

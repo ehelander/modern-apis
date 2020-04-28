@@ -1,6 +1,6 @@
 const { orderedFor } = require('../lib/util');
 const humps = require('humps');
-const { slug } = require('../lib/util');
+const { normalize, slug } = require('../lib/util');
 
 module.exports = (pgPool) => {
   return {
@@ -104,6 +104,36 @@ module.exports = (pgPool) => {
           RETURNING *
       `,
           [slug(title), title, description, apiKey],
+        )
+        .then((res) => {
+          return humps.camelizeKeys(res.rows[0]);
+        });
+    },
+
+    addNewName({ apiKey, contestId, label, description }) {
+      return pgPool
+        .query(
+          `
+          INSERT INTO
+            names(contest_id, label, normalized_label, description, created_by)
+          VALUES
+            (
+              $1,
+              $2,
+              $3,
+              $4,
+              (
+                SELECT
+                  id
+                FROM
+                  users
+                WHERE
+                  api_key = $5
+              )
+            )
+          RETURNING *
+      `,
+          [contestId, label, normalize(label), description, apiKey],
         )
         .then((res) => {
           return humps.camelizeKeys(res.rows[0]);

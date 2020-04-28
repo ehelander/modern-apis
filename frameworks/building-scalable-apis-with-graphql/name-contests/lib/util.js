@@ -20,4 +20,9 @@ module.exports = {
     // Lower-case and replace all spaces and non-word characters with a dash.
     return str.toLowerCase().replace(/[\s\W-]+/, '-');
   },
+
+  normalize: (str) => {
+    // Lower-case and replace all spaces and non-word characters with an empty string.
+    return str.toLowerCase().replace(/[\s\W-]+/, '');
+  },
 };
