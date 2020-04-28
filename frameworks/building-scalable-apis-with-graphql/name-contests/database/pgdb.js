@@ -61,5 +61,22 @@ module.exports = (pgPool) => {
           return orderedFor(res.rows, contestIds, 'contestId', false);
         });
     },
+
+    getTotalVotesByNameIds(nameIds) {
+      return pgPool
+        .query(
+          `
+        SELECT  name_id,
+                up,
+                down
+        FROM    total_votes_by_name
+        WHERE   name_id = ANY($1)
+      `,
+          [nameIds],
+        )
+        .then((res) => {
+          return orderedFor(res.rows, nameIds, 'nameId', true);
+        });
+    },
   };
 };

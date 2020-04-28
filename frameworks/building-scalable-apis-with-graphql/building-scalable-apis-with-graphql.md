@@ -2210,7 +2210,265 @@ mkdir schema && touch schema/index.js
 
 - We're now making a single call to the MongoDB server.
 
-### [Using Database Views with GraphQL]()
+### [Using Database Views with GraphQL](https://app.pluralsight.com/course-player?clipId=8850b577-4238-4a9d-a979-008f752ba233)
+
+- We want to be able to return `totalVotes`:
+
+  ```gql
+  query MyContests {
+    me(key: "4242") {
+      id
+      email
+      fullName
+      contestsCount
+      namesCount
+      votesCount
+      contests {
+        title
+        names {
+          label
+          createdBy {
+            fullName
+          }
+          totalVotes {
+            up
+            down
+          }
+        }
+      }
+    }
+  }
+  ```
+
+- Create TotalVotes type: `touch schema/types/total-votes.js`:
+
+  ```js
+  const { GraphQLObjectType, GraphQLInt } = require('graphql');
+
+  module.exports = new GraphQLObjectType({
+    name: 'TotalVotes',
+
+    fields: () => ({
+      up: { type: GraphQLInt },
+      down: { type: GraphQLInt },
+    }),
+  });
+  ```
+
+- Add `totalVotes` to `schema/types/name.js`:
+
+  ```js
+  const {
+    GraphQLID,
+    GraphQLNonNull,
+    GraphQLObjectType,
+    GraphQLString,
+  } = require('graphql');
+
+  const UserType = require('./user');
+
+  module.exports = new GraphQLObjectType({
+    name: 'Name',
+
+    fields: () => {
+      const UserType = require('./user');
+      const TotalVotes = require('./total-votes');
+      return {
+        id: { type: GraphQLID },
+        label: { type: new GraphQLNonNull(GraphQLString) },
+        description: { type: GraphQLString },
+        createdAt: { type: new GraphQLNonNull(GraphQLString) },
+        createdBy: {
+          type: new GraphQLNonNull(UserType),
+          resolve(obj, args, { loaders }) {
+            return loaders.usersByIds.load(obj.createdBy);
+          },
+        },
+        totalVotes: {
+          type: TotalVotes,
+          resolve(obj, args, { loaders }) {
+            return loaders.totalVotesByNameIds.load(obj.id);
+          },
+        },
+      };
+    },
+  });
+  ```
+
+- Add `totalVotesByNameIds` to `lib/index.js`:
+
+  ```js
+  const { nodeEnv } = require('./util');
+  console.log(`Running in ${nodeEnv} mode...`);
+
+  const DataLoader = require('dataloader');
+  const pg = require('pg');
+  const pgConfig = require('../config/pg')[nodeEnv];
+  const pgPool = new pg.Pool(pgConfig);
+  const pgdb = require('../database/pgdb')(pgPool);
+
+  const app = require('express')();
+
+  const ncSchema = require('../schema');
+  const graphqlHTTP = require('express-graphql');
+
+  const { MongoClient } = require('mongodb');
+  const assert = require('assert');
+  const mConfig = require('../config/mongo')[nodeEnv];
+
+  MongoClient.connect(mConfig.url, (err, mPool) => {
+    assert.equal(err, null);
+
+    const mdb = require('../database/mdb')(mPool);
+
+    app.use('/graphql', (req, res) => {
+      const loaders = {
+        usersByIds: new DataLoader(pgdb.getUsersByIds),
+        usersByApiKeys: new DataLoader(pgdb.getUsersByApiKeys),
+        namesForContestIds: new DataLoader(
+          pgdb.getNamesForContestIds,
+        ),
+        contestsForUserIds: new DataLoader(
+          pgdb.getContestsForUserIds,
+        ),
+        totalVotesByNameIds: new DataLoader(
+          pgdb.getTotalVotesByNameIds,
+        ),
+        mdb: {
+          usersByIds: new DataLoader(mdb.getUsersByIds),
+        },
+      };
+      graphqlHTTP({
+        schema: ncSchema,
+        graphiql: true,
+        context: {
+          pgPool,
+          mPool,
+          loaders,
+        },
+      })(req, res);
+    });
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is listening on port ${PORT}.`);
+    });
+  });
+  ```
+
+- Add `getTotalVotesByNameIds()` to `database/pgdb.js`:
+
+  ```js
+  const { orderedFor } = require('../lib/util');
+
+  module.exports = (pgPool) => {
+    return {
+      getUsersByIds(userIds) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    users
+          WHERE   id = ANY($1)
+        `,
+            [userIds],
+          )
+          .then((res) => {
+            return orderedFor(res.rows, userIds, 'id', true);
+          });
+      },
+
+      getUsersByApiKeys(apiKeys) {
+        return pgPool
+          .query(
+            `
+          SELECT  * 
+          FROM    users
+          WHERE   api_key = ANY($1)
+        `,
+            [apiKeys],
+          )
+          .then((res) => {
+            return orderedFor(res.rows, apiKeys, 'apiKey', true);
+          });
+      },
+
+      getContestsForUserIds(userIds) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    contests
+          WHERE   created_by = ANY($1)
+        `,
+            [userIds],
+          )
+          .then((res) => {
+            return orderedFor(res.rows, userIds, 'createdBy', false);
+          });
+      },
+
+      getNamesForContestIds(contestIds) {
+        return pgPool
+          .query(
+            `
+            SELECT  *
+            FROM    names
+            WHERE   contest_id = ANY($1)
+          `,
+            [contestIds],
+          )
+          .then((res) => {
+            return orderedFor(
+              res.rows,
+              contestIds,
+              'contestId',
+              false,
+            );
+          });
+      },
+
+      getTotalVotesByNameIds(nameIds) {
+        return pgPool
+          .query(
+            `
+          SELECT  name_id,
+                  up,
+                  down
+          FROM    total_votes_by_name
+          WHERE   name_id = ANY($1)
+        `,
+            [nameIds],
+          )
+          .then((res) => {
+            return orderedFor(res.rows, nameIds, 'nameId', true);
+          });
+      },
+    };
+  };
+  ```
+
+- Create `total_votes_by_name` database view:
+
+  ```sql
+  CREATE VIEW total_votes_by_name AS
+  SELECT  n.id AS name_id,
+          (
+            SELECT  COUNT(up)
+            FROM    votes v
+            WHERE   v.name_id = n.id
+              AND   up = true
+          ) AS up,
+          (
+            SELECT  COUNT(up)
+            FROM    votes v
+            WHERE   v.name_id = n.id
+              AND   up = false
+          ) AS down
+  FROM    names n;
+  ```
+
+- Consider using database views when then logic of the query is unlikely to change and to join multiple tables together (to limit the number of connections to the database).
 
 ### [Working with Mutations]()
 
