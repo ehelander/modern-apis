@@ -2,15 +2,15 @@ const humps = require('humps');
 const _ = require('lodash');
 
 module.exports = (pgPool) => {
-  const orderedFor = (rows, collection, field) => {
+  const orderedFor = (rows, collection, field, singleObject) => {
     const data = humps.camelizeKeys(rows);
     const inGroupsOfFields = _.groupBy(data, field);
     return collection.map((element) => {
       const elementArray = inGroupsOfFields[element];
       if (elementArray) {
-        return elementArray[0];
+        return singleObject ? elementArray[0] : elementArray;
       }
-      return {};
+      return singleObject ? {} : [];
     });
   };
 
@@ -26,52 +26,52 @@ module.exports = (pgPool) => {
           [userIds],
         )
         .then((res) => {
-          return orderedFor(res.rows, userIds, 'id');
+          return orderedFor(res.rows, userIds, 'id', true);
         });
     },
 
-    getUserByApiKey(apiKey) {
+    getUsersByApiKeys(apiKeys) {
       return pgPool
         .query(
           `
         SELECT  * 
         FROM    users
-        WHERE   api_key = $1
+        WHERE   api_key = ANY($1)
       `,
-          [apiKey],
+          [apiKeys],
         )
         .then((res) => {
-          return humps.camelizeKeys(res.rows[0]);
+          return orderedFor(res.rows, apiKeys, 'apiKey', true);
         });
     },
 
-    getContests(user) {
+    getContestsForUserIds(userIds) {
       return pgPool
         .query(
           `
         SELECT  *
         FROM    contests
-        WHERE   created_by = $1
+        WHERE   created_by = ANY($1)
       `,
-          [user.id],
+          [userIds],
         )
         .then((res) => {
-          return humps.camelizeKeys(res.rows);
+          return orderedFor(res.rows, userIds, 'createdBy', false);
         });
     },
 
-    getNames(contest) {
+    getNamesForContestIds(contestIds) {
       return pgPool
         .query(
           `
           SELECT  *
           FROM    names
-          WHERE   contest_id = $1
+          WHERE   contest_id = ANY($1)
         `,
-          [contest.id],
+          [contestIds],
         )
         .then((res) => {
-          return humps.camelizeKeys(res.rows);
+          return orderedFor(res.rows, contestIds, 'contestId', false);
         });
     },
   };

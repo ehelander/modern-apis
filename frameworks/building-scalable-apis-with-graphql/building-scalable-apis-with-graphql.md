@@ -1547,6 +1547,315 @@ module.exports = new GraphQLObjectType({
 
 - Now we're down to 6 queries, only calling `users` 1 time.
 - DataLoader is an essential tool for a GraphQL server.
+- Convert remaining getters in `database/pgdb.js`:
+
+```js
+const humps = require('humps');
+const _ = require('lodash');
+
+module.exports = (pgPool) => {
+  const orderedFor = (rows, collection, field, singleObject) => {
+    const data = humps.camelizeKeys(rows);
+    const inGroupsOfFields = _.groupBy(data, field);
+    return collection.map((element) => {
+      const elementArray = inGroupsOfFields[element];
+      if (elementArray) {
+        return singleObject ? elementArray[0] : elementArray;
+      }
+      return singleObject ? {} : [];
+    });
+  };
+
+  return {
+    getUsersByIds(userIds) {
+      return pgPool
+        .query(
+          `
+        SELECT  *
+        FROM    users
+        WHERE   id = ANY($1)
+      `,
+          [userIds],
+        )
+        .then((res) => {
+          return orderedFor(res.rows, userIds, 'id', true);
+        });
+    },
+
+    getUsersByApiKeys(apiKeys) {
+      return pgPool
+        .query(
+          `
+        SELECT  * 
+        FROM    users
+        WHERE   api_key = ANY($1)
+      `,
+          [apiKeys],
+        )
+        .then((res) => {
+          return orderedFor(res.rows, apiKeys, 'apiKey', true);
+        });
+    },
+
+    getContestsForUserIds(userIds) {
+      return pgPool
+        .query(
+          `
+        SELECT  *
+        FROM    contests
+        WHERE   created_by = ANY($1)
+      `,
+          [userIds],
+        )
+        .then((res) => {
+          return orderedFor(res.rows, userIds, 'createdBy', false);
+        });
+    },
+
+    getNamesForContestIds(contestIds) {
+      return pgPool
+        .query(
+          `
+          SELECT  *
+          FROM    names
+          WHERE   contest_id = ANY($1)
+        `,
+          [contestIds],
+        )
+        .then((res) => {
+          return orderedFor(res.rows, contestIds, 'contestId', false);
+        });
+    },
+  };
+};
+```
+
+- Create loaders in `lib/index.js`:
+
+```js
+const { nodeEnv } = require('./util');
+console.log(`Running in ${nodeEnv} mode...`);
+
+const DataLoader = require('dataloader');
+const pg = require('pg');
+const pgConfig = require('../config/pg')[nodeEnv];
+const pgPool = new pg.Pool(pgConfig);
+const pgdb = require('../database/pgdb')(pgPool);
+
+const app = require('express')();
+
+const ncSchema = require('../schema');
+const graphqlHTTP = require('express-graphql');
+
+const { MongoClient } = require('mongodb');
+const assert = require('assert');
+const mConfig = require('../config/mongo')[nodeEnv];
+
+MongoClient.connect(mConfig.url, (err, mPool) => {
+  assert.equal(err, null);
+
+  app.use('/graphql', (req, res) => {
+    const loaders = {
+      usersByIds: new DataLoader(pgdb.getUsersByIds),
+      usersByApiKeys: new DataLoader(pgdb.getUsersByApiKeys),
+      namesForContestIds: new DataLoader(pgdb.getNamesForContestIds),
+      contestsForUserIds: new DataLoader(pgdb.getContestsForUserIds),
+    };
+    graphqlHTTP({
+      schema: ncSchema,
+      graphiql: true,
+      context: {
+        pgPool,
+        mPool,
+        loaders,
+      },
+    })(req, res);
+  });
+
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}.`);
+  });
+});
+```
+
+- Replace database calls to PostgreSQL:
+
+  - `schema/index.js`:
+
+    ```js
+    const {
+      GraphQLNonNull,
+      GraphQLObjectType,
+      GraphQLSchema,
+      GraphQLString,
+    } = require('graphql');
+
+    const MeType = require('./types/user');
+
+    const RootQueryType = new GraphQLObjectType({
+      name: 'RootQueryType',
+
+      fields: {
+        me: {
+          type: MeType,
+          description: 'The current user identified by an API key.',
+          args: {
+            key: { type: new GraphQLNonNull(GraphQLString) },
+          },
+          resolve: (obj, args, { loaders }) => {
+            return loaders.usersByApiKeys.load(args.key);
+          },
+        },
+      },
+    });
+
+    const ncSchema = new GraphQLSchema({
+      query: RootQueryType,
+    });
+
+    module.exports = ncSchema;
+    ```
+
+  - `schema/types/user.js`:
+
+    ```js
+    const {
+      GraphQLID,
+      GraphQLInt,
+      GraphQLList,
+      GraphQLNonNull,
+      GraphQLObjectType,
+      GraphQLString,
+    } = require('graphql');
+
+    // const pgdb = require('../../database/pgdb');
+    const mdb = require('../../database/mdb');
+    const ContestType = require('./contest');
+
+    module.exports = new GraphQLObjectType({
+      name: 'UserType',
+
+      fields: {
+        id: { type: GraphQLID },
+        firstName: { type: GraphQLString },
+        lastName: { type: GraphQLString },
+        fullName: {
+          type: GraphQLString,
+          resolve: (obj) => `${obj.firstName} ${obj.lastName}`,
+        },
+        email: { type: GraphQLNonNull(GraphQLString) },
+        createdAt: { type: GraphQLString },
+        contests: {
+          type: new GraphQLList(ContestType),
+          // resolve(obj, args, { pgPool }) {
+          //   return pgdb(pgPool).getContestsForUserIds(obj);
+          resolve(obj, args, { loaders }) {
+            return loaders.contestsForUserIds.load(obj.id);
+          },
+        },
+        contestsCount: {
+          type: GraphQLInt,
+          resolve(obj, args, { mPool }, { fieldName }) {
+            return mdb(mPool).getCounts(obj, fieldName);
+          },
+        },
+        namesCount: {
+          type: GraphQLInt,
+          resolve(obj, args, { mPool }, { fieldName }) {
+            return mdb(mPool).getCounts(obj, fieldName);
+          },
+        },
+        votesCount: {
+          type: GraphQLInt,
+          resolve(obj, args, { mPool }, { fieldName }) {
+            return mdb(mPool).getCounts(obj, fieldName);
+          },
+        },
+      },
+    });
+    ```
+
+  - `schema/types/contest.js`:
+
+    ```js
+    const {
+      GraphQLID,
+      GraphQLList,
+      GraphQLNonNull,
+      GraphQLObjectType,
+      GraphQLString,
+    } = require('graphql');
+
+    // const pgdb = require('../../database/pgdb');
+    const NameType = require('./name');
+    const ContestStatusType = require('./contest-status');
+
+    module.exports = new GraphQLObjectType({
+      name: 'ContestType',
+
+      fields: {
+        id: { type: GraphQLID },
+        code: { type: new GraphQLNonNull(GraphQLString) },
+        title: { type: new GraphQLNonNull(GraphQLString) },
+        description: { type: GraphQLString },
+        status: { type: new GraphQLNonNull(ContestStatusType) },
+        createdAt: { type: new GraphQLNonNull(GraphQLString) },
+        names: {
+          type: new GraphQLList(NameType),
+          // resolve(obj, args, { pgPool }) {
+          //   return pgdb(pgPool).getNames(obj);
+          resolve(obj, args, { loaders }) {
+            return loaders.namesForContestIds.load(obj.id);
+          },
+        },
+      },
+    });
+    ```
+
+- We're down to 4 queries: 1 for each loader.
+  - The `names` query is now querying for a list: So instead of N+1, we now have 2.
+- For a complex query with aliases, we still only make 4 queries.
+
+  ```gql
+  query MyContests {
+    me(key: "4242") {
+      id
+      email
+      fullName
+      contestsCount
+      namesCount
+      votesCount
+      c1: contests {
+        title
+        names {
+          label
+          createdBy {
+            fullName
+          }
+        }
+      }
+      c2: contests {
+        title
+        names {
+          label
+          createdBy {
+            fullName
+          }
+        }
+      }
+      c3: contests {
+        title
+        names {
+          label
+          createdBy {
+            fullName
+          }
+        }
+      }
+    }
+  }
+  ```
 
 ### [Using Database Views with GraphQL]()
 

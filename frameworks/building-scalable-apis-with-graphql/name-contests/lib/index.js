@@ -22,6 +22,9 @@ MongoClient.connect(mConfig.url, (err, mPool) => {
   app.use('/graphql', (req, res) => {
     const loaders = {
       usersByIds: new DataLoader(pgdb.getUsersByIds),
+      usersByApiKeys: new DataLoader(pgdb.getUsersByApiKeys),
+      namesForContestIds: new DataLoader(pgdb.getNamesForContestIds),
+      contestsForUserIds: new DataLoader(pgdb.getContestsForUserIds),
     };
     graphqlHTTP({
       schema: ncSchema,
