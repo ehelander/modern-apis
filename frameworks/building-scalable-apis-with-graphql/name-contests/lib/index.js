@@ -30,6 +30,9 @@ MongoClient.connect(mConfig.url, (err, mPool) => {
       totalVotesByNameIds: new DataLoader(
         pgdb.getTotalVotesByNameIds,
       ),
+      activitiesForUserIds: new DataLoader(
+        pgdb.getActivitiesForUserIds,
+      ),
       mdb: {
         usersByIds: new DataLoader(mdb.getUsersByIds),
       },

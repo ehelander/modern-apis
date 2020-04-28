@@ -2804,5 +2804,198 @@ mkdir schema && touch schema/index.js
 - A few cleanup tasks:
   - Converting all `fields` into functions
   - Renaming type `name`s consistent (without a `Type` suffix).
+- We want to give users the ability to see all their activities (creating a contest or proposing a name for a contest).
 
-### [Summary]()
+  - This involves grouping `Contest` and `Name` types &rarr; union.
+
+  ```gql
+  {
+    me(key: "0000") {
+      email
+      fullName
+
+      activities {
+        # Contest or Name...
+      }
+    }
+  }
+  ```
+
+- Create `schema/types/activity.js`: `touch schema/types/activity.js`:
+
+  ```js
+  const { GraphQLUnionType } = require('graphql');
+
+  const ContestType = require('./contest');
+  const NameType = require('./name');
+
+  module.exports = new GraphQLUnionType({
+    name: 'Activity',
+
+    types: [ContestType, NameType],
+    // Determine which type the current item belongs to.
+    resolveType(value) {
+      return value.activityType === 'contest'
+        ? ContestType
+        : NameType;
+    },
+  });
+  ```
+
+- Add a new `activities` field on a `schema/types/user.js`:
+
+  ```js
+  const {
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLNonNull,
+    GraphQLObjectType,
+    GraphQLString,
+  } = require('graphql');
+
+  const ContestType = require('./contest');
+  const ActivityType = require('./activity');
+
+  module.exports = new GraphQLObjectType({
+    name: 'User',
+
+    fields: () => ({
+      id: { type: GraphQLID },
+      firstName: { type: GraphQLString },
+      lastName: { type: GraphQLString },
+      fullName: {
+        type: GraphQLString,
+        resolve: (obj) => `${obj.firstName} ${obj.lastName}`,
+      },
+      email: { type: GraphQLNonNull(GraphQLString) },
+      createdAt: { type: GraphQLString },
+      contests: {
+        type: new GraphQLList(ContestType),
+        resolve(obj, args, { loaders }) {
+          return loaders.contestsForUserIds.load(obj.id);
+        },
+      },
+      contestsCount: {
+        type: GraphQLInt,
+        resolve(obj, args, { loaders }, { fieldName }) {
+          return loaders.mdb.usersByIds
+            .load(obj.id)
+            .then((res) => res[fieldName]);
+        },
+      },
+      namesCount: {
+        type: GraphQLInt,
+        resolve(obj, args, { loaders }, { fieldName }) {
+          return loaders.mdb.usersByIds
+            .load(obj.id)
+            .then((res) => res[fieldName]);
+        },
+      },
+      votesCount: {
+        type: GraphQLInt,
+        resolve(obj, args, { loaders }, { fieldName }) {
+          return loaders.mdb.usersByIds
+            .load(obj.id)
+            .then((res) => res[fieldName]);
+        },
+      },
+      activities: {
+        type: new GraphQLList(ActivityType),
+        resolve(obj, args, { loaders }) {
+          return loaders.activitiesForUserIds.load(obj.id);
+        },
+      },
+    }),
+  });
+  ```
+
+- Add a loader in `lib/index.js`:
+
+  ```js
+  const { nodeEnv } = require('./util');
+  console.log(`Running in ${nodeEnv} mode...`);
+
+  const DataLoader = require('dataloader');
+  const pg = require('pg');
+  const pgConfig = require('../config/pg')[nodeEnv];
+  const pgPool = new pg.Pool(pgConfig);
+  const pgdb = require('../database/pgdb')(pgPool);
+
+  const app = require('express')();
+
+  const ncSchema = require('../schema');
+  const graphqlHTTP = require('express-graphql');
+
+  const { MongoClient } = require('mongodb');
+  const assert = require('assert');
+  const mConfig = require('../config/mongo')[nodeEnv];
+
+  MongoClient.connect(mConfig.url, (err, mPool) => {
+    assert.equal(err, null);
+
+    const mdb = require('../database/mdb')(mPool);
+
+    app.use('/graphql', (req, res) => {
+      const loaders = {
+        usersByIds: new DataLoader(pgdb.getUsersByIds),
+        usersByApiKeys: new DataLoader(pgdb.getUsersByApiKeys),
+        namesForContestIds: new DataLoader(
+          pgdb.getNamesForContestIds,
+        ),
+        contestsForUserIds: new DataLoader(
+          pgdb.getContestsForUserIds,
+        ),
+        totalVotesByNameIds: new DataLoader(
+          pgdb.getTotalVotesByNameIds,
+        ),
+        activitiesForUserIds: new DataLoader(
+          pgdb.getActivitiesForUserIds,
+        ),
+        mdb: {
+          usersByIds: new DataLoader(mdb.getUsersByIds),
+        },
+      };
+      graphqlHTTP({
+        schema: ncSchema,
+        graphiql: true,
+        context: {
+          pgPool,
+          mPool,
+          loaders,
+        },
+      })(req, res);
+    });
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is listening on port ${PORT}.`);
+    });
+  });
+  ```
+
+- We now have an `Activity` that can be either a `Contest` or a `Name`:
+  - ![activity](2020-04-28-14-12-02.png)
+  - ![contest-or-name](2020-04-28-14-12-31.png)
+- Use an inline fragment to query:
+
+  ```gql
+  {
+    me(key: "0000") {
+      email
+      fullName
+      activities {
+        ... on Contest {
+          header: title
+        }
+        ... on Name {
+          header: label
+        }
+      }
+    }
+  }
+  ```
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=8c3578bb-9af9-42d9-88c2-f6bba3aba10c)
+
+- Book: [Learning GraphQL and Relay](https://www.amazon.com/Learning-GraphQL-Relay-Samer-Buna-ebook/dp/B01G5LOM5Q)

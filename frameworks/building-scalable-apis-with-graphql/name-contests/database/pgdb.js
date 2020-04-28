@@ -139,5 +139,38 @@ module.exports = (pgPool) => {
           return humps.camelizeKeys(res.rows[0]);
         });
     },
+
+    getActivitiesForUserIds(userIds) {
+      return pgPool
+        .query(
+          `
+          SELECT
+            created_by,
+            created_at,
+            label,
+            '' AS title,
+            'name' AS activity_type
+          FROM
+            names
+          WHERE
+            created_by = ANY($1)
+          UNION
+          SELECT
+            created_by,
+            created_at,
+            '' AS label,
+            title,
+            'contest' AS activity_type
+          FROM
+            contests
+          WHERE
+            created_by = ANY($1)
+        `,
+          [userIds],
+        )
+        .then((res) => {
+          return orderedFor(res.rows, userIds, 'createdBy', false);
+        });
+    },
   };
 };

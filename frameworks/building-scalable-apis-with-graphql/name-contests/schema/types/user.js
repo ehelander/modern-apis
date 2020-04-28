@@ -8,6 +8,7 @@ const {
 } = require('graphql');
 
 const ContestType = require('./contest');
+const ActivityType = require('./activity');
 
 module.exports = new GraphQLObjectType({
   name: 'User',
@@ -50,6 +51,12 @@ module.exports = new GraphQLObjectType({
         return loaders.mdb.usersByIds
           .load(obj.id)
           .then((res) => res[fieldName]);
+      },
+    },
+    activities: {
+      type: new GraphQLList(ActivityType),
+      resolve(obj, args, { loaders }) {
+        return loaders.activitiesForUserIds.load(obj.id);
       },
     },
   }),
