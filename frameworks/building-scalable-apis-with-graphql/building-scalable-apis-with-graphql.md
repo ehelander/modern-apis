@@ -1341,343 +1341,352 @@ mkdir schema && touch schema/index.js
   - DataLoader is a function that takes an array of keys, and returns an array of values.
   - Then `dataloader` internallly applies caching & batching when it can.
 - To prepare for `dataloader`, we need to convert `database/pgdb.js` gets to take lists.
+
   - But 2 considerations:
     - If an ID is not found in the database, we could end up with fewer output items than input items. Dataloader would complain.
     - The order of items in the output array must match the order of items in the input array, or Dataloader would complain.
 
-```js
-const humps = require('humps');
-const _ = require('lodash');
+  ```js
+  const humps = require('humps');
+  const _ = require('lodash');
 
-module.exports = (pgPool) => {
-  const orderedFor = (rows, collection, field) => {
-    /*
-      Make sure:
-        - We have an output item for each input item.
-        - The order of output items matches the order of input items.
-    */
-    const data = humps.camelizeKeys(rows);
-    const inGroupsOfField = _.groupBy(data, field);
-    return collection.map((element) => {
-      const elementArray = inGroupsOfField[element];
-      if (elementArray) {
-        // If the array contains multiple row matches, just return the first one.
-        return elementArray[0];
-      }
-      return {};
-    });
-  };
+  module.exports = (pgPool) => {
+    const orderedFor = (rows, collection, field) => {
+      /*
+        Make sure:
+          - We have an output item for each input item.
+          - The order of output items matches the order of input items.
+      */
+      const data = humps.camelizeKeys(rows);
+      const inGroupsOfField = _.groupBy(data, field);
+      return collection.map((element) => {
+        const elementArray = inGroupsOfField[element];
+        if (elementArray) {
+          // If the array contains multiple row matches, just return the first one.
+          return elementArray[0];
+        }
+        return {};
+      });
+    };
 
-  return {
-    // getUserById(userId) {
-    getUsersByIds(userIds) {
-      return (
-        pgPool
-          //   .query(
-          //     `
-          //   SELECT  *
-          //   FROM    users
-          //   WHERE   id = $1
-          // `,
+    return {
+      // getUserById(userId) {
+      getUsersByIds(userIds) {
+        return (
+          pgPool
+            //   .query(
+            //     `
+            //   SELECT  *
+            //   FROM    users
+            //   WHERE   id = $1
+            // `,
+            .query(
+              `
+          SELECT  *
+          FROM    users
+          WHERE   id = ANY($1)
+        `,
+              // [userId],
+              [userIds],
+            )
+            .then((res) => {
+              // return humps.camelizeKeys(res.rows[0]);
+              // return humps.camelizeKeys(res.rows);
+              return orderedFor(res.rows, userIds, 'id');
+            })
+        );
+      },
+
+      getUserByApiKey(apiKey) {
+        return pgPool
           .query(
             `
-        SELECT  *
-        FROM    users
-        WHERE   id = ANY($1)
-      `,
-            // [userId],
-            [userIds],
+          SELECT  *
+          FROM    users
+          WHERE   api_key = $1
+        `,
+            [apiKey],
           )
           .then((res) => {
-            // return humps.camelizeKeys(res.rows[0]);
-            // return humps.camelizeKeys(res.rows);
-            return orderedFor(res.rows, userIds, 'id');
-          })
-      );
-    },
+            return humps.camelizeKeys(res.rows[0]);
+          });
+      },
 
-    getUserByApiKey(apiKey) {
-      return pgPool
-        .query(
-          `
-        SELECT  *
-        FROM    users
-        WHERE   api_key = $1
-      `,
-          [apiKey],
-        )
-        .then((res) => {
-          return humps.camelizeKeys(res.rows[0]);
-        });
-    },
-
-    getContests(user) {
-      return pgPool
-        .query(
-          `
-        SELECT  *
-        FROM    contests
-        WHERE   created_by = $1
-      `,
-          [user.id],
-        )
-        .then((res) => {
-          return humps.camelizeKeys(res.rows);
-        });
-    },
-
-    getNames(contest) {
-      return pgPool
-        .query(
-          `
+      getContests(user) {
+        return pgPool
+          .query(
+            `
           SELECT  *
-          FROM    names
-          WHERE   contest_id = $1
+          FROM    contests
+          WHERE   created_by = $1
         `,
-          [contest.id],
-        )
-        .then((res) => {
-          return humps.camelizeKeys(res.rows);
-        });
-    },
+            [user.id],
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows);
+          });
+      },
+
+      getNames(contest) {
+        return pgPool
+          .query(
+            `
+            SELECT  *
+            FROM    names
+            WHERE   contest_id = $1
+          `,
+            [contest.id],
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows);
+          });
+      },
+    };
   };
-};
-```
+  ```
 
 - Set up DataLoader in `lib/index.js` (because we want the dataloaders to be initialized _per request_, not globally for all requests: we want to minimize the number of queries per request; not maintain a global cache, which gets more complicated):
 
-```js
-const { nodeEnv } = require('./util');
-console.log(`Running in ${nodeEnv} mode...`);
+  ```js
+  const { nodeEnv } = require('./util');
+  console.log(`Running in ${nodeEnv} mode...`);
 
-const DataLoader = require('dataloader');
-const pg = require('pg');
-const pgConfig = require('../config/pg')[nodeEnv];
-const pgPool = new pg.Pool(pgConfig);
-const pgdb = require('../database/pgdb')(pgPool);
+  const DataLoader = require('dataloader');
+  const pg = require('pg');
+  const pgConfig = require('../config/pg')[nodeEnv];
+  const pgPool = new pg.Pool(pgConfig);
+  const pgdb = require('../database/pgdb')(pgPool);
 
-const app = require('express')();
+  const app = require('express')();
 
-const ncSchema = require('../schema');
-const graphqlHTTP = require('express-graphql');
+  const ncSchema = require('../schema');
+  const graphqlHTTP = require('express-graphql');
 
-const { MongoClient } = require('mongodb');
-const assert = require('assert');
-const mConfig = require('../config/mongo')[nodeEnv];
+  const { MongoClient } = require('mongodb');
+  const assert = require('assert');
+  const mConfig = require('../config/mongo')[nodeEnv];
 
-MongoClient.connect(mConfig.url, (err, mPool) => {
-  assert.equal(err, null);
+  MongoClient.connect(mConfig.url, (err, mPool) => {
+    assert.equal(err, null);
 
-  // app.use(
-  //   '/graphql',
-  //   graphqlHTTP({
-  //     schema: ncSchema,
-  //     graphiql: true,
-  //     context: {
-  //       pgPool,
-  //       mPool,
-  //     },
-  //   }),
-  // );
-  // Use Express's callback:
-  app.use(
-    '/graphql', (req, res) => {
-      // Anything we write in the callback will have the lifetime of the request.
-      const loaders = {
-        // Create a DataLoader object.
-        usersByIds: new DataLoader(pgdb.getUsersByIds)
+    // app.use(
+    //   '/graphql',
+    //   graphqlHTTP({
+    //     schema: ncSchema,
+    //     graphiql: true,
+    //     context: {
+    //       pgPool,
+    //       mPool,
+    //     },
+    //   }),
+    // );
+    // Use Express's callback:
+    app.use(
+      '/graphql', (req, res) => {
+        // Anything we write in the callback will have the lifetime of the request.
+        const loaders = {
+          // Create a DataLoader object.
+          usersByIds: new DataLoader(pgdb.getUsersByIds)
+        }
+        graphqlHTTP({
+          schema: ncSchema,
+          graphiql: true,
+          context: {
+            pgPool,
+            mPool,
+            // Make the loaders available in the context.
+            loaders
+          },
+        })(req, res),
       }
-      graphqlHTTP({
-        schema: ncSchema,
-        graphiql: true,
-        context: {
-          pgPool,
-          mPool,
-          // Make the loaders available in the context.
-          loaders
-        },
-      })(req, res),
-    }
-  );
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}.`);
-});
-```
-
-- Install new dependencies: `npm i dataloader lodash`
-
-- Convert `schema/types/names.js` to use the dataloader:
-
-```js
-const {
-  GraphQLID,
-  GraphQLNonNull,
-  GraphQLObjectType,
-  GraphQLString,
-} = require('graphql');
-
-// const pgdb = require('../../database/pgdb');
-const UserType = require('./user');
-
-module.exports = new GraphQLObjectType({
-  name: 'Name',
-
-  fields: () => {
-    const UserType = require('./user');
-    return {
-      id: { type: GraphQLID },
-      label: { type: new GraphQLNonNull(GraphQLString) },
-      description: { type: GraphQLString },
-      createdAt: { type: new GraphQLNonNull(GraphQLString) },
-      createdBy: {
-        type: new GraphQLNonNull(UserType),
-        // resolve(obj, args, { pgPool }) {
-        //   return pgdb(pgPool).getUserById(obj.createdBy);
-        resolve(obj, args, { loaders }) {
-          return loaders.usersByIds.load(obj.createdBy);
-        },
-      },
-    };
-  },
-});
-```
-
-- Now we're down to 6 queries, only calling `users` 1 time.
-- DataLoader is an essential tool for a GraphQL server.
-- Convert remaining getters in `database/pgdb.js`:
-
-```js
-const humps = require('humps');
-const _ = require('lodash');
-
-module.exports = (pgPool) => {
-  const orderedFor = (rows, collection, field, singleObject) => {
-    const data = humps.camelizeKeys(rows);
-    const inGroupsOfFields = _.groupBy(data, field);
-    return collection.map((element) => {
-      const elementArray = inGroupsOfFields[element];
-      if (elementArray) {
-        return singleObject ? elementArray[0] : elementArray;
-      }
-      return singleObject ? {} : [];
-    });
-  };
-
-  return {
-    getUsersByIds(userIds) {
-      return pgPool
-        .query(
-          `
-        SELECT  *
-        FROM    users
-        WHERE   id = ANY($1)
-      `,
-          [userIds],
-        )
-        .then((res) => {
-          return orderedFor(res.rows, userIds, 'id', true);
-        });
-    },
-
-    getUsersByApiKeys(apiKeys) {
-      return pgPool
-        .query(
-          `
-        SELECT  * 
-        FROM    users
-        WHERE   api_key = ANY($1)
-      `,
-          [apiKeys],
-        )
-        .then((res) => {
-          return orderedFor(res.rows, apiKeys, 'apiKey', true);
-        });
-    },
-
-    getContestsForUserIds(userIds) {
-      return pgPool
-        .query(
-          `
-        SELECT  *
-        FROM    contests
-        WHERE   created_by = ANY($1)
-      `,
-          [userIds],
-        )
-        .then((res) => {
-          return orderedFor(res.rows, userIds, 'createdBy', false);
-        });
-    },
-
-    getNamesForContestIds(contestIds) {
-      return pgPool
-        .query(
-          `
-          SELECT  *
-          FROM    names
-          WHERE   contest_id = ANY($1)
-        `,
-          [contestIds],
-        )
-        .then((res) => {
-          return orderedFor(res.rows, contestIds, 'contestId', false);
-        });
-    },
-  };
-};
-```
-
-- Create loaders in `lib/index.js`:
-
-```js
-const { nodeEnv } = require('./util');
-console.log(`Running in ${nodeEnv} mode...`);
-
-const DataLoader = require('dataloader');
-const pg = require('pg');
-const pgConfig = require('../config/pg')[nodeEnv];
-const pgPool = new pg.Pool(pgConfig);
-const pgdb = require('../database/pgdb')(pgPool);
-
-const app = require('express')();
-
-const ncSchema = require('../schema');
-const graphqlHTTP = require('express-graphql');
-
-const { MongoClient } = require('mongodb');
-const assert = require('assert');
-const mConfig = require('../config/mongo')[nodeEnv];
-
-MongoClient.connect(mConfig.url, (err, mPool) => {
-  assert.equal(err, null);
-
-  app.use('/graphql', (req, res) => {
-    const loaders = {
-      usersByIds: new DataLoader(pgdb.getUsersByIds),
-      usersByApiKeys: new DataLoader(pgdb.getUsersByApiKeys),
-      namesForContestIds: new DataLoader(pgdb.getNamesForContestIds),
-      contestsForUserIds: new DataLoader(pgdb.getContestsForUserIds),
-    };
-    graphqlHTTP({
-      schema: ncSchema,
-      graphiql: true,
-      context: {
-        pgPool,
-        mPool,
-        loaders,
-      },
-    })(req, res);
+    );
   });
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}.`);
   });
-});
-```
+  ```
+
+- Install new dependencies: `npm i dataloader lodash`
+- Convert `schema/types/names.js` to use the dataloader:
+
+  ```js
+  const {
+    GraphQLID,
+    GraphQLNonNull,
+    GraphQLObjectType,
+    GraphQLString,
+  } = require('graphql');
+
+  // const pgdb = require('../../database/pgdb');
+  const UserType = require('./user');
+
+  module.exports = new GraphQLObjectType({
+    name: 'Name',
+
+    fields: () => {
+      const UserType = require('./user');
+      return {
+        id: { type: GraphQLID },
+        label: { type: new GraphQLNonNull(GraphQLString) },
+        description: { type: GraphQLString },
+        createdAt: { type: new GraphQLNonNull(GraphQLString) },
+        createdBy: {
+          type: new GraphQLNonNull(UserType),
+          // resolve(obj, args, { pgPool }) {
+          //   return pgdb(pgPool).getUserById(obj.createdBy);
+          resolve(obj, args, { loaders }) {
+            return loaders.usersByIds.load(obj.createdBy);
+          },
+        },
+      };
+    },
+  });
+  ```
+
+- Now we're down to 6 queries, only calling `users` 1 time.
+- DataLoader is an essential tool for a GraphQL server.
+- Convert remaining getters in `database/pgdb.js`:
+
+  ```js
+  const humps = require('humps');
+  const _ = require('lodash');
+
+  module.exports = (pgPool) => {
+    const orderedFor = (rows, collection, field, singleObject) => {
+      const data = humps.camelizeKeys(rows);
+      const inGroupsOfFields = _.groupBy(data, field);
+      return collection.map((element) => {
+        const elementArray = inGroupsOfFields[element];
+        if (elementArray) {
+          return singleObject ? elementArray[0] : elementArray;
+        }
+        return singleObject ? {} : [];
+      });
+    };
+
+    return {
+      getUsersByIds(userIds) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    users
+          WHERE   id = ANY($1)
+        `,
+            [userIds],
+          )
+          .then((res) => {
+            return orderedFor(res.rows, userIds, 'id', true);
+          });
+      },
+
+      getUsersByApiKeys(apiKeys) {
+        return pgPool
+          .query(
+            `
+          SELECT  * 
+          FROM    users
+          WHERE   api_key = ANY($1)
+        `,
+            [apiKeys],
+          )
+          .then((res) => {
+            return orderedFor(res.rows, apiKeys, 'apiKey', true);
+          });
+      },
+
+      getContestsForUserIds(userIds) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    contests
+          WHERE   created_by = ANY($1)
+        `,
+            [userIds],
+          )
+          .then((res) => {
+            return orderedFor(res.rows, userIds, 'createdBy', false);
+          });
+      },
+
+      getNamesForContestIds(contestIds) {
+        return pgPool
+          .query(
+            `
+            SELECT  *
+            FROM    names
+            WHERE   contest_id = ANY($1)
+          `,
+            [contestIds],
+          )
+          .then((res) => {
+            return orderedFor(
+              res.rows,
+              contestIds,
+              'contestId',
+              false,
+            );
+          });
+      },
+    };
+  };
+  ```
+
+- Create loaders in `lib/index.js`:
+
+  ```js
+  const { nodeEnv } = require('./util');
+  console.log(`Running in ${nodeEnv} mode...`);
+
+  const DataLoader = require('dataloader');
+  const pg = require('pg');
+  const pgConfig = require('../config/pg')[nodeEnv];
+  const pgPool = new pg.Pool(pgConfig);
+  const pgdb = require('../database/pgdb')(pgPool);
+
+  const app = require('express')();
+
+  const ncSchema = require('../schema');
+  const graphqlHTTP = require('express-graphql');
+
+  const { MongoClient } = require('mongodb');
+  const assert = require('assert');
+  const mConfig = require('../config/mongo')[nodeEnv];
+
+  MongoClient.connect(mConfig.url, (err, mPool) => {
+    assert.equal(err, null);
+
+    app.use('/graphql', (req, res) => {
+      const loaders = {
+        usersByIds: new DataLoader(pgdb.getUsersByIds),
+        usersByApiKeys: new DataLoader(pgdb.getUsersByApiKeys),
+        namesForContestIds: new DataLoader(
+          pgdb.getNamesForContestIds,
+        ),
+        contestsForUserIds: new DataLoader(
+          pgdb.getContestsForUserIds,
+        ),
+      };
+      graphqlHTTP({
+        schema: ncSchema,
+        graphiql: true,
+        context: {
+          pgPool,
+          mPool,
+          loaders,
+        },
+      })(req, res);
+    });
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is listening on port ${PORT}.`);
+    });
+  });
+  ```
 
 - Replace database calls to PostgreSQL:
 
