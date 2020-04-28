@@ -24,8 +24,20 @@ const RootQueryType = new GraphQLObjectType({
   },
 });
 
+const AddContestMutation = require('./mutations/add-contest');
+
+const RootMutationType = new GraphQLObjectType({
+  name: 'RootMutationType',
+
+  fields: () => ({
+    AddContest: AddContestMutation,
+    // AddName: AddNameMutation
+  }),
+});
+
 const ncSchema = new GraphQLSchema({
   query: RootQueryType,
+  mutation: RootMutationType,
 });
 
 module.exports = ncSchema;

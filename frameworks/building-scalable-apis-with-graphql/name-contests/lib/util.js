@@ -15,4 +15,9 @@ module.exports = {
       return singleObject ? {} : [];
     });
   },
+
+  slug: (str) => {
+    // Lower-case and replace all spaces and non-word characters with a dash.
+    return str.toLowerCase().replace(/[\s\W-]+/, '-');
+  },
 };
