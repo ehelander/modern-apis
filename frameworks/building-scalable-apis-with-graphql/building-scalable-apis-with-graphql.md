@@ -1326,7 +1326,227 @@ mkdir schema && touch schema/index.js
 
 - But we have an N+1 problem: Too many database queries.
 
-### [The N+1 Queries Problem]()
+### [The N+1 Queries Problem](https://app.pluralsight.com/course-player?clipId=e5fff204-25d9-4ea8-ab7e-1b8d07dda913)
+
+- The query above results in 9 PostgreSQL calls.
+  - 3 `names` queries, plus 1 for `contests`.
+    - We have 3 contests, and we're reading names for each contest. Thus, N+1.
+  - And 4 `users` calls, onc for each name in the return data.
+- Caching (same-session) is our friend.
+  - This helps if the query is asking for the _same_ user repeatedly.
+  - But if we're querying for _different_ users, we need more than caching. We need batching.
+  - With batching, we delay the query for a particular resource until we know all the IDs we'll be querying for. Then query for a list of IDs.
+  - Managing caching and batching is a pain. Thankfully we have `dataloader` from facebook.
+- `dataloader`
+  - DataLoader is a function that takes an array of keys, and returns an array of values.
+  - Then `dataloader` internallly applies caching & batching when it can.
+- To prepare for `dataloader`, we need to convert `database/pgdb.js` gets to take lists.
+  - But 2 considerations:
+    - If an ID is not found in the database, we could end up with fewer output items than input items. Dataloader would complain.
+    - The order of items in the output array must match the order of items in the input array, or Dataloader would complain.
+
+```js
+const humps = require('humps');
+const _ = require('lodash');
+
+module.exports = (pgPool) => {
+  const orderedFor = (rows, collection, field) => {
+    /*
+      Make sure:
+        - We have an output item for each input item.
+        - The order of output items matches the order of input items.
+    */
+    const data = humps.camelizeKeys(rows);
+    const inGroupsOfField = _.groupBy(data, field);
+    return collection.map((element) => {
+      const elementArray = inGroupsOfField[element];
+      if (elementArray) {
+        // If the array contains multiple row matches, just return the first one.
+        return elementArray[0];
+      }
+      return {};
+    });
+  };
+
+  return {
+    // getUserById(userId) {
+    getUsersByIds(userIds) {
+      return (
+        pgPool
+          //   .query(
+          //     `
+          //   SELECT  *
+          //   FROM    users
+          //   WHERE   id = $1
+          // `,
+          .query(
+            `
+        SELECT  *
+        FROM    users
+        WHERE   id = ANY($1)
+      `,
+            // [userId],
+            [userIds],
+          )
+          .then((res) => {
+            // return humps.camelizeKeys(res.rows[0]);
+            // return humps.camelizeKeys(res.rows);
+            return orderedFor(res.rows, userIds, 'id');
+          })
+      );
+    },
+
+    getUserByApiKey(apiKey) {
+      return pgPool
+        .query(
+          `
+        SELECT  *
+        FROM    users
+        WHERE   api_key = $1
+      `,
+          [apiKey],
+        )
+        .then((res) => {
+          return humps.camelizeKeys(res.rows[0]);
+        });
+    },
+
+    getContests(user) {
+      return pgPool
+        .query(
+          `
+        SELECT  *
+        FROM    contests
+        WHERE   created_by = $1
+      `,
+          [user.id],
+        )
+        .then((res) => {
+          return humps.camelizeKeys(res.rows);
+        });
+    },
+
+    getNames(contest) {
+      return pgPool
+        .query(
+          `
+          SELECT  *
+          FROM    names
+          WHERE   contest_id = $1
+        `,
+          [contest.id],
+        )
+        .then((res) => {
+          return humps.camelizeKeys(res.rows);
+        });
+    },
+  };
+};
+```
+
+- Set up DataLoader in `lib/index.js` (because we want the dataloaders to be initialized _per request_, not globally for all requests: we want to minimize the number of queries per request; not maintain a global cache, which gets more complicated):
+
+```js
+const { nodeEnv } = require('./util');
+console.log(`Running in ${nodeEnv} mode...`);
+
+const DataLoader = require('dataloader');
+const pg = require('pg');
+const pgConfig = require('../config/pg')[nodeEnv];
+const pgPool = new pg.Pool(pgConfig);
+const pgdb = require('../database/pgdb')(pgPool);
+
+const app = require('express')();
+
+const ncSchema = require('../schema');
+const graphqlHTTP = require('express-graphql');
+
+const { MongoClient } = require('mongodb');
+const assert = require('assert');
+const mConfig = require('../config/mongo')[nodeEnv];
+
+MongoClient.connect(mConfig.url, (err, mPool) => {
+  assert.equal(err, null);
+
+  // app.use(
+  //   '/graphql',
+  //   graphqlHTTP({
+  //     schema: ncSchema,
+  //     graphiql: true,
+  //     context: {
+  //       pgPool,
+  //       mPool,
+  //     },
+  //   }),
+  // );
+  // Use Express's callback:
+  app.use(
+    '/graphql', (req, res) => {
+      // Anything we write in the callback will have the lifetime of the request.
+      const loaders = {
+        // Create a DataLoader object.
+        usersByIds: new DataLoader(pgdb.getUsersByIds)
+      }
+      graphqlHTTP({
+        schema: ncSchema,
+        graphiql: true,
+        context: {
+          pgPool,
+          mPool,
+          // Make the loaders available in the context.
+          loaders
+        },
+      })(req, res),
+    }
+  );
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}.`);
+});
+```
+
+- Install new dependencies: `npm i dataloader lodash`
+
+- Convert `schema/types/names.js` to use the dataloader:
+
+```js
+const {
+  GraphQLID,
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLString,
+} = require('graphql');
+
+// const pgdb = require('../../database/pgdb');
+const UserType = require('./user');
+
+module.exports = new GraphQLObjectType({
+  name: 'Name',
+
+  fields: () => {
+    const UserType = require('./user');
+    return {
+      id: { type: GraphQLID },
+      label: { type: new GraphQLNonNull(GraphQLString) },
+      description: { type: GraphQLString },
+      createdAt: { type: new GraphQLNonNull(GraphQLString) },
+      createdBy: {
+        type: new GraphQLNonNull(UserType),
+        // resolve(obj, args, { pgPool }) {
+        //   return pgdb(pgPool).getUserById(obj.createdBy);
+        resolve(obj, args, { loaders }) {
+          return loaders.usersByIds.load(obj.createdBy);
+        },
+      },
+    };
+  },
+});
+```
+
+- Now we're down to 6 queries, only calling `users` 1 time.
+- DataLoader is an essential tool for a GraphQL server.
 
 ### [Using Database Views with GraphQL]()
 
