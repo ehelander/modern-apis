@@ -12,12 +12,17 @@ const app = require('express')();
 const ncSchema = require('../schema');
 const graphqlHTTP = require('express-graphql');
 
-const { MongoClient } = require('mongodb');
+const { MongoClient, Logger } = require('mongodb');
 const assert = require('assert');
 const mConfig = require('../config/mongo')[nodeEnv];
 
 MongoClient.connect(mConfig.url, (err, mPool) => {
   assert.equal(err, null);
+
+  Logger.setLevel('debug');
+  Logger.filter('class', ['Server']);
+
+  const mdb = require('../database/mdb')(mPool);
 
   app.use('/graphql', (req, res) => {
     const loaders = {
@@ -25,6 +30,9 @@ MongoClient.connect(mConfig.url, (err, mPool) => {
       usersByApiKeys: new DataLoader(pgdb.getUsersByApiKeys),
       namesForContestIds: new DataLoader(pgdb.getNamesForContestIds),
       contestsForUserIds: new DataLoader(pgdb.getContestsForUserIds),
+      mdb: {
+        usersByIds: new DataLoader(mdb.getUsersByIds),
+      },
     };
     graphqlHTTP({
       schema: ncSchema,

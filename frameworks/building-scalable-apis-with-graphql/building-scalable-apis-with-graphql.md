@@ -1866,6 +1866,350 @@ mkdir schema && touch schema/index.js
   }
   ```
 
+### [Avoiding Extra MongoDB Connections](https://app.pluralsight.com/course-player?clipId=aa6b1093-ec47-4bf8-807c-50a201fd3595)
+
+- We can also use DataLoader with Mongo, since there are multiple connections for `contestsCount`, `namesCount`, and `votesCount`. (Not an N+1 problem, but a multiple connections problem).
+- Enable Mongo logging:
+
+  ```js
+  const { nodeEnv } = require('./util');
+  console.log(`Running in ${nodeEnv} mode...`);
+
+  const DataLoader = require('dataloader');
+  const pg = require('pg');
+  const pgConfig = require('../config/pg')[nodeEnv];
+  const pgPool = new pg.Pool(pgConfig);
+  const pgdb = require('../database/pgdb')(pgPool);
+
+  const app = require('express')();
+
+  const ncSchema = require('../schema');
+  const graphqlHTTP = require('express-graphql');
+
+  const { MongoClient, Logger } = require('mongodb');
+  const assert = require('assert');
+  const mConfig = require('../config/mongo')[nodeEnv];
+
+  MongoClient.connect(mConfig.url, (err, mPool) => {
+    assert.equal(err, null);
+
+    Logger.setLevel('debug');
+    Logger.filter('class', ['Server']);
+
+    app.use('/graphql', (req, res) => {
+      const loaders = {
+        usersByIds: new DataLoader(pgdb.getUsersByIds),
+        usersByApiKeys: new DataLoader(pgdb.getUsersByApiKeys),
+        namesForContestIds: new DataLoader(
+          pgdb.getNamesForContestIds,
+        ),
+        contestsForUserIds: new DataLoader(
+          pgdb.getContestsForUserIds,
+        ),
+      };
+      graphqlHTTP({
+        schema: ncSchema,
+        graphiql: true,
+        context: {
+          pgPool,
+          mPool,
+          loaders,
+        },
+      })(req, res);
+    });
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is listening on port ${PORT}.`);
+    });
+  });
+  ```
+
+- We can see 3 Mongo server connections with our query, even though they're all asking for the same information.
+- Caching will help here.
+- In `database/mdb.js`:
+
+  ```js
+  module.exports = (mPool) => {
+    return {
+      // getCounts(user, countsField) {
+      //   // For some reason, passing the database name with the `url` didn't seem to work.
+      //   return mPool
+      //     .db('contests')
+      //     .collection('users')
+      //     .findOne({ userId: user.id })
+      //     .then((userCounts) => userCounts[countsField]);
+      // },
+      getUsersByIds(userIds) {
+        // For some reason, passing the database name with the `url` didn't seem to work.
+        return mPool
+          .db('contests')
+          .collection('users')
+          .find({ userId: { $in: userIds } })
+          .toArray();
+      },
+    };
+  };
+  ```
+
+- But we're not handling ordering or IDs that aren't found in Mongo.
+
+  - Example: `lib/index.js`:
+
+  ```js
+  const { nodeEnv } = require('./util');
+  console.log(`Running in ${nodeEnv} mode...`);
+
+  const DataLoader = require('dataloader');
+  const pg = require('pg');
+  const pgConfig = require('../config/pg')[nodeEnv];
+  const pgPool = new pg.Pool(pgConfig);
+  const pgdb = require('../database/pgdb')(pgPool);
+
+  const app = require('express')();
+
+  const ncSchema = require('../schema');
+  const graphqlHTTP = require('express-graphql');
+
+  const { MongoClient, Logger } = require('mongodb');
+  const assert = require('assert');
+  const mConfig = require('../config/mongo')[nodeEnv];
+
+  MongoClient.connect(mConfig.url, (err, mPool) => {
+    assert.equal(err, null);
+
+    Logger.setLevel('debug');
+    Logger.filter('class', ['Server']);
+
+    const mdb = require('../database/mdb')(mPool);
+
+    mdb.getUsersByIds([2, 3, 1]).then((res) => console.log(res));
+
+    /*
+      Output:
+      [
+        {
+          _id: 5ea3a641bf31bd526278a138,
+          userId: 1,
+          contestsCount: 3,
+          namesCount: 0,
+          votesCount: 4
+        },
+        {
+          _id: 5ea3a641bf31bd526278a139,
+          userId: 2,
+          contestsCount: 0,
+          namesCount: 4,
+          votesCount: 4
+        }
+      ]
+    */
+
+    app.use('/graphql', (req, res) => {
+      const loaders = {
+        usersByIds: new DataLoader(pgdb.getUsersByIds),
+        usersByApiKeys: new DataLoader(pgdb.getUsersByApiKeys),
+        namesForContestIds: new DataLoader(
+          pgdb.getNamesForContestIds,
+        ),
+        contestsForUserIds: new DataLoader(
+          pgdb.getContestsForUserIds,
+        ),
+      };
+      graphqlHTTP({
+        schema: ncSchema,
+        graphiql: true,
+        context: {
+          pgPool,
+          mPool,
+          loaders,
+        },
+      })(req, res);
+    });
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is listening on port ${PORT}.`);
+    });
+  });
+  ```
+
+- `database/mdb.js`:
+
+  ```js
+  const { orderedFor } = require('../lib/util');
+
+  module.exports = (mPool) => {
+    return {
+      getUsersByIds(userIds) {
+        // For some reason, passing the database name with the `url` didn't seem to work.
+        return mPool
+          .db('contests')
+          .collection('users')
+          .find({ userId: { $in: userIds } })
+          .toArray()
+          .then((rows) => {
+            return orderedFor(rows, userIds, 'userId', true);
+          });
+      },
+    };
+  };
+  ```
+
+- Move `orderedFor` from `database/pgdb.js` to `lib/util.js`:
+
+  ```js
+  const humps = require('humps');
+  const _ = require('lodash');
+
+  module.exports = {
+    nodeEnv: process.env.NODE_ENV || 'development',
+
+    orderedFor: (rows, collection, field, singleObject) => {
+      const data = humps.camelizeKeys(rows);
+      const inGroupsOfFields = _.groupBy(data, field);
+      return collection.map((element) => {
+        const elementArray = inGroupsOfFields[element];
+        if (elementArray) {
+          return singleObject ? elementArray[0] : elementArray;
+        }
+        return singleObject ? {} : [];
+      });
+    },
+  };
+  ```
+
+- Add a Mongo DataLoader to `lib/index.js`:
+
+  ```js
+  const { nodeEnv } = require('./util');
+  console.log(`Running in ${nodeEnv} mode...`);
+
+  const DataLoader = require('dataloader');
+  const pg = require('pg');
+  const pgConfig = require('../config/pg')[nodeEnv];
+  const pgPool = new pg.Pool(pgConfig);
+  const pgdb = require('../database/pgdb')(pgPool);
+
+  const app = require('express')();
+
+  const ncSchema = require('../schema');
+  const graphqlHTTP = require('express-graphql');
+
+  const { MongoClient, Logger } = require('mongodb');
+  const assert = require('assert');
+  const mConfig = require('../config/mongo')[nodeEnv];
+
+  MongoClient.connect(mConfig.url, (err, mPool) => {
+    assert.equal(err, null);
+
+    Logger.setLevel('debug');
+    Logger.filter('class', ['Server']);
+
+    const mdb = require('../database/mdb')(mPool);
+
+    app.use('/graphql', (req, res) => {
+      const loaders = {
+        usersByIds: new DataLoader(pgdb.getUsersByIds),
+        usersByApiKeys: new DataLoader(pgdb.getUsersByApiKeys),
+        namesForContestIds: new DataLoader(
+          pgdb.getNamesForContestIds,
+        ),
+        contestsForUserIds: new DataLoader(
+          pgdb.getContestsForUserIds,
+        ),
+        mdb: {
+          usersByIds: new DataLoader(mdb.getUsersByIds),
+        },
+      };
+      graphqlHTTP({
+        schema: ncSchema,
+        graphiql: true,
+        context: {
+          pgPool,
+          mPool,
+          loaders,
+        },
+      })(req, res);
+    });
+
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is listening on port ${PORT}.`);
+    });
+  });
+  ```
+
+- Replace calls in `schema/types/user.js`:
+
+  ```js
+  const {
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLNonNull,
+    GraphQLObjectType,
+    GraphQLString,
+  } = require('graphql');
+
+  // const mdb = require('../../database/mdb');
+  const ContestType = require('./contest');
+
+  module.exports = new GraphQLObjectType({
+    name: 'UserType',
+
+    fields: {
+      id: { type: GraphQLID },
+      firstName: { type: GraphQLString },
+      lastName: { type: GraphQLString },
+      fullName: {
+        type: GraphQLString,
+        resolve: (obj) => `${obj.firstName} ${obj.lastName}`,
+      },
+      email: { type: GraphQLNonNull(GraphQLString) },
+      createdAt: { type: GraphQLString },
+      contests: {
+        type: new GraphQLList(ContestType),
+        resolve(obj, args, { loaders }) {
+          return loaders.contestsForUserIds.load(obj.id);
+        },
+      },
+      contestsCount: {
+        type: GraphQLInt,
+        // resolve(obj, args, { mPool }, { fieldName }) {
+        //   return mdb(mPool).getUsersByIds(obj, fieldName);
+        resolve(obj, args, { loaders }, { fieldName }) {
+          return loaders.mdb.usersByIds
+            .load(obj.id)
+            .then((res) => res[fieldName]);
+        },
+      },
+      namesCount: {
+        type: GraphQLInt,
+        // resolve(obj, args, { mPool }, { fieldName }) {
+        //   return mdb(mPool).getUsersByIds(obj, fieldName);
+        resolve(obj, args, { loaders }, { fieldName }) {
+          return loaders.mdb.usersByIds
+            .load(obj.id)
+            .then((res) => res[fieldName]);
+        },
+      },
+      votesCount: {
+        type: GraphQLInt,
+        // resolve(obj, args, { mPool }, { fieldName }) {
+        //   return mdb(mPool).getUsersByIds(obj, fieldName);
+        resolve(obj, args, { loaders }, { fieldName }) {
+          return loaders.mdb.usersByIds
+            .load(obj.id)
+            .then((res) => res[fieldName]);
+        },
+      },
+    },
+  });
+  ```
+
+- We're now making a single call to the MongoDB server.
+
 ### [Using Database Views with GraphQL]()
 
 ### [Working with Mutations]()
