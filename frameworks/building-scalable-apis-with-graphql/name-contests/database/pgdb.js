@@ -2,7 +2,22 @@ const humps = require('humps');
 
 module.exports = (pgPool) => {
   return {
-    getUser(apiKey) {
+    getUserById(userId) {
+      return pgPool
+        .query(
+          `
+        SELECT  *
+        FROM    users
+        WHERE   id = $1
+      `,
+          [userId],
+        )
+        .then((res) => {
+          return humps.camelizeKeys(res.rows[0]);
+        });
+    },
+
+    getUserByApiKey(apiKey) {
       return pgPool
         .query(
           `
@@ -26,6 +41,21 @@ module.exports = (pgPool) => {
         WHERE   created_by = $1
       `,
           [user.id],
+        )
+        .then((res) => {
+          return humps.camelizeKeys(res.rows);
+        });
+    },
+
+    getNames(contest) {
+      return pgPool
+        .query(
+          `
+          SELECT  *
+          FROM    names
+          WHERE   contest_id = $1
+        `,
+          [contest.id],
         )
         .then((res) => {
           return humps.camelizeKeys(res.rows);

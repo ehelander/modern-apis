@@ -1050,9 +1050,281 @@ mkdir schema && touch schema/index.js
 
 ## Data Loader and GraphQL Mutations
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=089c552a-8d6c-43bb-b53a-1624cc5d1c08)
 
-### [Node's Cycling Module Dependency]()
+### [Node's Cyclic Module Dependency](https://app.pluralsight.com/course-player?clipId=7bd1f1e5-7996-41f3-b06a-372ca712346f)
+
+- Create `schema/types/name.js`: `touch schema/types/name.js`:
+
+  ```js
+  const { GraphQLObjectType } = require('graphql');
+
+  const UserType = require('./user');
+
+  module.exports = new GraphQLObjectType({
+    name: 'Name',
+
+    fields: {
+      id: { type: GraphQLID },
+      label: { type: new GraphQLNonNull(GraphQLString) },
+      description: { type: GraphQLString },
+      createdAt: { type: new GraphQLNonNull(GraphQLString) },
+      // We'll expose the user object instead of the createdBy id: Override the type -> UserType.
+      createdBy: { type: new GraphQLNonNull(UserType) },
+    },
+  });
+  ```
+
+- Rename `MeType` to `UserType` (`me.js` &rarr; `user.js`).
+- In `contest.js`:
+
+  ```js
+  const {
+    GraphQLID,
+    GraphQLList,
+    GraphQLNonNull,
+    GraphQLObjectType,
+    GraphQLString,
+  } = require('graphql');
+
+  const pgdb = require('../../database/pgdb');
+  const NameType = require('./name');
+  const ContestStatusType = require('./contest-status');
+
+  module.exports = new GraphQLObjectType({
+    name: 'ContestType',
+
+    fields: {
+      id: { type: GraphQLID },
+      code: { type: new GraphQLNonNull(GraphQLString) },
+      title: { type: new GraphQLNonNull(GraphQLString) },
+      description: { type: GraphQLString },
+      status: { type: new GraphQLNonNull(ContestStatusType) },
+      createdAt: { type: new GraphQLNonNull(GraphQLString) },
+      // A list of names associated with the contest.
+      names: {
+        type: new GraphQLList(NameType),
+        resolve(obj, args, { pgPool }) {
+          return pgdb(pgPool).getNames(obj);
+        },
+      },
+    },
+  });
+  ```
+
+- In `pgdb.js`:
+
+  ```js
+  const humps = require('humps');
+
+  module.exports = (pgPool) => {
+    return {
+      getUser(apiKey) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    users
+          WHERE   api_key = $1
+        `,
+            [apiKey],
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows[0]);
+          });
+      },
+
+      getContests(user) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    contests
+          WHERE   created_by = $1
+        `,
+            [user.id],
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows);
+          });
+
+      // Add getNames().
+          getNames(contest) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    names
+          WHERE   contest_id = $1
+        `,
+            [contest.id],
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows);
+          });
+      },
+    };
+  };
+  ```
+
+- In `schema/types/name.js`::
+
+  ```js
+  const { GraphQLObjectType } = require('graphql');
+
+  const pgdb = require('../../database/pgdb');
+  const UserType = require('./user');
+
+  module.exports = new GraphQLObjectType({
+    name: 'Name',
+
+    fields: {
+      id: { type: GraphQLID },
+      label: { type: new GraphQLNonNull(GraphQLString) },
+      description: { type: GraphQLString },
+      createdAt: { type: new GraphQLNonNull(GraphQLString) },
+      createdBy: {
+        type: new GraphQLNonNull(UserType),
+        // Return an object, not a number (as it's stored in the DB).
+        resolve(obj, args, { pgPool }) {
+          return pgdb(pgPool).getUserById(obj.createdBy);
+        },
+      },
+    },
+  });
+  ```
+
+- In `database.pgdb`,
+
+  ```js
+  const humps = require('humps');
+
+  module.exports = (pgPool) => {
+    return {
+      // Add `getUserById()`.
+      getUserById(userId) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    users
+          WHERE   id = $1
+        `,
+            [userId],
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows[0]);
+          });
+      },
+      // Rename `getUser()` to `getUserByApiKey()`.
+      getUserByApiKey(apiKey) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    users
+          WHERE   api_key = $1
+        `,
+            [apiKey],
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows[0]);
+          });
+      },
+
+      getContests(user) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    contests
+          WHERE   created_by = $1
+        `,
+            [user.id],
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows);
+          });
+
+      getNames(contest) {
+        return pgPool
+          .query(
+            `
+          SELECT  *
+          FROM    names
+          WHERE   contest_id = $1
+        `,
+            [contest.id],
+          )
+          .then((res) => {
+            return humps.camelizeKeys(res.rows);
+          });
+      },
+    };
+  };
+  ```
+
+- But we have a cyclic module dependency.
+  - NameType depends on UserType
+  - UserType depends on ContestType
+  - ContestType depends on NameType.
+- Instead of using a plain JavaScript object for the `fields` of `name.js`, we can use a function that returns the fields; and we can move the `UserType` import inside the function so that we're not immediately using it.
+
+  - This is also a useful technique when dealing with a field that references its own parent type (e.g., an employee's boss is also an employee). In fact, we should _default to using this syntax_.
+  - In `schema/types/name.js`:
+
+    ```js
+    const { GraphQLObjectType } = require('graphql');
+
+    const pgdb = require('../database/pgdb');
+
+    module.exports = new GraphQLObjectType({
+      name: 'Name',
+
+      fields: () => {
+        const UserType = require('./user');
+        return {
+          id: { type: GraphQLID },
+          label: { type: new GraphQLNonNull(GraphQLString) },
+          description: { type: GraphQLString },
+          createdAt: { type: new GraphQLNonNull(GraphQLString) },
+          createdBy: {
+            type: new GraphQLNonNull(UserType),
+            // Return an object, not a number (as it's stored in the DB).
+            resolve(obj, args, { pgPool }) {
+              return pgdb(pgPool).getUserById(obj.createdBy);
+            },
+          },
+        };
+      },
+    });
+    ```
+
+- Now we can query the following:
+
+  ```gql
+  query MyContests {
+    me(key: "4242") {
+      id
+      email
+      fullName
+      contestsCount
+      namesCount
+      votesCount
+      contests {
+        title
+        names {
+          label
+          createdBy {
+            fullName
+          }
+        }
+      }
+    }
+  }
+  ```
+
+- But we have an N+1 problem: Too many database queries.
 
 ### [The N+1 Queries Problem]()
 
