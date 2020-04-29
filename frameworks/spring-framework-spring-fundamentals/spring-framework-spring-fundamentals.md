@@ -554,9 +554,105 @@
   }
   ```
 
-### [Setter Injection]()
+### [Setter Injection](https://app.pluralsight.com/course-player?clipId=58a23dfd-b35e-4e5f-b069-1382f967adb2)
 
-### [Demo: Setter Injection]()
+- As simple as a method call - abstracts away the mystery of injection.
+- Setter injection is simply a matter of calling a setter on a Bean. We call and get an instance of a _Bean_ from the Spring configuration.
+  - ![setter-injection](2020-04-29-15-37-20.png)
+  - Spring is still doing a lot of magic behind the scenes. Beans are singletons, and the method will only be executed the first time it's called.
+    - This is key. Otherwise, it would create a new Bean every time we called it.
+
+### [Demo: Setter Injection](https://app.pluralsight.com/course-player?clipId=4fb96d2d-dc84-416d-91d1-020d37f55c72)
+
+- To add setter injection, we need to change a few things we have hard-coded.
+- `SpeakerServiceImpl.java`:
+
+  - Remove hard-coded instance of `= new HibernateSpeakerRepositoryImpl()`.
+  - Add a setter where we can wire-up this configuration.
+    - Right click > Generate > setter > `SpeakerRepository`.
+      - Now we've configured the SpeakerRepository to be injected, rather than it being a hard-coded instance.
+
+  ```java
+  package com.pluralsight.service;
+
+  import com.pluralsight.model.Speaker;
+  import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+  import com.pluralsight.repository.SpeakerRepository;
+
+  import java.util.List;
+
+  public class SpeakerServiceImpl implements SpeakerService {
+
+      private SpeakerRepository repository;
+
+      public List<Speaker> findAll() {
+          return repository.findAll();
+      }
+
+      public void setRepository(SpeakerRepository repository) {
+          this.repository = repository;
+      }
+  }
+  ```
+
+- `AppConfig.java`
+
+  - Create a new Bean for our SpeakerRepository
+    - The names of our Beans get to be important in autowiring.
+
+  ```java
+  import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+  import com.pluralsight.repository.SpeakerRepository;
+  import com.pluralsight.service.SpeakerService;
+  import com.pluralsight.service.SpeakerServiceImpl;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+
+  @Configuration
+  public class AppConfig {
+
+      @Bean(name = "speakerService")
+      public SpeakerService getSpeakerService() {
+          SpeakerServiceImpl service = new SpeakerServiceImpl();
+          service.setRepository(getSpeakerRepository());
+          return service;
+      }
+
+      @Bean(name = "speakerRepository")
+      public SpeakerRepository getSpeakerRepository() {
+          return new HibernateSpeakerRepositoryImpl();
+      }
+  }
+  ```
+
+  - Our repository is injected through setter injection.
+    - Why didn't we just create a new instance of `new HibernateSpeakerRepositoryImpl();` within `getSpeakerService()`?
+      - Because SpeakerRepository is now created as a Bean: a singleton.
+
+- Right now, though, our `Application` isn't set up for using Spring.
+
+  ```java
+  import com.pluralsight.service.SpeakerService;
+  import com.pluralsight.service.SpeakerServiceImpl;
+  import org.springframework.context.ApplicationContext;
+  import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+  public class Application {
+
+      public static void main(String args[]) {
+          // Load Spring and our config.
+          ApplicationContext appContext = new AnnotationConfigApplicationContext(AppConfig.class)
+
+          // SpeakerService service = new SpeakerServiceImpl();
+          SpeakerService service = appContext.getBean("speakerService", SpeakerService.class);
+
+          System.out.println(service.findAll().get(0).getFirstName());
+      }
+  }
+  ```
+
+- So this will create a register with the two Beans we defined in AppConfig.
+- Now nothing in our application is hard-coded; instead, it's managed by our configuration.
 
 ### [Constructor Injection]()
 
