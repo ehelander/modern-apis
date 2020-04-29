@@ -161,7 +161,59 @@
 - Base project:
   - ![base-project](2020-04-29-13-22-51.png)
 
-### [Demo: Sample App pom.xml]()
+### [Demo: Sample App pom.xml](https://app.pluralsight.com/course-player?clipId=1cb422dd-30cf-4fe3-80ae-d3f2bc41102a)
+
+- We need to fix 1 thing in `pom.xml`: We need to add a specific build version for our app.
+
+  - Before
+
+    ```xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <project xmlns="http://maven.apache.org/POM/4.0.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+        <modelVersion>4.0.0</modelVersion>
+
+        <groupId>com.pluralsight</groupId>
+        <artifactId>conference</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    ```
+
+
+    </project>
+    ```
+
+- After
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <project xmlns="http://maven.apache.org/POM/4.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+      <modelVersion>4.0.0</modelVersion>
+
+      <groupId>com.pluralsight</groupId>
+      <artifactId>conference</artifactId>
+      <version>1.0-SNAPSHOT</version>
+
+      <build>
+          <plugins>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-compiler-plugin</artifactId>
+                  <version>3.8.1</version>
+                  <configuration>
+                      <source>11</source>
+                      <target>11</target>
+                  </configuration>
+              </plugin>
+          </plugins>
+      </build>
+
+  </project>
+  ```
+
+  - Without doing this, we'll get a warning about Maven not supporting Java 5.
 
 ### [Demo: Sample App Add Model]()
 
