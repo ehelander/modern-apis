@@ -480,7 +480,87 @@
 
 ### [Summary](https://app.pluralsight.com/course-player?clipId=610401a7-d1b6-4b96-9268-801b12d87ad9)
 
+- Note that the XML configuration section of the course can help solidify the separation of concerns, etc.
+
 ## Spring Configuration Using Java
+
+### [Java Configuration Introduction](https://app.pluralsight.com/course-player?clipId=07068cc4-42f8-4720-bb4e-56faa5734a02)
+
+- We'll take the sample application from the previous module and wire it up using Java annotations and the Java configuration loader.
+  - Java Configuration is the latest and preferred method for configuring Spring (vs. XML).
+- Key point of Java configuration:
+  - There's no `applicationContext.xml`
+    - We still have a context; just not in XML.
+    - Spring got push-back about people being XML developers instead of Java developers.
+    - Though namespaces helped some.
+  - Everything in Spring can be configured with Java.
+
+### [Demo: Copy Project](https://app.pluralsight.com/course-player?clipId=320ceb74-ec74-4c09-b0c8-6588e96c9196)
+
+- With IntelliJ, copying a project is easiest at the file system level (Finder, etc.).
+
+  ```sh
+  cp -r conference conference-java
+  ```
+
+- Then in IntelliJ, File > Open > `conference-java`
+- Need to rename `conference.iml`
+  - Right click > `Refactor` > `Rename` > `conference-java.iml`
+- Change `artifactId` in `pom.xml` > `<artifactId>conference-java</artifactId>`
+- Run `src/main/java/Application`
+  - In the `Edit configuration` dialog:
+    - `Use classpath of module`: `conference-java`
+    - `JRE`: Likely best to choose a specific version (rather than default). E.g., 11.
+
+### [Demo: App Config](https://app.pluralsight.com/course-player?clipId=5d8471d5-4d19-43b0-9680-2266392d40e7)
+
+- To begin configuring out application, we want to create a file where we can bootstrap everything now.
+- New Java class `src/main/java`: `AppConfig`
+
+  - This is all we need to start bootstrapping our application - just a POJO.
+    - Equivalent to the start of the application context in previous versions of Spring.
+
+  ```java
+  public class AppConfig {
+  }
+  ```
+
+### [Demo: @Configuration](https://app.pluralsight.com/course-player?clipId=b785c658-e524-481d-bf8e-0074ef7baaa9)
+
+- To start the configuration of our application, we begin with `@Configuration`.
+  - It's a class-level annotation.
+  - `@Configuration` replaces `applicationContext.xml`
+  - Methods used in conjunction with the `@Bean` annotation are used to get instances of Spring Beans.
+    - `@Bean` is a method-level annotation.
+  - Spring doesn't care about class and method names. Spring just cares that something is annotated as a `@Bean` in an `@Configuration` class.
+- In `AppConfig.java`:
+
+  ```java
+  import com.pluralsight.service.SpeakerService;
+  import com.pluralsight.service.SpeakerServiceImpl;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+
+  // Signifies this file is to be used for configuration purposes.
+  @Configuration
+  public class AppConfig {
+
+      // Create a bean. The name is optional; camelCase by convention.
+      @Bean(name = "speakerService")
+      public SpeakerService getSpeakerService() {
+          return new SpeakerServiceImpl();
+
+      }
+  }
+  ```
+
+### [Setter Injection]()
+
+### [Demo: Setter Injection]()
+
+### [Constructor Injection]()
+
+### [Summary]()
 
 ## Spring Scopes and Autowiring
 
