@@ -654,11 +654,90 @@
 - So this will create a register with the two Beans we defined in AppConfig.
 - Now nothing in our application is hard-coded; instead, it's managed by our configuration.
 
-### [Constructor Injection]()
+### [Constructor Injection](https://app.pluralsight.com/course-player?clipId=9ac67f3d-678b-4e6b-96ed-4849b95f19c8)
 
-### [Summary]()
+- Constructor injection is just like setter injection; instead of calling the setter, we call the defined constructor.
+- Add a `SpeakerServiceImpl` constructor in `SpeakerServiceImpl.java`:
+
+  ```java
+  package com.pluralsight.service;
+
+  import com.pluralsight.model.Speaker;
+  import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+  import com.pluralsight.repository.SpeakerRepository;
+
+  import java.util.List;
+
+  public class SpeakerServiceImpl implements SpeakerService {
+
+      private SpeakerRepository repository;
+
+      public SpeakerServiceImpl (SpeakerRepository speakerRepository) {
+          repository = speakerRepository;
+      }
+
+      public List<Speaker> findAll() {
+          return repository.findAll();
+      }
+
+      public void setRepository(SpeakerRepository repository) {
+          this.repository = repository;
+      }
+  }
+  ```
+
+- In `AppConfig.java`, inject the constructor:
+
+  ```java
+  import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+  import com.pluralsight.repository.SpeakerRepository;
+  import com.pluralsight.service.SpeakerService;
+  import com.pluralsight.service.SpeakerServiceImpl;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.Configuration;
+
+  @Configuration
+  public class AppConfig {
+
+      @Bean(name = "speakerService")
+      public SpeakerService getSpeakerService() {
+  //         SpeakerServiceImpl service = new SpeakerServiceImpl();
+  //         service.setRepository(getSpeakerRepository());
+          SpeakerServiceImpl service = new SpeakerServiceImpl(getSpeakerRepository());
+          return service;
+      }
+
+      @Bean(name = "speakerRepository")
+      public SpeakerRepository getSpeakerRepository() {
+          return new HibernateSpeakerRepositoryImpl();
+      }
+  }
+  ```
+
+- Common mistake:
+  - Creating variables, trying to hold on to variables here, trying to create your own singleton, etc. But that's what Spring does for us.
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=415f0112-a3f1-4b46-b0e1-d5e91af096d0)
 
 ## Spring Scopes and Autowiring
+
+### [Bean Scopes Introduction]()
+
+### [Scopes]()
+
+### [Singleton Java Config]()
+
+### [Prototype Java Config]()
+
+### [Web Scopes]()
+
+### [Autowired]()
+
+### [Demo: Autowired]()
+
+### [Stereotype Annotations]()
+
+### [Summary]()
 
 ## Spring Configuration Using XML
 
