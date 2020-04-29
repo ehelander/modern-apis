@@ -415,7 +415,27 @@
   }
   ```
 
-### [Demo: Sample App Run Application]()
+### [Demo: Sample App Run Application](https://app.pluralsight.com/course-player?clipId=43f5d03f-50de-4cbb-aed7-79bd990404fd)
+
+- Add `src/main/java` Java class: `Application` (default package)
+
+  ```java
+  import com.pluralsight.service.SpeakerService;
+  import com.pluralsight.service.SpeakerServiceImpl;
+
+  public class Application {
+
+      public static void main(String args[]) {
+          SpeakerService service = new SpeakerServiceImpl();
+
+          System.out.println(service.findAll().get(0).getFirstName());
+      }
+  }
+  ```
+
+- Right click on `main` > `Run Application.main()`
+  - Note: [IntelliJ - Error:java: release version 5 not supported](https://dev.to/techgirl1908/intellij-error-java-release-version-5-not-supported-376)
+  - Should see name output.
 
 ### [Configuration]()
 
