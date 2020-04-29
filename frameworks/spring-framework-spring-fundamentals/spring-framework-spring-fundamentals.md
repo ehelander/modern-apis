@@ -437,15 +437,48 @@
   - Note: [IntelliJ - Error:java: release version 5 not supported](https://dev.to/techgirl1908/intellij-error-java-release-version-5-not-supported-376)
   - Should see name output.
 
-### [Configuration]()
+### [Configuration](https://app.pluralsight.com/course-player?clipId=00480c44-33e9-415a-8f55-f3fe19bc438e)
 
-### [Demo: Pain Points Walkthrough]()
+- Spring is all about removing configuration code from your application.
+  - Configuration code makes things brittle (e.g., deploying to different environments).
+  - Configuration codes makes tests difficult to write.
+- We'll update our app to make use of:
+  - Java configuration in Spring approach
+  - Annotations in Spring
+  - XML configuration method
 
-### [Spring Download]()
+### [Demo: Pain Points Walkthrough](https://app.pluralsight.com/course-player?clipId=73257dcf-954f-4a31-9e0b-aa9864a02a68)
 
-### [Demo: Spring Download Maven]()
+- Pain points we're going to address:
+  - `Application.java` has a hard-coded reference to `SpeakerServiceImpl`.
+    - We could use a factory or abstract factory, but this is one of the things Spring handles for us.
+  - `SpeakerServiceImpl` has a hard-coded reference to `HibernateSpeakerRepositoryImpl`.
+  - `HibernateSpeakerRepositoryImpl` has stubbed-out code until our database is ready to go.
+    - We should just be able to use a stub, and use Spring to load in the stubbed out class (and the swap it for the database when it's ready).
 
-### [Summary]()
+### [Spring Download](https://app.pluralsight.com/course-player?clipId=c244e469-2eda-471e-bcab-5de5cf22d298)
+
+- Spring quite offering a direct download for the compiled jars.
+- So Spring wants you to download their tools using Maven or Gradle to manage dependencies.
+
+### [Demo: Spring Download Maven](https://app.pluralsight.com/course-player?clipId=e803f658-1cda-444b-a4cf-757f2d2aa989)
+
+- In `pom.xml`, above `<build></build>` (referring to latest version from spring.io):
+
+  ```xml
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>5.2.5.RELEASE</version>
+    </dependency>
+  </dependencies>
+  ```
+
+- Refresh Maven. If the import worked correctly, the Spring transitive dependencies should be visible.
+  - ![spring-dependencies](2020-04-29-14-55-20.png)
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=610401a7-d1b6-4b96-9268-801b12d87ad9)
 
 ## Spring Configuration Using Java
 
