@@ -356,7 +356,64 @@
   }
   ```
 
-### [Demo: Sample App Service]()
+### [Demo: Sample App Service](https://app.pluralsight.com/course-player?clipId=a8d7a2fe-3c54-4a19-aa18-9ffe44c03845)
+
+- Now we'll add a services (business logic) tier.
+- Add a new Java class in `src/main/java`: `com.pluralsight.service.SpeakerServiceImpl`
+
+  ```java
+  package com.pluralsight.service;
+
+  import com.pluralsight.model.Speaker;
+  import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+  import com.pluralsight.repository.SpeakerRepository;
+
+  import java.util.List;
+
+  public class SpeakerServiceImpl {
+
+      // Part of the problem we'll solve with Spring: We need to hardcode this for now.
+      private SpeakerRepository repository = new HibernateSpeakerRepositoryImpl();
+
+      public List<Speaker> findAll() {
+          return repository.findAll();
+      }
+  }
+  ```
+
+- Extract a `SpeakerService` interface with `findAll()`.
+
+  ```java
+  package com.pluralsight.service;
+
+  import com.pluralsight.model.Speaker;
+
+  import java.util.List;
+
+  public interface SpeakerService {
+      List<Speaker> findAll();
+  }
+  ```
+
+  ```java
+  package com.pluralsight.service;
+
+  import com.pluralsight.model.Speaker;
+  import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+  import com.pluralsight.repository.SpeakerRepository;
+
+  import java.util.List;
+
+  public class SpeakerServiceImpl implements SpeakerService {
+
+      private SpeakerRepository repository = new HibernateSpeakerRepositoryImpl();
+
+      public List<Speaker> findAll() {
+          return repository.findAll();
+      }
+
+  }
+  ```
 
 ### [Demo: Sample App Run Application]()
 
