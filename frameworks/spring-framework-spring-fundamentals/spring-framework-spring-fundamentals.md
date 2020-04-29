@@ -74,6 +74,111 @@
 
 ## Architecture and Project Setup
 
+### [Sample App Intro](https://app.pluralsight.com/course-player?clipId=522ffd33-bcbe-4c8e-82f6-ba0f35722c1b)
+
+### [Architecture](https://app.pluralsight.com/course-player?clipId=a71de5f3-b60c-462d-bef2-a554428f194f)
+
+- Spring was developed to make existing tasks easier.
+  - Before Spring, we used design patterns from JEE Blueprints.
+    - They helped, but made things brittle.
+    - Couldn't WORA: Write Once Run Anywhere.
+    - And we ended up hard-coding a lot.
+
+### [Prerequisites](https://app.pluralsight.com/course-player?clipId=18120043-179d-4e21-9b23-864e16190df4)
+
+- Java
+
+  - Using 11 in this course
+
+  ```sh
+  # https://mkyong.com/java/how-to-install-java-on-mac-osx/
+  # https://github.com/AdoptOpenJDK/homebrew-openjdk
+  brew tap adoptopenjdk/openjdk
+  brew cask install adoptopenjdk11
+  brew cask install adoptopenjdk14
+  ## Add jdk function. To change Java versions, run `jdk 11`.
+  cat <<\EOT >>~/.profile
+  jdk() {
+          version=$1
+          export JAVA_HOME=$(/usr/libexec/java_home -v"$version");
+          java -version
+  }
+  EOT
+  source ~/.profile
+  jdk 11
+  java --version
+  ```
+
+- Maven
+
+  ```sh
+  # https://www.code2bits.com/how-to-install-maven-on-macos-using-homebrew/
+  brew install maven
+  mvn --version
+  ```
+
+  - Got output:
+
+    ```txt
+    For the system Java wrappers to find this JDK, symlink it with
+      sudo ln -sfn /usr/local/opt/openjdk/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk.jdk
+
+    openjdk is keg-only, which means it was not symlinked into /usr/local,
+    because it shadows the macOS `java` wrapper.
+
+    If you need to have openjdk first in your PATH run:
+      echo 'export PATH="/usr/local/opt/openjdk/bin:$PATH"' >> ~/.zshrc
+
+    For compilers to find openjdk you may need to set:
+      export CPPFLAGS="-I/usr/local/opt/openjdk/include"
+    ```
+
+- IntelliJ
+
+  ```sh
+  brew cask install intellij-idea
+  ```
+
+- Tomcat
+
+  - For sample app at the end.
+
+  ```sh
+  # https://medium.com/@fahimhossain_16989/installing-apache-tomcat-on-macos-mojave-using-homebrew-28ce039b4b2e
+  brew install tomcat
+  # brew services start tomcat
+  # brew services stop tomcat
+  ```
+
+### [Sample App Setup](https://app.pluralsight.com/course-player?clipId=2bb860ad-969e-4e9b-a9be-e74eba0552ce)
+
+- Open IntelliJ > Create New Project
+  - Select Project SDK for Java 11
+  - Select Maven on the left
+  - Groupid: `com.pluralsight`
+  - ArtifactID: `conference`
+  - Project location: Choose a location (e.g., `~/dev/workspace/conference`)
+- Base project:
+  - ![base-project](2020-04-29-13-22-51.png)
+
+### [Demo: Sample App pom.xml]()
+
+### [Demo: Sample App Add Model]()
+
+### [Demo: Sample App Add Repository]()
+
+### [Demo: Sample App Fun Application]()
+
+### [Configuration]()
+
+### [Demo: Pain Points Walkthrough]()
+
+### [Spring Download]()
+
+### [Demo: Spring Download Maven]()
+
+### [Summary]()
+
 ## Spring Configuration Using Java
 
 ## Spring Scopes and Autowiring
