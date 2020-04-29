@@ -215,11 +215,150 @@
 
   - Without doing this, we'll get a warning about Maven not supporting Java 5.
 
-### [Demo: Sample App Add Model]()
+### [Demo: Sample App Add Model](https://app.pluralsight.com/course-player?clipId=a93ef48e-f755-4d7e-8885-e57743c550bf)
 
-### [Demo: Sample App Add Repository]()
+- Note: Looks like this sectionw as added to `pom.xml` before `<build></build>`:
 
-### [Demo: Sample App Fun Application]()
+  ```xml
+      <dependencies>
+          <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-context</artifactId>
+              <version>5.2.0.RELEASE</version>
+          </dependency>
+      </dependencies>
+  ```
+
+- Navigate to `src/main/java`
+
+  - Right click > New > Java Class
+    - Note that by fully qualifying the name of the package structure we want, we can create a package here.
+    - `com.pluralsight.model.Speaker`
+      - ![speaker](2020-04-29-13-40-03.png)
+  - Creates:
+
+    ```java
+    package com.pluralsight.model;
+
+    public class Speaker {
+    }
+    ```
+
+- In `Speaker`:
+
+  ```java
+  package com.pluralsight.model;
+
+  public class Speaker {
+
+    private String firstName;
+    private String lastName;
+
+    // Right click > generate > getter and setter for both
+    public String getFirstName() {
+      return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+      this.firstName = firstName;
+    }
+
+    public String getLastName() {
+      return lastName;
+    }
+
+    public void setLastName(String lastName) {
+      this.lastName = lastName;
+    }
+  }
+
+  ```
+
+### [Demo: Sample App Add Repository](https://app.pluralsight.com/course-player?clipId=99f141a3-7623-4367-8558-f039a791d1bd)
+
+- Add a new Java class in `src/main/java`: `com.pluralsight.repository.HibernateSpeakerRepositoryImpl`
+
+  - For now, we _do_ have 'implementation' in the name. That's a bit of a code smell. When this is all done, we'll be coding to an interface (and then we can swap out the interfaces dynamically).
+
+  ```java
+  package com.pluralsight.repository;
+
+  import com.pluralsight.model.Speaker;
+
+  import java.util.ArrayList;
+  import java.util.List;
+
+  public class HibernateSpeakerRepositoryImpl {
+
+      public List<Speaker> findAll() {
+          List<Speaker> speakers = new ArrayList<Speaker>();
+
+          Speaker speaker = new Speaker();
+
+          speaker.setFirstName("Eric");
+          speaker.setLastName("Helander");
+
+          speakers.add(speaker);
+
+          return speakers;
+      }
+
+  }
+  ```
+
+  - A couple ways we could extract/create an interface. Easiest:
+    - Right click > Refactor > Extract Interface
+      - Interface name: `SpeakerRepository`
+      - Leave package and target as-is
+      - Select `findAll()` in order to form interface.
+      - Select `Yes`.
+        - ![analyze-and-replace-usages](2020-04-29-13-57-03.png)
+
+- Resulting SpeakerRepository interface:
+
+  ```java
+  package com.pluralsight.repository;
+
+  import com.pluralsight.model.Speaker;
+
+  import java.util.List;
+
+  public interface SpeakerRepository {
+      List<Speaker> findAll();
+  }
+  ```
+
+- Resulting `HibernateSpeakerRepositoryImpl`:
+
+  ```java
+  package com.pluralsight.repository;
+
+  import com.pluralsight.model.Speaker;
+
+  import java.util.ArrayList;
+  import java.util.List;
+
+  public class HibernateSpeakerRepositoryImpl implements SpeakerRepository {
+
+      public List<Speaker> findAll() {
+          List<Speaker> speakers = new ArrayList<Speaker>();
+
+          Speaker speaker = new Speaker();
+
+          speaker.setFirstName("Eric");
+          speaker.setLastName("Helander");
+
+          speakers.add(speaker);
+
+          return speakers;
+      }
+
+  }
+  ```
+
+### [Demo: Sample App Service]()
+
+### [Demo: Sample App Run Application]()
 
 ### [Configuration]()
 
