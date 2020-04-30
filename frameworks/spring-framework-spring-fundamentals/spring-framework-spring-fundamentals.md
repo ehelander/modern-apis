@@ -721,23 +721,392 @@
 
 ## Spring Scopes and Autowiring
 
-### [Bean Scopes Introduction]()
+### [Bean Scopes Introduction](https://app.pluralsight.com/player?course=spring-framework-spring-fundamentals&author=bryan-hansen&name=0fd7eb0d-ee98-4993-9381-496f6abe4450&clip=0&mode=live)
 
-### [Scopes]()
+- Bean scopes (scopes of Beans) are quite important.
+  - Scopes are _not the same as_ patterns, though Spring uses patterns.
+    - Pluralsight: Design Patters in Java
 
-### [Singleton Java Config]()
+### [Scopes](https://app.pluralsight.com/course-player?clipId=215c1346-decb-4a50-9352-f64fffdbad23)
 
-### [Prototype Java Config]()
+- 5 scopes are available for us to configure in Spring
+  - Valid in any configuration
+    - Singleton
+      - Default
+      - This is usually what we want.
+    - Prototype
+      - New Bean per request.
+      - We don't usually want this.
+  - Valid only in web-aware Spring projects
+    - Request
+    - Session
+    - Global
 
-### [Web Scopes]()
+### [Singleton Java Config](https://app.pluralsight.com/course-player?clipId=cb4c4bfc-60e0-42e8-8605-8ac41622a4a8)
 
-### [Autowired]()
+- Default bean scope inside of Spring
+- One instance per Spring container or Spring context
+  - Could _possibly_ have more than 1 Spring container in a JVM.
+- When using Maven, scope is set with `@Scope`
+  - ![scope](2020-04-30-14-44-47.png)
+- `AppConfig.java`:
+  - Add `@Scope(value="singleton")` below `@Bean(name = "speakerService")`
+  - Though using an enum is preferable
+    - `@Scope(value=BeanDefinition.SCOPE_SINGLETON)`
+- To test it: in `Application.java`:
 
-### [Demo: Autowired]()
+  ```java
+  import com.pluralsight.service.SpeakerService;
+  import org.springframework.context.ApplicationContext;
+  import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-### [Stereotype Annotations]()
+  public class Application {
 
-### [Summary]()
+      public static void main(String args[]) {
+          ApplicationContext appContext = new AnnotationConfigApplicationContext(AppConfig.class);
+          SpeakerService service = appContext.getBean("speakerService", SpeakerService.class);
+          System.out.println(service);
+          System.out.println(service.findAll().get(0).getFirstName());
+          SpeakerService service2 = appContext.getBean("speakerService", SpeakerService.class);
+          // Prints out exact same object address
+          System.out.println(service2);
+      }
+  }
+  ```
+
+### [Prototype Java Config](https://app.pluralsight.com/course-player?clipId=4f21a7ef-6866-4d33-a022-20cea9cc3ead)
+
+- Prototype design pattern: Guaranteed unique instance per request.
+  - The opposite of a singleton.
+  - `@Scope(value="prototype")` (or `@Scope(value= BeanDefinition.SCOPE_PROTOTYPE)`).
+  - Now we get a different object address.
+    - A new unique request of the bean from the context.
+
+### [Web Scopes](https://app.pluralsight.com/course-player?clipId=e14ab924-ba3b-4010-b5f1-24fed8f95fed)
+
+- Covered more in Pluralsight: Introduction to Spring MVC course
+- 3 web scopes
+  - Request
+    - Returns a bean per HTTP request.
+      - Similar to prototype.
+    - For the lifecycle of the HTTP request.
+  - Session
+    - Returns a single bean per HTTP session
+    - Lives as long as the session lives.
+  - GlobalSession
+    - Returns a single bean per application.
+    - Similar to a singleton, but for the life of the application on the server.
+
+### [Autowired](https://app.pluralsight.com/course-player?clipId=e3e71c50-7283-4788-a62f-392a5ef9dfb4)
+
+- Autowiring is where the most magic seems to be taking place.
+- A prime example of _Convention over configuration_
+- We just need to add a `@ComponentScan({"com.pluralsight"})` annotation to our config file.
+  - `com.pluralsight`: Where to begin looking for autowired annotations.
+  - Can mark autowired beans by name or instance type.
+
+### [Demo: Autowired](https://app.pluralsight.com/course-player?clipId=aa960afc-3bf1-4ed8-bcab-d7f9ab52500f)
+
+- To set up our application for autowiring:
+
+  - `AppConfig.java`
+
+    - Right now, still using constructor injection.
+    - Comment it out, and switch back to the default no args constructor.
+
+    ```java
+    import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+    import com.pluralsight.repository.SpeakerRepository;
+    import com.pluralsight.service.SpeakerService;
+    import com.pluralsight.service.SpeakerServiceImpl;
+    import org.springframework.beans.factory.config.BeanDefinition;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.context.annotation.Scope;
+
+    @Configuration
+    public class AppConfig {
+
+        @Bean(name = "speakerService")
+        @Scope(value= BeanDefinition.SCOPE_SINGLETON)
+        public SpeakerService getSpeakerService() {
+    //        SpeakerServiceImpl service = new SpeakerServiceImpl(getSpeakerRepository());
+            SpeakerServiceImpl service = new SpeakerServiceImpl();
+            return service;
+        }
+
+        @Bean(name = "speakerRepository")
+        public SpeakerRepository getSpeakerRepository() {
+            return new HibernateSpeakerRepositoryImpl();
+        }
+    }
+    ```
+
+  - `SpeakerServiceImpl.java`
+
+    - Add back default no-args constructor (removed in a previous demo) and a few printlns.
+    - Add `@Autowired` above `setRepository()`.
+      - We're not wiring in the repository anywhere.
+      - The SpeakerRepository bean is automatically injected into `setRepository()`.
+
+    ```java
+    package com.pluralsight.service;
+
+    import com.pluralsight.model.Speaker;
+    import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+    import com.pluralsight.repository.SpeakerRepository;
+
+    import java.util.List;
+
+    public class SpeakerServiceImpl implements SpeakerService {
+
+        private SpeakerRepository repository;
+
+        public SpeakerServiceImpl() {
+            System.out.println("SpeakerServiceImpl no args constructor");
+        }
+
+        public SpeakerServiceImpl (SpeakerRepository speakerRepository) {
+            System.out.println("SpeakerServiceImpl repository constructor");
+            repository = speakerRepository;
+        }
+
+        public List<Speaker> findAll() {
+            return repository.findAll();
+        }
+
+        @Autowired
+        public void setRepository(SpeakerRepository repository) {
+            System.out.println("SpeakerServiceImpl setter");
+            this.repository = repository;
+        }
+    }
+    ```
+
+  - From running the application now:
+
+    ```txt
+    SpeakerServiceImpl no args constructor
+    SpeakerServiceImpl setter
+    Eric
+    ```
+
+  - What if we want to do constructor injection? We can do this with _fully autowiring our beans_, nor just per-method.
+
+### [Stereotype Annotations](https://app.pluralsight.com/course-player?clipId=453f4f80-c51e-4ebc-bbdf-a54a54580ab3)
+
+- Stereotypes
+  - `@Component`
+    - Same thing as `@Bean`
+  - `@Repository`
+    - Used to denote a class being used as a repository object.
+    - Could technically just use `@Bean` or `@Component` everywhere.
+  - `@Service`
+    - Where you would put your business logic.
+  - `@Controller`
+    - Out of scope for what we're covering here. For web/microservices.
+- Finish wiring up our application.
+
+  - `AppConfig`.
+
+    - Add `@ComponentScan`
+      - Give it the string syntax for an array of the package structure we want to scan.
+    - The `@Bean` annotation is only applicable at a method level, not a class level.
+
+    ```java
+    import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+    import com.pluralsight.repository.SpeakerRepository;
+    import com.pluralsight.service.SpeakerService;
+    import com.pluralsight.service.SpeakerServiceImpl;
+    import org.springframework.beans.factory.config.BeanDefinition;
+    import org.springframework.context.annotation.Bean;
+    import org.springframework.context.annotation.ComponentScan;
+    import org.springframework.context.annotation.Configuration;
+    import org.springframework.context.annotation.Scope;
+
+    @Configuration
+    @ComponentScan({"com.pluralsight"})
+    public class AppConfig {
+
+        @Bean(name = "speakerService")
+        @Scope(value= BeanDefinition.SCOPE_SINGLETON)
+        public SpeakerService getSpeakerService() {
+    //        SpeakerServiceImpl service = new SpeakerServiceImpl(getSpeakerRepository());
+            SpeakerServiceImpl service = new SpeakerServiceImpl();
+            return service;
+        }
+
+        @Bean(name = "speakerRepository")
+        public SpeakerRepository getSpeakerRepository() {
+            return new HibernateSpeakerRepositoryImpl();
+        }
+    }
+
+    ```
+
+  - `SpeakerServiceImpl.java`
+
+    - Add `@Service("speakerService")
+
+    ```java
+    package com.pluralsight.service;
+
+    import com.pluralsight.model.Speaker;
+    import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+    import com.pluralsight.repository.SpeakerRepository;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.stereotype.Service;
+
+    import java.util.List;
+
+    @Service("speakerService")
+    public class SpeakerServiceImpl implements SpeakerService {
+
+        private SpeakerRepository repository;
+
+        public SpeakerServiceImpl() {
+            System.out.println("SpeakerServiceImpl no args constructor");
+        }
+
+        public SpeakerServiceImpl (SpeakerRepository speakerRepository) {
+            System.out.println("SpeakerServiceImpl repository constructor");
+            repository = speakerRepository;
+        }
+
+        public List<Speaker> findAll() {
+            return repository.findAll();
+        }
+
+        @Autowired
+        public void setRepository(SpeakerRepository repository) {
+            System.out.println("SpeakerServiceImpl setter");
+            this.repository = repository;
+        }
+    }
+    ```
+
+  - `HibernateSpeakerRepositoryImpl.java` (implementation, not interface)
+
+    - Add `@Repository("speakerRepository")
+
+    ```java
+    package com.pluralsight.repository;
+
+    import com.pluralsight.model.Speaker;
+    import org.springframework.stereotype.Repository;
+
+    import java.util.ArrayList;
+    import java.util.List;
+
+    @Repository("speakerRepository")
+    public class HibernateSpeakerRepositoryImpl implements SpeakerRepository {
+
+        public List<Speaker> findAll() {
+            List<Speaker> speakers = new ArrayList<Speaker>();
+
+            Speaker speaker = new Speaker();
+
+            speaker.setFirstName("Eric");
+            speaker.setLastName("Helander");
+
+            speakers.add(speaker);
+
+            return speakers;
+        }
+
+    }
+    ```
+
+- So now we have an `@Repository`, `@Service`, and `@ComponentScan`
+- And now we can comment out `getSpeakerService()` and `getSpeakerRepository()` from `AppConfig.java`:
+
+  ```java
+  import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+  import com.pluralsight.repository.SpeakerRepository;
+  import com.pluralsight.service.SpeakerService;
+  import com.pluralsight.service.SpeakerServiceImpl;
+  import org.springframework.beans.factory.config.BeanDefinition;
+  import org.springframework.context.annotation.Bean;
+  import org.springframework.context.annotation.ComponentScan;
+  import org.springframework.context.annotation.Configuration;
+  import org.springframework.context.annotation.Scope;
+
+  @Configuration
+  @ComponentScan({"com.pluralsight"})
+  public class AppConfig {
+      /*
+      @Bean(name = "speakerService")
+      @Scope(value= BeanDefinition.SCOPE_SINGLETON)
+      public SpeakerService getSpeakerService() {
+  //        SpeakerServiceImpl service = new SpeakerServiceImpl(getSpeakerRepository());
+          SpeakerServiceImpl service = new SpeakerServiceImpl();
+          return service;
+      }
+
+      //    @Bean(name = "speakerRepository")
+      public SpeakerRepository getSpeakerRepository() {
+          return new HibernateSpeakerRepositoryImpl();
+      }
+      */
+  }
+  ```
+
+- Run the app.
+
+  - Calls no args constructor and SpeakerServiceImpl setter.
+  - We can define scope at the class level.
+
+  ```txt
+  SpeakerServiceImpl no args constructor
+  SpeakerServiceImpl setter
+  Eric
+  ```
+
+- We can autowire constructor injection instead of setter injection:
+
+  ```java
+  package com.pluralsight.service;
+
+  import com.pluralsight.model.Speaker;
+  import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+  import com.pluralsight.repository.SpeakerRepository;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.stereotype.Service;
+
+  import java.util.List;
+
+  @Service("speakerService")
+  public class SpeakerServiceImpl implements SpeakerService {
+
+      private SpeakerRepository repository;
+
+      public SpeakerServiceImpl() {
+          System.out.println("SpeakerServiceImpl no args constructor");
+      }
+
+      @Autowired
+      public SpeakerServiceImpl (SpeakerRepository speakerRepository) {
+          System.out.println("SpeakerServiceImpl repository constructor");
+          repository = speakerRepository;
+      }
+
+      public List<Speaker> findAll() {
+          return repository.findAll();
+      }
+
+      public void setRepository(SpeakerRepository repository) {
+          System.out.println("SpeakerServiceImpl setter");
+          this.repository = repository;
+      }
+  }
+  ```
+
+  ```txt
+  SpeakerServiceImpl repository constructor
+  Eric
+  ```
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=012a08d3-245d-4844-ba57-477db400fc89)
 
 ## Spring Configuration Using XML
 
