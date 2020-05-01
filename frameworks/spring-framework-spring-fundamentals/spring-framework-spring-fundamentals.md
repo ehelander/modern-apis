@@ -1433,3 +1433,345 @@
 ### [Summary](https://app.pluralsight.com/course-player?clipId=35eb546f-6205-4a41-883f-b9364fb28541)
 
 ## Advanced Bean Configuration
+
+### [Advanced Bean Configuration Introduction](https://app.pluralsight.com/course-player?clipId=8795f65c-9428-492f-8e90-e08b54b84b63)
+
+- Useful topics for Spring certifications
+
+### [Bean Lifecycle](https://app.pluralsight.com/course-player?clipId=5cecb98c-16d5-4f0d-b6f0-e63742a0724f)
+
+- Bean Lifecycle
+  - Instantiation
+  - Populate Properties
+    - Read from properties files or injected from other resources
+  - BeanNameAware
+    - Framework sets bean names and makes it aware of other resources
+  - BeanFactoryAware
+    - Set that as a BeanFactoryAware context
+  - Pre Initialization - Bean Post Processors
+  - InitializeBean
+    - Utilize properties that were just set
+  - initMethod
+    - Call the init method: We'll demonstrate this.
+  - Post Initialization - Bean Post Processors
+- Adding an init method:
+
+  - Open `conference-java` in IntelliJ. Navigate to `pom.xml`.
+  - Add a dependency, because Java EE has now assumed an annotation for post-construct API calls.
+
+    ```xml
+    <dependency>
+        <groupId>javax.annotation</groupId>
+        <artifactId>javax.annotation-api</artifactId>
+        <version>1.3.2</version>
+    </dependency>
+    ```
+
+  - Save, refresh imports.
+  - `SpeakerServiceImpl.java`
+
+    - Below the constructors we've implemented, add a private void method with `@PostConstruct`:
+
+    ```java
+    package com.pluralsight.service;
+
+    import com.pluralsight.model.Speaker;
+    import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+    import com.pluralsight.repository.SpeakerRepository;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.stereotype.Service;
+
+    import javax.annotation.PostConstruct;
+    import java.util.List;
+
+    @Service("speakerService")
+    public class SpeakerServiceImpl implements SpeakerService {
+
+        private SpeakerRepository repository;
+
+        public SpeakerServiceImpl() {
+            System.out.println("SpeakerServiceImpl no args constructor");
+        }
+
+        @Autowired
+        public SpeakerServiceImpl (SpeakerRepository speakerRepository) {
+            System.out.println("SpeakerServiceImpl repository constructor");
+            repository = speakerRepository;
+        }
+
+        @PostConstruct
+        private void initialize() {
+            System.out.println("We're called after the constructors.");
+        }
+
+        public List<Speaker> findAll() {
+            return repository.findAll();
+        }
+
+        public void setRepository(SpeakerRepository repository) {
+            System.out.println("SpeakerServiceImpl setter");
+            this.repository = repository;
+        }
+    }
+    ```
+
+  - Can be useful for logging, etc.
+  - Not a good place for open/closing database connections, etc.
+    - These things should be handled by Spring.
+
+### [FactoryBean](https://app.pluralsight.com/course-player?clipId=c3b4a39f-2135-40e5-ab51-f4a1924145f3)
+
+- FactoryBean
+  - Builds on initMethod concept
+  - Builds on Factory Method Pattern
+    - One of the strengths of Spring: The code doesn't have to be written as a factory in order to be using Spring as a factory.
+  - Good way to integrate legacy code
+    - Can enforce a creational contract without a constructor
+  - Can work with static methods inside of a class.
+- `conference-java` > `src/main/java/com.pluralsight` > New > Java Class > `util.CalendarFactory.java`
+
+  - Add `implements FactoryBean<Calendar>`
+  - Hover over red squiggly > click `Implement methods` > click OK.
+
+    ```java
+    package com.pluralsight.util;
+
+    import org.springframework.beans.factory.FactoryBean;
+
+    import java.util.Calendar;
+
+    public class CalendarFactory implements FactoryBean<Calendar> {
+        @Override
+        public Calendar getObject() throws Exception {
+            return null;
+        }
+
+        @Override
+        public Class<?> getObjectType() {
+            return null;
+        }
+    }
+    ```
+
+  - Add a private Calendar instance, adjust returns, add `addDays()`:
+
+    ```java
+    package com.pluralsight.util;
+
+    import org.springframework.beans.factory.FactoryBean;
+
+    import java.util.Calendar;
+
+    public class CalendarFactory implements FactoryBean<Calendar> {
+
+        private Calendar instance = Calendar.getInstance();
+
+        @Override
+        public Calendar getObject() throws Exception {
+            return instance;
+        }
+
+        @Override
+        public Class<?> getObjectType() {
+            return Calendar.class;
+        }
+
+        public void addDays(int num) {
+            instance.add(Calendar.DAY_OF_YEAR, num);
+        }
+    }
+    ```
+
+  - So now we have our factory bean implemented.
+  - `AppConfig.java`:
+    - Add 2 beans
+  - `HibernateSpeakerRepositoryImpl.java`:
+
+    - Add an `@Autowired` Calendar.
+
+    ```java
+    package com.pluralsight.repository;
+
+    import com.pluralsight.model.Speaker;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.stereotype.Repository;
+
+    import java.util.ArrayList;
+    import java.util.Calendar;
+    import java.util.List;
+
+    @Repository("speakerRepository")
+    public class HibernateSpeakerRepositoryImpl implements SpeakerRepository {
+
+        @Autowired
+        private Calendar cal;
+
+        public List<Speaker> findAll() {
+            List<Speaker> speakers = new ArrayList<Speaker>();
+
+            Speaker speaker = new Speaker();
+
+            speaker.setFirstName("Eric");
+            speaker.setLastName("Helander");
+
+            System.out.print("cal: " + cal.getTime());
+
+            speakers.add(speaker);
+
+            return speakers;
+        }
+
+    }
+    ```
+
+- So now the bean is going to be called from the factory bean of our calendar object, and we can reference it in our code.
+
+### [SpEL](https://app.pluralsight.com/course-player?clipId=e7511249-1f0b-404e-adb7-cd3c2972074b)
+
+- Spring Expression Language
+
+  - Most typically used in libraries (though can be useful in other cases)
+  - Can manipulate object graph
+  - Can evaluate values at runtime and change the behavior of your code.
+  - Can be use in configuration
+  - Example:
+
+    ```java
+    @Value('#{ T(java.lang.Math).random() * 100.0 }")
+    private double seedNum;
+    ```
+
+- Example: Inject values at runtime, adding a seed value to our model.
+
+  - `Speaker.java`
+
+    ```java
+    package com.pluralsight.model;
+
+    public class Speaker {
+
+        private String firstName;
+        private String lastName;
+        private double seedNum;
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public void setLastName(String lastName) {
+            this.lastName = lastName;
+        }
+
+        public double getSeedNum() {
+            return seedNum;
+        }
+
+        public void setSeedNum(double seedNum) {
+            this.seedNum = seedNum;
+        }
+    }
+    ```
+
+  - `HibernateSpeakerRepositoryImpl.java`
+
+    - Use the Spring Expression Language to grab a value from Math.random() at runtime.
+
+    ```java
+    package com.pluralsight.repository;
+
+    import com.pluralsight.model.Speaker;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.beans.factory.annotation.Value;
+    import org.springframework.stereotype.Repository;
+
+    import java.util.ArrayList;
+    import java.util.Calendar;
+    import java.util.List;
+
+    @Repository("speakerRepository")
+    public class HibernateSpeakerRepositoryImpl implements SpeakerRepository {
+
+        @Autowired
+        private Calendar cal;
+
+        @Value("#{ T(java.lang.Math).random() * 100 }")
+        private double seedNum;
+
+        public List<Speaker> findAll() {
+            List<Speaker> speakers = new ArrayList<Speaker>();
+
+            Speaker speaker = new Speaker();
+
+            speaker.setFirstName("Eric");
+            speaker.setLastName("Helander");
+            speaker.setSeedNum(seedNum);
+
+            System.out.print("cal: " + cal.getTime());
+
+            speakers.add(speaker);
+
+            return speakers;
+        }
+
+    }
+    ```
+
+  - In `Application.java`:
+
+    ```java
+    import com.pluralsight.service.SpeakerService;
+    import org.springframework.context.ApplicationContext;
+    import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+    public class Application {
+
+        public static void main(String args[]) {
+            ApplicationContext appContext = new AnnotationConfigApplicationContext(AppConfig.class);
+
+            SpeakerService service = appContext.getBean("speakerService", SpeakerService.class);
+
+            System.out.println(service.findAll().get(0).getFirstName());
+            System.out.println(service.findAll().get(0).getSeedNum());
+        }
+    }
+    ```
+
+  - Run application.
+
+- Can manipulate something from a list, evaluate truthiness, etc.
+
+### [Proxies](https://app.pluralsight.com/course-player?clipId=44e39d8c-8640-4c61-b105-65f33ec64367)
+
+- ![spring-aop-proxy](2020-05-01-14-18-21.png)
+- Proxies are a great way to inject behavior without modifying code.
+- Not needed very often.
+- When should this be used?
+  - When dealing with databases and the `@Transactional` annotation.
+
+### [Bean Profiles](https://app.pluralsight.com/course-player?clipId=1658475c-6896-4e9a-bbd7-4db8a9434f95)
+
+- Bean profiles were implemented later, to help adapt to environments (setting up specific code that only gets run in a specific environment).
+- In `HibernateSpeakerRepositoryImpl.java`:
+  - Add `@Profile("dev")` above the class definition.
+    - `"dev"` could be anything.
+  - Good example of where we might use something like this: A data call.
+    - By marking it as "dev", it won't get accidentally deployed. Similar to a TODO:.
+- Add same in `SpeakerServiceImpl.java`.
+- Then in Application dropdown > `Edit Configurations`
+  - VM options: `-Dspring.profiles.active=dev`
+    - NOT an environment variable. Needs to be a VM option.
+    - If we run this for an environment that doesn't have a profile, we'll get a NoSuchBeanDefinitionException.
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=238a62e3-4b3e-412f-b64f-b1b401d0b9b1)
+
+- Pluralsight:
+  - Spring MVC Intro
+  - Spring Boot Fundamentals (Dan Bunker)
