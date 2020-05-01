@@ -1110,4 +1110,72 @@
 
 ## Spring Configuration Using XML
 
+### [XML Config Introduction](https://app.pluralsight.com/course-player?clipId=f59af70a-fd22-4be6-99ef-e97ad73e19e6)
+
+- Why XML?
+  - XML was the first method available in Spring.
+  - Some things are simpler: There's a natural separation of concerns that happens when configuration code is removed an placed in a different file.
+
+### [Demo: Copy Project](https://app.pluralsight.com/course-player?clipId=6595e3a3-861b-488c-b77f-3c61d490dfcd)
+
+- Copy `conference`: `cp -r conference conference-xml`
+  - Same steps as earlier:
+    - Then in IntelliJ, File > Open > `conference-xml`
+    - Need to rename `conference.iml`
+      - Right click > `Refactor` > `Rename` > `conference-xml.iml`
+    - Change `artifactId` in `pom.xml` > `<artifactId>conference-xml</artifactId>`
+    - Run `src/main/java/Application`
+      - In the `Edit configuration` dialog:
+        - `Use classpath of module`: `conference-xml`
+        - `JRE`: Likely best to choose a specific version (rather than default). E.g., 11.
+  - We don't want to try to mix Java configuration with XML configuration.
+  - We're going back to the version where everything was hard-coded.
+- Open `conference-xml` in IntelliJ.
+- Run `Application.java` to ensure everything's working as expected.
+
+### [applicationContext.xml](https://app.pluralsight.com/course-player?clipId=e6412721-2c7e-4b4a-ae99-be893ef2eb71)
+
+- Synonymous with `AppConfig.java`.
+- Doesn't _need_ to be named `applicationContext.xml`, though this is the default and convention.
+- Spring:
+  - Basically a HashMap of objects.
+  - Spring Context is sort of a HashMap - name-value pairs.
+    - This isn't the intention of Spring, but it can be simply used as a simple registry, where we look up the Beans out of out context.
+- XML configuration begins in this file.
+- Namespaces aid in configuration/validation.
+- In `src/main/resources` (`resources` was created when we created our Maven project):
+
+  - One drawback to Community IntelliJ: doesn't have a dialog to help create the XML file (whereas paid version does).
+
+    - Right click on `resources` > `New` > `File` > `applicationContext.xml`
+    - XML typical root namespace file:
+
+      ```xml
+      <?xml version="1.0" encoding="UTF-8"?>
+      <beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="
+              http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+      ```
+
+
+      </beans>
+      ```
+
+      - Including this XML schema definition helps with context menus.
+
+### [Bean Definition]()
+
+### [Demo: Add Bean]()
+
+### [Demo: Setter Injection]()
+
+### [Constructor Injection]()
+
+### [Autowiring]()
+
+### [Demo: Autowired]()
+
+### [Summary]()
+
 ## Advanced Bean Configuration
