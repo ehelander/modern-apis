@@ -13,6 +13,7 @@
 
 - [Spring: The Big Picture](frameworks/spring-the-big-picture/spring-the-big-picture.md)
 - [Spring Framework: Spring Fundamentals](frameworks/spring-framework-spring-fundamentals/spring-framework-spring-fundamentals.md)
+- [\*Spring Framework: Creating Your First Spring Boot Application](frameworks/spring-framework-creating-your-first-spring-boot-application/spring-framework-creating-your-first-spring-boot-application.md)
 - Spring Framework: Spring Data JPA
 - [GraphQL: The Big Picture](frameworks/graphql-the-big-picture/graphql-the-big-picture.md)
 - [Building Scalable APIs with GraphQL](frameworks/building-scalable-apis-with-graphql/building-scalable-apis-with-graphql.md)
