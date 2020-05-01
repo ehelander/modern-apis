@@ -42,7 +42,7 @@
 ### [Business Focus](https://app.pluralsight.com/course-player?clipId=644287f1-37c1-443f-8c60-34cccf6f1735)
 
 - JDBC for a simple SELECT:
-  - ![jdbc-without-spring](2020-04-29-10-51-09.png)
+  - ![jdbc-without-spring](img/2020-04-29-10-51-09.png)
   - Rather than handling assignments, closing resources, etc., Spring can help us by injecting these into our code.
 
 ### [The Solution](https://app.pluralsight.com/course-player?clipId=30610e74-2f2e-4606-ae48-c501f8339223)
@@ -57,7 +57,7 @@
 ### [Business Focus Revisited](https://app.pluralsight.com/course-player?clipId=755c7758-02da-4ba5-bd17-b319a7b66677)
 
 - Database query with Spring (using Spring JDBC template code):
-  - ![spring-select](2020-04-29-10-55-57.png)
+  - ![spring-select](img/2020-04-29-10-55-57.png)
   - Spring is using a template method pattern
 
 ### [How It Works](https://app.pluralsight.com/course-player?clipId=3775f3b5-afd8-421b-9904-b908d15dc511)
@@ -159,7 +159,7 @@
   - ArtifactID: `conference`
   - Project location: Choose a location (e.g., `~/dev/workspace/conference`)
 - Base project:
-  - ![base-project](2020-04-29-13-22-51.png)
+  - ![base-project](img/2020-04-29-13-22-51.png)
 
 ### [Demo: Sample App pom.xml](https://app.pluralsight.com/course-player?clipId=1cb422dd-30cf-4fe3-80ae-d3f2bc41102a)
 
@@ -234,7 +234,7 @@
   - Right click > New > Java Class
     - Note that by fully qualifying the name of the package structure we want, we can create a package here.
     - `com.pluralsight.model.Speaker`
-      - ![speaker](2020-04-29-13-40-03.png)
+      - ![speaker](img/2020-04-29-13-40-03.png)
   - Creates:
 
     ```java
@@ -312,7 +312,7 @@
       - Leave package and target as-is
       - Select `findAll()` in order to form interface.
       - Select `Yes`.
-        - ![analyze-and-replace-usages](2020-04-29-13-57-03.png)
+        - ![analyze-and-replace-usages](img/2020-04-29-13-57-03.png)
 
 - Resulting SpeakerRepository interface:
 
@@ -476,7 +476,7 @@
   ```
 
 - Refresh Maven. If the import worked correctly, the Spring transitive dependencies should be visible.
-  - ![spring-dependencies](2020-04-29-14-55-20.png)
+  - ![spring-dependencies](img/2020-04-29-14-55-20.png)
 
 ### [Summary](https://app.pluralsight.com/course-player?clipId=610401a7-d1b6-4b96-9268-801b12d87ad9)
 
@@ -558,7 +558,7 @@
 
 - As simple as a method call - abstracts away the mystery of injection.
 - Setter injection is simply a matter of calling a setter on a Bean. We call and get an instance of a _Bean_ from the Spring configuration.
-  - ![setter-injection](2020-04-29-15-37-20.png)
+  - ![setter-injection](img/2020-04-29-15-37-20.png)
   - Spring is still doing a lot of magic behind the scenes. Beans are singletons, and the method will only be executed the first time it's called.
     - This is key. Otherwise, it would create a new Bean every time we called it.
 
@@ -748,7 +748,7 @@
 - One instance per Spring container or Spring context
   - Could _possibly_ have more than 1 Spring container in a JVM.
 - When using Maven, scope is set with `@Scope`
-  - ![scope](2020-04-30-14-44-47.png)
+  - ![scope](img/2020-04-30-14-44-47.png)
 - `AppConfig.java`:
   - Add `@Scope(value="singleton")` below `@Bean(name = "speakerService")`
   - Though using an enum is preferable
@@ -1170,7 +1170,7 @@
   - This acts like a dictionary of properties we can use to create Beans.
   - XML Declaration
     - Allows us to define a bean in XML.
-    - ![xml-bean-declaration](2020-05-01-10-56-38.png)
+    - ![xml-bean-declaration](img/2020-05-01-10-56-38.png)
       - Beans are essentially classes (POJOs).
       - Defining beans can be thought of as replacing `new` keyword.
         - Wherever we're using `new`, that's something that may be a good candidate for going in our Java or XML configuration.
@@ -1290,7 +1290,7 @@
     ```
 
 - Now our application is set up to run with setter injection. Run it.
-- ![app](2020-05-01-11-25-10.png)
+- ![app](img/2020-05-01-11-25-10.png)
   - Maven, when compiling, will reference `src/main/resources/applicationContext` and compile out to `target/classes` (where our classpath launches from).
 
 ### [Constructor Injection](https://app.pluralsight.com/course-player?clipId=6fdd19d1-cb41-406b-98bd-b978d39fba7a)
@@ -1750,7 +1750,7 @@
 
 ### [Proxies](https://app.pluralsight.com/course-player?clipId=44e39d8c-8640-4c61-b105-65f33ec64367)
 
-- ![spring-aop-proxy](2020-05-01-14-18-21.png)
+- ![spring-aop-proxy](img/2020-05-01-14-18-21.png)
 - Proxies are a great way to inject behavior without modifying code.
 - Not needed very often.
 - When should this be used?
