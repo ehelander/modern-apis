@@ -73,11 +73,46 @@
   - Create New Project
   - Select `Spring Initializr` on the left menu
 
-### [Demo: Using the Spring Boot CLI]()
+### [Demo: Using the Spring Boot CLI](https://app.pluralsight.com/course-player?clipId=c8d2df30-bff1-402a-bf90-7548ab984558)
 
-### [Understanding Spring Boot Starters]()
+- [Spring Boot CLI installation](https://docs.spring.io/spring-boot/docs/current/reference/html/getting-started.html#getting-started-installing-the-cli)
 
-### [Summary]()
+  - Suggested install: [sdkman](https://sdkman.io/)
+    - `sdk install springboot`
+  - Homebrew
+
+    ```sh
+    brew tap pivotal/tap
+    brew install springboot
+    ```
+
+- Once installed
+
+  ```sh
+  spring
+  spring help
+  spring init # Another way to create a Spring Boot project
+  spring run # Can run a Groovy-based Spring Boot project
+  ```
+
+### [Understanding Spring Boot Starters](https://app.pluralsight.com/course-player?clipId=90ec12ea-9d75-4acd-aa03-d879dbda8731)
+
+- Starters are what make Spring Boot shine.
+- A starter is a way to integrate a dependency on your project.
+  - Simply declare a starter, and it will take care of getting all the right versions and dependencies in place.
+- `pom.xml` > dependencies
+  - ![starter-dependencies](2020-05-01-16-27-02.png)
+  - We have 2 starters currently:
+    - `spring-boot-starter-web`
+    - `spring-boot-starter-test`
+  - You don't have to specify a version when declaring a starter dependency.
+    - The `spring-boot-starter-parent` declaration at the top declares the versions of all the possible dependencies.
+      - Sometimes called the BOM (bill of materials).
+      - Can see by right clicking > `Maven` > `Show Effective POM`
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=2e7c8e2a-6a08-41c8-a53b-aff752d920a7)
+
+- What is Spring Boot? Simply, an opinionated rapid development framework.
 
 ## Building Apps with Spring Boot
 
