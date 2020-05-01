@@ -1,0 +1,78 @@
+# [Golang Guide: A List of Top Golang Frameworks, IDEs & Tools](https://medium.com/@quintinglvr/golang-guide-a-list-of-top-golang-frameworks-ides-tools-e7c7866e96c9) (Quintin G., 2017-08-13)
+
+- Frameworks
+  - [Revel](https://revel.github.io/)
+    - Includes hot code reload
+  - [Beego](https://beego.me/)
+    - MVC, logging library, ORM, web framework
+  - [Martini](https://github.com/go-martini/martini)
+    - Handlers and middleware
+    - No longer maintained
+  - [Gin Gonic](https://gin-gonic.github.io/gin/)
+    - Web framework
+      - Middleware, nested groups, JSON validation, rendering, httprouter
+    - Minimalistic; good for REST APIs
+    - 40 times faster than Martini
+  - [Buffalo](https://github.com/gobuffalo/buffalo)
+    - Web: frontend & backend
+    - Hot reloading
+  - [Goji](https://goji.io/)
+    - Web
+    - Lightweight, fast: composability
+    - Minimalistic HTTP request multiplexer
+    - URL patterns, re-configurable middleware stack, graceful shutdown
+  - [Tiger Tonic](https://github.com/rcrowley/go-tigertonic)
+    - JSON web services, REST APIs
+    - Not great for large-scale backend apps
+  - [Gocraft](https://github.com/gocraft/web)
+    - Fast, scalable routing
+    - Mux & middleware
+    - Casting & reflection
+    - Easy to use for backend
+  - [Mango](https://github.com/paulbellamy/mango)
+    - Good modularity
+    - No longer maintained by creator
+- IDEs
+  - [Goland](https://www.jetbrains.com/go/)
+    - JetBrains
+  - [Visual Studio Code](https://code.visualstudio.com/)
+    - Active Go community &rarr; plugins
+  - [LiteIDE](https://github.com/visualfc/liteide)
+    - Early Golang-centric, open-source IDE
+  - [Wide](https://github.com/b3log/wide)
+    - Focused on teams, web development
+    - Most docs are in Chinese
+  - Atom with [go-plus plugin](https://atom.io/packages/go-plus)
+  - Eclipse with [GoClipse](https://github.com/GoClipse/goclipse)
+  - Sublime Text with [GoSublime](https://github.com/DisposaBoy/GoSublime)
+  - Vim with [vim-go plugin](https://github.com/fatih/vim-go)
+  - [Komodo](https://www.activestate.com/komodo-ide/golang-editor)
+    - Great for collaboration: allows multiple editors
+  - IntelliJ IDEA with [Go Language (golang.org) Support Plugin](https://plugins.jetbrains.com/plugin/5047-go-language-golang-org-support-plugin)
+- Tools
+  - [Apicompat](https://github.com/bradleyfalzon/apicompat)
+    - Helps developers detect backwards, incompatible changes and exported declarations
+  - [Checkstyle](https://github.com/qiniu/checkstyle)
+    - Offers coding style suggestions; configurable
+  - [Depth](https://github.com/KyleBanks/depth)
+    - Dependency visualizations
+  - [Go-Swagger](https://github.com/go-swagger/go-swagger)
+    - Serialize & deserialize swagger specs;
+    - Can validate against jsonschema
+    - Code generation, API generation
+  - [Go Meta Linter](https://github.com/alecthomas/gometalinter)
+    - Normalize Go lint tools output concurrently
+  - [Go-callvis](https://github.com/TrueFurby/go-callvis)
+    - Web development: Visualize the call graph &rarr; Graphviz dot format
+  - [Gonative](https://github.com/inconshreveable/gonative)
+    - Build Go toolchains with native libs
+    - Limited cross-platform support
+  - [Grapes](https://github.com/yaronsumel/grapes)
+    - Distribute commands over SSH
+  - [Go Simple](https://github.com/dominikh/go-tools/tree/master/cmd/gosimple)
+    - Based on latest Go version, suggests easiest/simplest methods
+  - [Go Vendor](https://github.com/kardianos/govendor)
+    - Works with standard Vendor file
+    - Copy existing dependencies from $GOPATH
+    - Directly pull new dependencies, update existing dependencies with govendor fetch
+    - Move legacy systems with govendor migrate
