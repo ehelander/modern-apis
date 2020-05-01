@@ -45,9 +45,33 @@
   - Choose or setup JDK.
   - Finish.
 
-### [Demo: Overview of a Spring Boot App]()
+### [Demo: Overview of a Spring Boot App](https://app.pluralsight.com/course-player?clipId=b638e587-8ad0-475a-95b1-56f0023fcb64)
 
-### [Demo: Creating a Spring Boot App with IntelliJ]()
+- Maven apps generally follow the same layout:
+  - `pom.xml`
+    - Dependencies (e.g., `org.springframework.boot`)
+  - `src/main`
+    - Java goes in `java`
+      - `src/main/java/com.pluralsight.conferencedemo/ConferenceDemoApplication` is main entry point of application.
+      - Note `@SpringBootApplication`
+    - Property files, XML files, etc. go in `resources`
+  - `src/test`
+- Restructure our app and add some new files.
+  - Right click on `com.pluralsight.conferencedemo` > `New` > `Package`
+    - `com.pluralsight.conferencedemo.controllers`
+      - Will hold API controllers
+    - `com.pluralsight.conferencedemo.models`
+      - Will hold JPA entities and other persistence info
+    - `com.pluralsight.conferencedemo.repositories`
+      - Will hold JPA repositories
+    - `com.pluralsight.conferencedemo.services`
+      - Will hold service- or logic-based code
+
+### [Demo: Creating a Spring Boot App with IntelliJ](https://app.pluralsight.com/course-player?clipId=ac40d0a9-5570-42b3-8905-21d9834a650c)
+
+- Alternate way to create a Spring Boot application (IntelliJ Ultimate)
+  - Create New Project
+  - Select `Spring Initializr` on the left menu
 
 ### [Demo: Using the Spring Boot CLI]()
 
