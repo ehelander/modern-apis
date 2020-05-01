@@ -1293,7 +1293,81 @@
 - ![app](2020-05-01-11-25-10.png)
   - Maven, when compiling, will reference `src/main/resources/applicationContext` and compile out to `target/classes` (where our classpath launches from).
 
-### [Constructor Injection]()
+### [Constructor Injection](https://app.pluralsight.com/course-player?clipId=6fdd19d1-cb41-406b-98bd-b978d39fba7a)
+
+- We defined our bean to use setter injection.
+- Keep in mind: Both setter and constructor injection can be used together.
+  - Setter injection is often better for existing code.
+- Constructor injection guarantees a contract for us.
+  - However, we need to have a constructor defined for each situation we want to guarantee.
+  - Constructor injection is index-based (not name-based like setter injection).
+- `applicationContext.xml`:
+
+  - Change `property` to `constructor-arg`
+    - `index` argument values are 0-indexed.
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+      <bean name="speakerRepository" class="com.pluralsight.repository.HibernateSpeakerRepositoryImpl"/>
+
+      <bean name="speakerService" class="com.pluralsight.service.SpeakerServiceImpl" >
+          <constructor-arg index="0" ref="speakerRepository" />
+      </bean>
+
+  </beans>
+  ```
+
+- Add 2 constructors in `SpeakerServiceImpl.java`.
+
+  - Add a no-args constructor (so that we don't break any examples in the future).
+  - Add a constructor that takes an instance of our SpeakerRepository.
+
+  ```java
+  package com.pluralsight.service;
+
+  import com.pluralsight.model.Speaker;
+  import com.pluralsight.repository.SpeakerRepository;
+
+  import java.util.List;
+
+  public class SpeakerServiceImpl implements SpeakerService {
+
+      private SpeakerRepository repository;
+
+      public SpeakerServiceImpl() {}
+
+      public SpeakerServiceImpl(SpeakerRepository repository) {
+          this.repository = repository
+      }
+
+      public List<Speaker> findAll() {
+          return repository.findAll();
+      }
+
+      public void setSpeakerRepository(SpeakerRepository repository) {
+          this.repository = repository;
+      }
+  }
+  ```
+
+- Now our app runs as previously.
+
+  - The only change (once we had the necessary constructor defined) was:
+
+    ```xml
+    <property name="speakerRepository" ref="speakerRepository" />
+    ```
+
+  - To:
+
+    ```xml
+    <constructor-arg index="0" ref="speakerRepository" />
+    ```
 
 ### [Autowiring]()
 
