@@ -1162,13 +1162,136 @@
       </beans>
       ```
 
-      - Including this XML schema definition helps with context menus.
+      - Including this XML schema definition helps with context suggestions (e.g., when typing `<bean>`).
 
-### [Bean Definition]()
+### [Bean Definition](https://app.pluralsight.com/course-player?clipId=4e5109f2-b4bd-466e-abdb-c09e70aaffe1)
 
-### [Demo: Add Bean]()
+- Namespaces in XML
+  - This acts like a dictionary of properties we can use to create Beans.
+  - XML Declaration
+    - Allows us to define a bean in XML.
+    - ![xml-bean-declaration](2020-05-01-10-56-38.png)
+      - Beans are essentially classes (POJOs).
+      - Defining beans can be thought of as replacing `new` keyword.
+        - Wherever we're using `new`, that's something that may be a good candidate for going in our Java or XML configuration.
+      - We always want to _define a class_, but _use an interface_.
 
-### [Demo: Setter Injection]()
+### [Demo: Add Bean](https://app.pluralsight.com/course-player?clipId=b4188559-a5f2-4dbd-8b91-5a774d72f2e6)
+
+- Adding a bean in our `applicationContext`:
+
+  - We want this to reference an _instance_ of `HibernateSpeakerRepositoryImpl`.
+
+    - In our code, we'll reference it with the interface. But we create the bean with our implemenation.
+
+    ```xml
+    <bean name="speakerRepository" class="com.pluralsight.repository.HibernateSpeakerRepositoryImpl" />
+    ```
+
+    - Note that HibernateSpeakerRepositoryImpl has no dependencies - we're not injecting anything in it.
+
+### [Demo: Setter Injection](https://app.pluralsight.com/course-player?clipId=d459885a-1479-4073-a8be-b0011803600c)
+
+- In `SpeakerServiceImpl.java`:
+
+  - Get rid of hard-coded HibernateSpeakerRepositoryImpl reference and generate a setter for `repository` (through change name from `setRepository` to `setSpeakerRepository`; otherwise our `speakerService` XML bean definition would need to refer to `property` `name="repository"`).
+
+    ```java
+    package com.pluralsight.service;
+
+    import com.pluralsight.model.Speaker;
+    import com.pluralsight.repository.HibernateSpeakerRepositoryImpl;
+    import com.pluralsight.repository.SpeakerRepository;
+
+    import java.util.List;
+
+    public class SpeakerServiceImpl implements SpeakerService {
+
+    //    private SpeakerRepository repository = new HibernateSpeakerRepositoryImpl();
+        private SpeakerRepository repository;
+
+        public List<Speaker> findAll() {
+            return repository.findAll();
+        }
+
+        public void setSpeakerRepository(SpeakerRepository repository) {
+            this.repository = repository;
+        }
+    }
+    ```
+
+- To set our application up for setter injection, we need to define another bean in `applicationContext.xml`:
+
+  - Note that in a `<property>`, we have 2 options: `ref` or `value`.
+    - Since we're referring to another bean, we want `ref`. We'd use `value` if we were just supplying a string or numerical value.
+      - Here, we're referring to the `speakerRepository` bean defined above.
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+      <bean name="speakerRepository" class="com.pluralsight.repository.HibernateSpeakerRepositoryImpl"/>
+
+      <bean name="speakerService" class="com.pluralsight.service.SpeakerServiceImpl" >
+          <property name="speakerRepository" ref="speakerRepository" />
+      </bean>
+
+  </beans>
+  ```
+
+- `Application.java`:
+
+  - Need to create an instance of `ApplicationContext` to bootstrap the application.
+
+    ```java
+    import com.pluralsight.service.SpeakerService;
+    import com.pluralsight.service.SpeakerServiceImpl;
+    import org.springframework.context.ApplicationContext;
+    import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+    public class Application {
+
+        public static void main(String args[]) {
+            ApplicationContext appContext = new ClassPathXmlApplicationContext("applicationContext.xml");
+
+            SpeakerService service = new SpeakerServiceImpl();
+
+            System.out.println(service.findAll().get(0).getFirstName());
+        }
+    }
+    ```
+
+  - Comment out the previous hard-coded `service` instance.
+
+    - Instead, call `getBean()` on `appContext`.
+    - Pass it the name of the bean we want: `speakerService`.
+    - Pass it the class type (`SpeakerService.class`) so that we don't have to cast.
+
+    ```java
+    import com.pluralsight.service.SpeakerService;
+    import com.pluralsight.service.SpeakerServiceImpl;
+    import org.springframework.context.ApplicationContext;
+    import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+    public class Application {
+
+        public static void main(String args[]) {
+            ApplicationContext appContext = new ClassPathXmlApplicationContext("applicationContext.xml");
+
+    //        SpeakerService service = new SpeakerServiceImpl();
+            SpeakerService service = appContext.getBean("speakerService", SpeakerService.class);
+
+            System.out.println(service.findAll().get(0).getFirstName());
+        }
+    }
+    ```
+
+- Now our application is set up to run with setter injection. Run it.
+- ![app](2020-05-01-11-25-10.png)
+  - Maven, when compiling, will reference `src/main/resources/applicationContext` and compile out to `target/classes` (where our classpath launches from).
 
 ### [Constructor Injection]()
 
