@@ -116,11 +116,78 @@
 
 ## Building Apps with Spring Boot
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=c2ec0a13-8324-466a-b309-0109a57f2c76)
 
-### [Application Overview]()
+- Our conference scheduling app will include:
+  - Spring MVC
+  - Spring Data JPA
+  - JPA
+  - A relational database (PostgreSQL)
+- A full-stack Spring microservice app (though no GUI)
 
-### [Setting up the Database]()
+### [Application Overview](https://app.pluralsight.com/course-player?clipId=6759e7a8-d989-49e5-905b-20872aecbf97)
+
+### [Setting up the Database](https://app.pluralsight.com/course-player?clipId=2e2b265c-fff4-497a-8d76-e5bfc0364761)
+
+- Database ERD
+  - ![erd](2020-05-01-16-58-42.png)
+- [github.com/dlbunker/ps-first-spring-boot-app](https://github.com/dlbunker/ps-first-spring-boot-app)
+
+  - Can proceed with a local PostgreSQL instance or Docker.
+  - Docker:
+
+    - Install Docker
+
+      ```sh
+      # Install Docker
+      brew install cask docker
+      # Open Docker to create symbolic links
+      open /Applications/Docker.app
+      ```
+
+    - Create & run Docker container; create database.
+
+      ```sh
+      # Create Docker container with PostgreSQL database.
+      docker create --name postgres-demo -e POSTGRES_PASSWORD=Welcome -p 5432:5432 postgres:11.5-alpine
+      # Start container
+      docker start postgres-demo
+
+      # Connect to psql prompt from Docker
+      docker exec -it postgres-demo psql -U postgres
+
+      # Create database
+      create database conference_app;
+      ```
+
+    - Create tables & insert data
+
+      ```sh
+      cd ps-first-spring-boot-app/database/postgresql
+      docker cp create_tables.sql postgres-demo:/create_tables.sql
+      docker exec -it postgres-demo psql -d conference_app -f create_tables.sql -U postgres
+
+      docker cp insert_data.sql postgres-demo:/insert_data.sql
+      docker exec -it postgres-demo psql -d conference_app -f insert_data.sql -U postgres
+      ```
+
+    - Stop container
+
+      ```sh
+      # Stop container
+      docker stop postgres-demo
+      ```
+
+    - Connection info:
+      - JDBC URL: `jdbc:postgresql://localhost:5432/conference_app`
+      - Username: `postgres`
+      - Password: `Welcome`
+
+- Recommended database client: [Postico](https://eggerapps.at/postico/)
+
+  ```sh
+  brew cask install postico
+  ```
 
 ### [Demo: Connecting to the Database]()
 
