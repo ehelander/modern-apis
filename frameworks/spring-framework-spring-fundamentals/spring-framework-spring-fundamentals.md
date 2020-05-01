@@ -1342,7 +1342,7 @@
       public SpeakerServiceImpl() {}
 
       public SpeakerServiceImpl(SpeakerRepository repository) {
-          this.repository = repository
+          this.repository = repository;
       }
 
       public List<Speaker> findAll() {
@@ -1369,10 +1369,67 @@
     <constructor-arg index="0" ref="speakerRepository" />
     ```
 
-### [Autowiring]()
+### [Autowiring](https://app.pluralsight.com/course-player?clipId=f626c775-b88b-4d9f-ab82-a367fbc4cccb)
 
-### [Demo: Autowired]()
+- Autowiring automatically wires beans together
+- 4 kinds of autowiring you can do on a bean
+  - byType
+    - Allows a property to be autowired if exactly one object of that type exists in the application
+  - byName
+    - We need to name our beans for this to work.
+    - Allows us to choose by the name of the object we're wiring up (even if we have multiple objects of the same type).
+  - constructor
+    - Analogous to byType, but it applies to constructor arguments.
+      - Arguments can be indexed or named.
+      - Need to have a matching constructor.
+  - no
+    - No, it can't be autowiring at all.
 
-### [Summary]()
+### [Demo: Autowired](https://app.pluralsight.com/course-player?clipId=eedd2cec-1a81-4b86-b55c-edfa345e2d6a)
+
+- To convert our application to be autowired by constructor: Add `autowire="constructor"` in `applicationContext.xml`:
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+      <bean name="speakerRepository" class="com.pluralsight.repository.HibernateSpeakerRepositoryImpl"/>
+
+  <!--    <bean name="speakerService" class="com.pluralsight.service.SpeakerServiceImpl" >-->
+  <!--        <constructor-arg index="0" ref="speakerRepository" />-->
+  <!--    </bean>-->
+      <bean name="speakerService" class="com.pluralsight.service.SpeakerServiceImpl" autowire="constructor">
+      </bean>
+
+  </beans>
+  ```
+
+- And now our app runs as expected.
+- To autowire it by type: `applicationContext.xml`:
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+      <bean name="speakerRepository" class="com.pluralsight.repository.HibernateSpeakerRepositoryImpl"/>
+
+      <bean name="speakerService" class="com.pluralsight.service.SpeakerServiceImpl" autowire="byType"/>
+
+  </beans>
+  ```
+
+  - And can do `byName`. Same result.
+    - Because we are referring to `speakerService`, and we have a bean named `speakerRepository`, and it'll do `setSpeakerRepository`.
+      - If we go back to the default generated name of `setRepository`, then we get a NullPointerException runtime exception.
+
+- Names, in general, are a cleaner way wire.
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=35eb546f-6205-4a41-883f-b9364fb28541)
 
 ## Advanced Bean Configuration
