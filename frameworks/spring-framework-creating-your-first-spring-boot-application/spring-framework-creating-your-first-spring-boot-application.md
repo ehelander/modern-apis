@@ -6,15 +6,44 @@
 
 ## Using Spring Boot to Create Applications
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/player?course=creating-first-spring-boot-application&author=dan-bunker&name=1db3a0ad-cab9-46db-84fe-d7b033473655&clip=0&mode=live)
 
-### [Clip Watched]()
+- Prerequisites
+  - Java (at least Java 12)
+  - IntelliJ (Community is alright)
 
-### [What Is Spring Boot?]()
+### [What Is Spring Boot?](https://app.pluralsight.com/course-player?clipId=491b5cc0-bef1-4d46-90d9-7da8e777fa6d)
 
-### [Demo: Creating a Spring Boot App with Spring Initializr]()
+- Before Spring Boot, it could take days of development simply to get an app set up and talking to a database.
+- Spring Boot
+  - Opinionated framework
+  - Rapid development
+  - Stand alone app
+    - Self-contained, suitable for cloud deployments
 
-### [Demo: Importing and Setting up a Spring Boot App]()
+### [Demo: Creating a Spring Boot App with Spring Initializr](https://app.pluralsight.com/course-player?clipId=104fa981-df71-4342-9fd3-e748823e3ac4)
+
+- One way to create a Spring Boot app:
+  - [Spring Initializr](https://start.spring.io/)
+- Example project
+  - Maven Project
+  - Java
+  - Latest Spring Boot version
+  - Group: `com.pluralsight`
+  - Artifact: `conference-demo`
+  - Dependencies: `Spring Web`
+    - Spring MVC, REST API info
+  - Click `Generate`: generates `conference-demo.zip`.
+
+### [Demo: Importing and Setting up a Spring Boot App](https://app.pluralsight.com/course-player?clipId=b7bc9b61-098a-4bcc-84db-bee51013d9a2)
+
+- Extract `conference-demo.zip`.
+- Open IntelliJ.
+  - Import `conference-demo`.
+  - Maven project.
+  - Leave defaults.
+  - Choose or setup JDK.
+  - Finish.
 
 ### [Demo: Overview of a Spring Boot App]()
 
