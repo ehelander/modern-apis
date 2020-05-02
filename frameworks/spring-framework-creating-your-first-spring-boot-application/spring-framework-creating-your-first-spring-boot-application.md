@@ -193,8 +193,8 @@
 
 - Need to add a starter dependency that will include the Spring Data JPA library, and then connect it to PostgreSQL.
 - `pom.xml`
-  - Add the following dependencies below `spring-boot-starter-web` (and import the Maven changes):
 
+  - Add the following dependencies below `spring-boot-starter-web` (and import the Maven changes):
 
     ```xml
         <dependency>
@@ -369,9 +369,289 @@
     }
     ```
 
-### [Demo: Working with JPA Relationships]()
+### [Demo: Working with JPA Relationships](https://app.pluralsight.com/course-player?clipId=5b55594b-84fe-43fd-9bd7-8a1158b0b1bc)
 
-### [Demo: Working with Binary Data Types]()
+- Now we'll tie our Session and our Speaker together in a JPA relationship that will match their relationship in the database.
+  - In the databse, they're connected by a union or join table. So we'll need a many-to-many relationship.
+- We need to pick one side to be the owner or main definition point of the relationship. We'll use the `src/main/java/com.pluralsight.conference/models/Session` class.
+
+  - Start by adding a `private List<Speaker> speakers;` list.
+  - Add a getter and setter.
+  - Then define the relationship.
+    - `@ManyToMany`
+      - Setting up a many-to-many relationship.
+    - `@JoinTable`
+      - Defines the join table and the foreign key columns.
+  - Now JPA will set up the SQL the join automatically when calling the speakers attribute.
+
+  ```java
+  package com.pluralsight.conferencedemo.models;
+
+  import javax.persistence.*;
+  import java.util.List;
+
+  @Entity(name = "sessions")
+  public class Session {
+      @Id
+      @GeneratedValue(strategy = GenerationType.IDENTITY)
+      private Long session_id;
+
+      private String session_name;
+      private String session_description;
+      private Integer session_length;
+
+      @ManyToMany
+      @JoinTable(
+              name = "session_speakers",
+              joinColumns = @JoinColumn(name = "session_id"),
+              inverseJoinColumns = @JoinColumn(name = "speaker_id")
+      )
+      private List<Speaker> speakers;
+
+      public Session() {}
+
+      public List<Speaker> getSpeakers() {
+          return speakers;
+      }
+
+      public void setSpeakers(List<Speaker> speakers) {
+          this.speakers = speakers;
+      }
+
+      public Long getSession_id() {
+          return session_id;
+      }
+
+      public void setSession_id(Long session_id) {
+          this.session_id = session_id;
+      }
+
+      public String getSession_name() {
+          return session_name;
+      }
+
+      public void setSession_name(String session_name) {
+          this.session_name = session_name;
+      }
+
+      public String getSession_description() {
+          return session_description;
+      }
+
+      public void setSession_description(String session_description) {
+          this.session_description = session_description;
+      }
+
+      public Integer getSession_length() {
+          return session_length;
+      }
+
+      public void setSession_length(Integer session_length) {
+          this.session_length = session_length;
+      }
+  }
+  ```
+
+- And in `Speaker`:
+
+  - We need to define the many-to-many relationship here also (to make it bi-directional).
+  - Since we defined the nature of the mapping on `Session`, we can just specify `@ManyToMany(mappedBy = "speakers")` here.
+
+  ```java
+  package com.pluralsight.conferencedemo.models;
+
+  import javax.persistence.*;
+  import java.util.List;
+
+  @Entity(name = "speakers")
+  public class Speaker {
+      @Id
+      @GeneratedValue(strategy = GenerationType.IDENTITY)
+      private Long speaker_id;
+
+      private String first_name;
+      private String last_name;
+      private String title;
+      private String company;
+      private String speaker_bio;
+
+      @ManyToMany(mappedBy = "speakers")
+      private List<Session> sessions;
+
+      public Speaker() {}
+
+      public List<Session> getSessions() {
+          return sessions;
+      }
+
+      public void setSessions(List<Session> sessions) {
+          this.sessions = sessions;
+      }
+
+      public Long getSpeaker_id() {
+          return speaker_id;
+      }
+
+      public void setSpeaker_id(Long speaker_id) {
+          this.speaker_id = speaker_id;
+      }
+
+      public String getFirst_name() {
+          return first_name;
+      }
+
+      public void setFirst_name(String first_name) {
+          this.first_name = first_name;
+      }
+
+      public String getLast_name() {
+          return last_name;
+      }
+
+      public void setLast_name(String last_name) {
+          this.last_name = last_name;
+      }
+
+      public String getTitle() {
+          return title;
+      }
+
+      public void setTitle(String title) {
+          this.title = title;
+      }
+
+      public String getCompany() {
+          return company;
+      }
+
+      public void setCompany(String company) {
+          this.company = company;
+      }
+
+      public String getSpeaker_bio() {
+          return speaker_bio;
+      }
+
+      public void setSpeaker_bio(String speaker_bio) {
+          this.speaker_bio = speaker_bio;
+      }
+  }
+  ```
+
+### [Demo: Working with Binary Data Types](https://app.pluralsight.com/course-player?clipId=81f08dde-217a-45ac-80c6-a7aaf8235039)
+
+- In `Speaker` entity:
+
+  - We need to handle binary photo data.
+  - Add a `private byte[] speaker_photo;` property.
+    - A byte array is well-suited for binary data in Java.
+  - Generate getters and setters.
+  - Add annotations:
+    - `@Lob`
+      - Large object. Binary data can get quite large. Providing this annotation helps JPA deal with the large data.
+    - `@Type(type="org.hibernate.type.BinaryType")`
+      - Helps Hibernate deal with binary data.
+      - Hibernate is the JPA implementation we're using under the covers.
+      - Without this annotation, we'd end up with an exception.
+
+  ```java
+  package com.pluralsight.conferencedemo.models;
+
+  import org.hibernate.annotations.Type;
+
+  import javax.persistence.*;
+  import java.util.List;
+
+  @Entity(name = "speakers")
+  public class Speaker {
+      @Id
+      @GeneratedValue(strategy = GenerationType.IDENTITY)
+      private Long speaker_id;
+
+      private String first_name;
+      private String last_name;
+      private String title;
+      private String company;
+      private String speaker_bio;
+
+      @Lob
+      @Type(type="org.hibernate.type.BinaryType")
+      private byte[] speaker_photo;
+
+      @ManyToMany(mappedBy = "speakers")
+      private List<Session> sessions;
+
+      public Speaker() {}
+
+      public byte[] getSpeaker_photo() {
+          return speaker_photo;
+      }
+
+      public void setSpeaker_photo(byte[] speaker_photo) {
+          this.speaker_photo = speaker_photo;
+      }
+
+      public List<Session> getSessions() {
+          return sessions;
+      }
+
+      public void setSessions(List<Session> sessions) {
+          this.sessions = sessions;
+      }
+
+      public Long getSpeaker_id() {
+          return speaker_id;
+      }
+
+      public void setSpeaker_id(Long speaker_id) {
+          this.speaker_id = speaker_id;
+      }
+
+      public String getFirst_name() {
+          return first_name;
+      }
+
+      public void setFirst_name(String first_name) {
+          this.first_name = first_name;
+      }
+
+      public String getLast_name() {
+          return last_name;
+      }
+
+      public void setLast_name(String last_name) {
+          this.last_name = last_name;
+      }
+
+      public String getTitle() {
+          return title;
+      }
+
+      public void setTitle(String title) {
+          this.title = title;
+      }
+
+      public String getCompany() {
+          return company;
+      }
+
+      public void setCompany(String company) {
+          this.company = company;
+      }
+
+      public String getSpeaker_bio() {
+          return speaker_bio;
+      }
+
+      public void setSpeaker_bio(String speaker_bio) {
+          this.speaker_bio = speaker_bio;
+      }
+  }
+  ```
+
+- Back in `src/main/resources/application.properties`, add `spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation=true`
+  - Needed so the PostgreSQL JDBC driver can create Lob data correctly on the Java side.
+  - Would encounter exceptions otherwise.
 
 ### [Demo: Creating JPA Repositories]()
 
