@@ -189,9 +189,113 @@
   brew cask install postico
   ```
 
-### [Demo: Connecting to the Database]()
+### [Demo: Connecting to the Database](https://app.pluralsight.com/course-player?clipId=1d370eee-b668-4cdc-abd9-1ba7f198544c)
 
-### [Demo: Creating JPA Models]()
+- Need to add a starter dependency that will include the Spring Data JPA library, and then connect it to PostgreSQL.
+- `pom.xml`
+  - Add the following dependencies below `spring-boot-starter-web` (and import the Maven changes):
+
+
+    ```xml
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <dependency>
+          <groupId>org.postgresql</groupId>
+          <artifactId>postgresql</artifactId>
+          <scope>runtime</scope>
+        </dependency>
+    ```
+
+- Tell Spring Boot the database connection string.
+
+  - `src/main/resources/application.properties`
+
+    ```properties
+    spring.datasource.url=jdbc:postgresql://localhost:5432/conference_app
+    spring.datasource.username=postgres
+    spring.datasource.password=Welcome
+    spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+    spring.jpa.hibernate.ddl-auto=none
+    spring.jpa.hibernate.show-sql=true
+    ```
+
+### [Demo: Creating JPA Models](https://app.pluralsight.com/course-player?clipId=d1dea5c6-6bae-41a0-88cf-752f27dd3519)
+
+- Next step: Apply some JPA entities so we can talk to the database.
+- Right click `src/main/java/com.pluralsight.conferencedemo/models` > New > Java Class
+
+  - `Session.java`
+
+    - Add annotation: `@Entity(name="sessions")`
+    - Note that we're using plural `sessions` in the entity name because that is the name of our database table, whereas the class is singular because it will be one row or instance of that data.
+    - ![sessions](2020-05-01-21-02-03.png)
+    - Add default constructors to all entities.
+      - Helps with serialization and deserialization (when plugging in controllers).
+    - Add variables for our columns.
+      - Keeping the case and spelling the same (i.e., snake_case vs. normal Java camelCase) as the database columns allows JPA to automatically bind to them.
+        - Otherwise, we'd need to add an @Column annotation to each.
+      - We need to add the `@Id` annotation to tell JPA which key is the primary key.
+      - And `@GeneratedValue(strategy = GenerationType.IDENTITY)` tells JPA how the primary key gets populated on a new insert.
+        - With `strategy = GenerationType.IDENTITY`, JPA will use the PostgreSQL-generated value.
+      - Generate getters & setters.
+
+    ```java
+    package com.pluralsight.conferencedemo.models;
+
+    import javax.persistence.Entity;
+    import javax.persistence.GeneratedValue;
+    import javax.persistence.GenerationType;
+    import javax.persistence.Id;
+
+    @Entity(name="sessions")
+    public class Session {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long session_id;
+        private String session_name;
+        private String session_description;
+        private Integer session_length;
+
+        public Session() {}
+
+        public Long getSession_id() {
+            return session_id;
+        }
+
+        public void setSession_id(Long session_id) {
+            this.session_id = session_id;
+        }
+
+        public String getSession_name() {
+            return session_name;
+        }
+
+        public void setSession_name(String session_name) {
+            this.session_name = session_name;
+        }
+
+        public String getSession_description() {
+            return session_description;
+        }
+
+        public void setSession_description(String session_description) {
+            this.session_description = session_description;
+        }
+
+        public Integer getSession_length() {
+            return session_length;
+        }
+
+        public void setSession_length(Integer session_length) {
+            this.session_length = session_length;
+        }
+    }
+    ```
+
+-
 
 ### [Demo: Working with JPA Relationships]()
 
