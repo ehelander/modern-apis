@@ -782,7 +782,118 @@
   }
   ```
 
-### [Demo: Creating Spring API REST Controllers - Part 2]()
+### [Demo: Creating Spring API REST Controllers - Part 2](https://app.pluralsight.com/course-player?clipId=524195a9-b8bc-4fe9-93b0-221215cbee28)
+
+- Now for create, update, delete.
+- `SessionsController`:
+
+  ```java
+  package com.pluralsight.conferencedemo.controllers;
+
+  import com.pluralsight.conferencedemo.models.Session;
+  import com.pluralsight.conferencedemo.repositories.SessionRepository;
+  import org.springframework.beans.BeanUtils;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.web.bind.annotation.*;
+
+  import java.util.List;
+
+  @RestController
+  @RequestMapping("/api/v1/sessions")
+  public class SessionsController {
+      @Autowired
+      private SessionRepository sessionRepository;
+
+      @GetMapping
+      public List<Session> list() {
+          return sessionRepository.findAll();
+      }
+
+      @GetMapping
+      @RequestMapping("{id}")
+      public Session get(@PathVariable Long id) {
+          return sessionRepository.getOne(id);
+      }
+
+      // Map the POST verb to this method.
+      @PostMapping
+      // Spring MVC is taking in all the attributes in the JSON payload and marshalling them into a Session object.
+      public Session create(@RequestBody final Session session) {
+          // When working with JPA & entities, you can save an object as you're working with it, but it doesn't get committed to the database until you flush.
+          return sessionRepository.saveAndFlush(session);
+      }
+
+      // Add /{id} to the path.
+      // Map the HTTP DELETE verb to this method. Spring only provides @GetMappings and @PostMappings, so we must specify it this way.
+      @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
+      public void delete(@PathVariable Long id) {
+          // TODO: Check for children records before deleting. (Need to handle cascading deletes anytime working with JPA.)
+          sessionRepository.deleteById(id);
+      }
+
+      @RequestMapping(value = "{id}", method = RequestMethod.PUT)
+      public Session update(@PathVariable Long id, @RequestBody Session session) {
+          // Because this is a PUT, we expect all attributes to be passed in.
+          // TODO: Validate that all attributes are passed in. Otherwise, return a 400.
+          // In order to update an existing record, we first need to retrieve the session object currently associated with that id.
+          Session existingSession = sessionRepository.getOne(id);
+          // Copy properties from the new object onto the old one. But don't copy the session_id, because that's the PK and we don't want to replace it (i.e., we don't want a null PK). Non-existent properties on the incoming session will be copied as null.
+          BeanUtils.copyProperties(session, existingSession, "session_id");
+          return sessionRepository.saveAndFlush(existingSession);
+      }
+  }
+  ```
+
+- `SpeakersController`:
+
+  ```java
+  package com.pluralsight.conferencedemo.controllers;
+
+  import com.pluralsight.conferencedemo.models.Speaker;
+  import com.pluralsight.conferencedemo.repositories.SpeakerRepository;
+  import org.springframework.beans.BeanUtils;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.web.bind.annotation.*;
+
+  import java.util.List;
+
+  @RestController
+  @RequestMapping("/api/v1/speakers")
+  public class SpeakersController {
+      @Autowired
+      private SpeakerRepository speakerRepository;
+
+      @GetMapping
+      public List<Speaker> list() {
+          return speakerRepository.findAll();
+      }
+
+      @GetMapping
+      @RequestMapping("{id}")
+      public Speaker get(@PathVariable Long id) {
+          return speakerRepository.getOne(id);
+      }
+
+      @PostMapping
+      public Speaker create(@RequestBody Speaker speaker) {
+          return speakerRepository.saveAndFlush(speaker);
+      }
+
+      @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
+      public void delete(@PathVariable Long id) {
+          // TODO: Check for children records before deleting. (Need to handle cascading deletes anytime working with JPA.)
+          speakerRepository.deleteById(id);
+      }
+
+      @RequestMapping(value = "{id}", method = RequestMethod.PUT)
+      public Speaker update(@PathVariable Long id, @RequestBody Speaker speaker) {
+          // TODO: Validate that all attributes are passed in. Otherwise, return a 400.
+          Speaker existingSpeaker = speakerRepository.getOne(id);
+          BeanUtils.copyProperties(speaker, existingSpeaker, "speaker_id");
+          return speakerRepository.saveAndFlush(existingSpeaker);
+      }
+  }
+  ```
 
 ### [Demo: Handling Serialization Issues and Running the App]()
 
