@@ -653,9 +653,134 @@
   - Needed so the PostgreSQL JDBC driver can create Lob data correctly on the Java side.
   - Would encounter exceptions otherwise.
 
-### [Demo: Creating JPA Repositories]()
+### [Demo: Creating JPA Repositories](https://app.pluralsight.com/course-player?clipId=813fea5b-eeaf-4b61-a98e-22d5a8f71395)
 
-### [Demo: Creating Spring API REST Controllers - Part 1]()
+- Once entities are in place, we have a few options for how to handle our data access layer.
+  - Spring Data JPA provides many out-of-the box benefits.
+- `pom.xml`
+  - Adding the `spring-boot-starter-data-jpa` pulls in the libraries necessary for us to get started with JPA repos.
+- Add Java Interface: `src/main/java/com.pluralsight.conference/repositories/SessionRepository`.
+
+  - To make it a JPA repository:
+    - `extends JpaRepository<Session, Long>`
+      - `Session`: Data type
+      - `Long`: Primary key
+    - So now we have find, update, save, delete, etc., set up on our Session JPA class.
+
+  ```java
+  package com.pluralsight.conferencedemo.repositories;
+
+  import com.pluralsight.conferencedemo.models.Session;
+  import org.springframework.data.jpa.repository.JpaRepository;
+
+  public interface SessionRepository extends JpaRepository<Session, Long> {
+  }
+  ```
+
+- Add Java Interface: `src/main/java/com.pluralsight.conference/repositories/SpeakerRepository`.
+
+  ```java
+  package com.pluralsight.conferencedemo.repositories;
+
+  import com.pluralsight.conferencedemo.models.Speaker;
+  import org.springframework.data.jpa.repository.JpaRepository;
+
+  public interface SpeakerRepository extends JpaRepository<Speaker, Long> {
+  }
+  ```
+
+### [Demo: Creating Spring API REST Controllers - Part 1](https://app.pluralsight.com/course-player?clipId=4715f7b8-c4f4-4854-8bac-8f427a17c8d1)
+
+- Controllers will handle our API endpoints.
+- New Java Class: `src/main/java/com.pluralsight.conference/controllers/SessionsController`
+
+  - Add annotations to tell Spring this is a controller.
+    - `@RestController`
+      - This will respond to payloads incoming and outgoing as JSON REST endpoints.
+    - `@RequestMapping("/api/v1/sessions")`
+      - Tells the router what the mapping URL is.
+  - Autowire `SessionRepository`: When a `SessionsController` is created, an instance of `SessionRepository` is created and added automatically.
+  - By default, the REST controller will return 200s for all statuses.
+    - One way to override: `@ResponseStatus(HttpStatus.CREATED)` &rarr; returns a 201 instead (but we'll just leave these all as the 200 defaults for now).
+  - `list()`
+    - `@GetMapping`
+      - When a call is made to `/api/v1/sessions`, this maps the HTTP GET verb to this method.
+    - We can call `findAll()` on `sessionRepository` because it's a JPA repository.
+    - The method returns a `List` of `Session` objects.
+      - Spring MVC will pass this to Jackson (a serialization library) which will turn these Session objects into JSON and return that back to the caller.
+  - `get()`
+    - Return a specific session.
+    - `@GetMapping`
+      - Map the GET verb to this method.
+    - `@RequestMapping("{id}")`
+      - In addition to the class-level request mapping.
+        - So now we're actually mapping `/api/v1/sessions/{id}`
+    - Since we have `Long` data types for our primary key, we'll marshall it into a `Long`.
+    - Again, the `sessionRepository` has auto-built `getOne()`.
+    - And with Spring MVC we can automarshall the return value into a `Session` that gets returned to the caller as a JSON payload.
+
+  ```java
+  package com.pluralsight.conferencedemo.controllers;
+
+  import com.pluralsight.conferencedemo.models.Session;
+  import com.pluralsight.conferencedemo.repositories.SessionRepository;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.web.bind.annotation.*;
+
+  import java.util.List;
+
+  @RestController
+  @RequestMapping("/api/v1/sessions")
+  public class SessionsController {
+      @Autowired
+      private SessionRepository sessionRepository;
+
+      @GetMapping
+      public List<Session> list() {
+          return sessionRepository.findAll();
+      }
+
+      @GetMapping
+      @RequestMapping("{id}")
+      public Session get(@PathVariable Long id) {
+          return sessionRepository.getOne(id);
+      }
+  }
+  ```
+
+- New Java Class: `src/main/java/com.pluralsight.conference/controllers/SpeakerssController`
+
+  ```java
+  package com.pluralsight.conferencedemo.controllers;
+
+  import com.pluralsight.conferencedemo.models.Speaker;
+  import com.pluralsight.conferencedemo.repositories.SpeakerRepository;
+  import org.springframework.beans.factory.annotation.Autowired;
+  import org.springframework.web.bind.annotation.GetMapping;
+  import org.springframework.web.bind.annotation.PathVariable;
+  import org.springframework.web.bind.annotation.RequestMapping;
+  import org.springframework.web.bind.annotation.RestController;
+
+  import java.util.List;
+
+  @RestController
+  @RequestMapping("/api/v1/speakers")
+  public class SpeakersController {
+      @Autowired
+      private SpeakerRepository speakerRepository;
+
+      @GetMapping
+      public List<Speaker> list() {
+          return speakerRepository.findAll();
+      }
+
+      @GetMapping
+      @RequestMapping("{id}")
+      public Speaker get(@PathVariable Long id) {
+          return speakerRepository.getOne(id);
+      }
+  }
+  ```
 
 ### [Demo: Creating Spring API REST Controllers - Part 2]()
 
