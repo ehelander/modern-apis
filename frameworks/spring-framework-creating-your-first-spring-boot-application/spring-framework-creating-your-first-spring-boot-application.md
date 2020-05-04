@@ -134,6 +134,27 @@
 - [github.com/dlbunker/ps-first-spring-boot-app](https://github.com/dlbunker/ps-first-spring-boot-app)
 
   - Can proceed with a local PostgreSQL instance or Docker.
+  - Local PostgreSQL instance.
+
+    - Note: Found this to work better in terms of port mapping, etc. Did _not_ need username or password specified in `application.properties`.
+
+    ```sh
+    # See https://github.com/ehelander/modern-apis/blob/master/frameworks/building-scalable-apis-with-graphql/building-scalable-apis-with-graphql.md#introduction-2
+    # Start postgres.
+    brew services start postgres
+    # Create conference_app DB.
+    createdb conference_app
+    # Create tables & load data.
+    psql conference_app < create_tables.sql
+    psql conference_app < insert_data.sql
+    # Begin psql shell.
+    psql conference_app
+    # Ensure data is in session table.
+    select * from sessions;
+    # Quit psql shell.
+    \q
+    ```
+
   - Docker:
 
     - Install Docker
@@ -150,14 +171,20 @@
       ```sh
       # Create Docker container with PostgreSQL database.
       docker create --name postgres-demo -e POSTGRES_PASSWORD=Welcome -p 5432:5432 postgres:11.5-alpine
-      # Start container
+      # Start container.
       docker start postgres-demo
 
-      # Connect to psql prompt from Docker
+      # Connect to psql prompt from Docker.
       docker exec -it postgres-demo psql -U postgres
 
-      # Create database
+      # Create database.
       create database conference_app;
+
+      # List databases.
+      \l
+
+      # Use conference_app database.
+      \c conference_app
       ```
 
     - Create tables & insert data
@@ -907,7 +934,185 @@
     </properties>
     ```
 
-### [Summary]()
+- Our application is started on port `8080`.
+- In Postman:
+  - GET `http://localhost:8080/api/v1/sessions`
+- Right now, we have a serialization problem: We're getting a bunch of nested data.
+  - It's looping cyclically over our many-to-many relationship.
+- To handle this cyclical looping, we can either add annotations in our entities, or create DTOs (data transfer objects). Here, we'll deal with serialization issues on our models instead of using DTOs.
+- In `Session.java`:
+  - `@ManyToMany` is causing the problem.
+  - Since we defined Session as the dominant side, we'll leave this alone.
+- In `Speaker.java`:
+
+  - Add a new annotation: `@JsonIgnore` (from `com.fasterxml.jackson.annotation.JsonIgnore`) below `@ManyToMany`.
+    - Jackson will ignore this when it goes to reload the sessions.
+
+  ```java
+  package com.pluralsight.conferencedemo.models;
+
+  import com.fasterxml.jackson.annotation.JsonIgnore;
+  import org.hibernate.annotations.Type;
+
+  import javax.persistence.*;
+  import java.util.List;
+
+  @Entity(name = "speakers")
+  public class Speaker {
+      @Id
+      @GeneratedValue(strategy = GenerationType.IDENTITY)
+      private Long speaker_id;
+
+      private String first_name;
+      private String last_name;
+      private String title;
+      private String company;
+      private String speaker_bio;
+
+      @Lob
+      @Type(type="org.hibernate.type.BinaryType")
+      private byte[] speaker_photo;
+
+      @ManyToMany(mappedBy = "speakers")
+      @JsonIgnore
+      private List<Session> sessions;
+
+      public Speaker() {}
+
+      public byte[] getSpeaker_photo() {
+          return speaker_photo;
+      }
+
+      public void setSpeaker_photo(byte[] speaker_photo) {
+          this.speaker_photo = speaker_photo;
+      }
+
+      public List<Session> getSessions() {
+          return sessions;
+      }
+
+      public void setSessions(List<Session> sessions) {
+          this.sessions = sessions;
+      }
+
+      public Long getSpeaker_id() {
+          return speaker_id;
+      }
+
+      public void setSpeaker_id(Long speaker_id) {
+          this.speaker_id = speaker_id;
+      }
+
+      public String getFirst_name() {
+          return first_name;
+      }
+
+      public void setFirst_name(String first_name) {
+          this.first_name = first_name;
+      }
+
+      public String getLast_name() {
+          return last_name;
+      }
+
+      public void setLast_name(String last_name) {
+          this.last_name = last_name;
+      }
+
+      public String getTitle() {
+          return title;
+      }
+
+      public void setTitle(String title) {
+          this.title = title;
+      }
+
+      public String getCompany() {
+          return company;
+      }
+
+      public void setCompany(String company) {
+          this.company = company;
+      }
+
+      public String getSpeaker_bio() {
+          return speaker_bio;
+      }
+
+      public void setSpeaker_bio(String speaker_bio) {
+          this.speaker_bio = speaker_bio;
+      }
+  }
+  ```
+
+- Restart server. (Note restart button on top toolbar.)
+  - Now we get a list.
+- If we try to GET `http://localhost:8080/api/v1/sessions/2`, we encounter another Spring/Hibernate serialization issue.
+- In `Session.java`:
+
+  - Add `@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})` below `@Entity(name = "sessions")`
+    - When you create an entity with a relationship, Hibernate adds a few stub methods to handle lazy & eager loading of data. When you go to serialize a Hibernate object, you don't want to serialize this: it will try to load in all your relational data and cause exceptions.
+
+  ```java
+  @Entity(name = "sessions")
+  @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+  public class Session {
+  ```
+
+- Add it to the Speaker class also.
+- Restart the server.
+- Now GET `http://localhost:8080/api/v1/sessions/2` works.
+- POST `http://localhost:8080/api/v1/sessions`:
+
+  ```json
+  {
+    "session_name": "Some new session",
+    "session_description": "A new session description",
+    "session_length": 42
+  }
+  ```
+
+- PUT `http://localhost:8080/api/v1/sessions/93`:
+
+  ```json
+  {
+    "session_name": "Some updated session",
+    "session_description": "An updated session description",
+    "session_length": 43
+  }
+  ```
+
+- DELETE `http://localhost:8080/api/v1/sessions/93` (no children data on the session we just created)
+- Test out speaker endpoints.
+  - GET `http://localhost:8080/api/v1/speakers`
+  - GET `http://localhost:8080/api/v1/speakers/1`
+  - POST `http://localhost:8080/api/v1/speakers`
+
+    ```json
+    {
+      "first_name": "Eric",
+      "last_name": "Helander",
+      "title": "Software Engineer Consultant",
+      "company": "Object Partners, Inc.",
+      "speaker_bio": "cloud, web, services, data"
+    }
+    ```
+
+  - PUT `http://localhost:8080/api/v1/speakers/42`
+
+    ```json
+    {
+      "first_name": "Eric",
+      "last_name": "Helander",
+      "title": "Software Engineer Consultant",
+      "company": "Object Partners, Inc.",
+      "speaker_bio": "frontend, backend, cloud, data"
+    }
+    ```
+
+  - DELETE `http://localhost:8080/api/v1/speakers/42`
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=6475d1a1-b98c-47e9-a54d-7f6441ad6906)
 
 ## Working with Spring Boot Config and Environment Needs
 
