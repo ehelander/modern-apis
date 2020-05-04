@@ -895,7 +895,17 @@
   }
   ```
 
-### [Demo: Handling Serialization Issues and Running the App]()
+### [Demo: Handling Serialization Issues and Running the App](https://app.pluralsight.com/course-player?clipId=63956c4e-bb7c-4975-b85e-c2a438a616b4)
+
+- Right click on `ConferenceDemoApplication` > `Run`.
+
+  - Note: Had to change `pom.xml` to use Java version 1.8.
+
+    ```xml
+    <properties>
+      <java.version>1.8</java.version>
+    </properties>
+    ```
 
 ### [Summary]()
 
