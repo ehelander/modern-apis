@@ -25,7 +25,7 @@
 ## \*Cloud
 
 - \*Azure
-  - [\*Introduction to Serverless on Azure](cloud/azure/introduction-to-serverless-on-azure/introduction-to-serverless-on-azure.md)
+  - [\*Introduction to Serverless on Azure](cloud/azure/introduction-to-serverless-on-azure/README.md)
 
 ## Data
 
