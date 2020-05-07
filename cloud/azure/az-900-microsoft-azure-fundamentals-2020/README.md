@@ -2,6 +2,8 @@
 
 ## Introduction
 
+### Welcome
+
 ## Cloud Concepts
 
 ## Azure Architecture

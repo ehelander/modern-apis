@@ -26,6 +26,7 @@
 
 - \*Azure
   - [\*Introduction to Serverless on Azure](cloud/azure/introduction-to-serverless-on-azure/README.md)
+  - [Developing with Node.js on Microsoft Azure - Getting Started](cloud/azure/developing-with-nodejs-on-microsoft-azure-getting-started)
 
 ## Data
 
