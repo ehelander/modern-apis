@@ -411,21 +411,135 @@ client.queryDocuments(/* ... */); // Returns a query iterator; can call .toArray
 
 ## Cloud Storage
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=83a9e92c-7d6a-4598-bddb-6ce1dec95cb7)
 
-### [Understanding Azure Storage Features]()
+### [Understanding Azure Storage Features](https://app.pluralsight.com/course-player?clipId=350b93cb-054b-496c-9844-c7b0db301bfb)
 
-### [Accounts, Containers, and Blobs]()
+- Storage Account services
+  - Blob Storage
+    - Block blob (Binary Large OBject) storage
+  - Table Storage
+    - Optimized key-value store
+  - Queue Storage
+    - Useful for decoupling, async communication.
 
-### [Creating a Storage Account]()
+### [Accounts, Containers, and Blobs](https://app.pluralsight.com/course-player?clipId=0251068e-94ac-453d-b5b5-8273e30070e3)
 
-### [Managing Storage with Storage Explorer]()
+- Currently, each account has access to 500 TB (but only used storage incurs costs).
+- In Azure, there's only one level of containers (but slashes can be used to simulate nested containers).
 
-### [Uploading a Blob from NodeJS]()
+### [Creating a Storage Account](https://app.pluralsight.com/course-player?clipId=2c900e00-1e29-4b95-b26c-f9faca4fa4a8)
 
-### [Generating a Shared Access Signature]()
+- Create new storage account
+  - `Name`
+    - Become first part of URL: `.core.windows.net`.
+  - `Deployment model`
+    - Use `Resource manager` unless there is a specific reason for using `Classic`.
+  - `Account kind`
+    - `Storage (general purpose v1)`
+    - `StorageV2 (general purpose v2)`
+      - Comes with the most features.
+    - `Blob storage`
+  - `Location`
+  - `Replication`
+    - Data is always replicated, but can select an option to specify how widely replicated.
+    - `Locally-redundant storage (LRS)`
+      - Write is only successful until replicated 3x in same data center.
+      - Least expensive.
+    - `Geo-redundant storage (GRS)`
+      - Write is only successful until replicated 3x in same data center; then data is replicated in a separate data center.
+    - `Read-access geo-redundant storage (RA-GRS)`
+      - Write is only successful until replicated 3x in same data center; then data is replicated in a separate data center, and data can be read from the second data center (e.g., for failover while the primary is still operational).
+      - Most expensive.
+    - `Access tier`
+      - `Hot`
+        - Expensive storage, cheap access costs
+      - `Cool`
+        - Cheaper storage, higher access costs
+      - `Archive`
+        - Very cheap storage; high access costs
+    - `Secure transfer required`
+    - `Subscription`
+    - `Resource group`
+- For estimating cost: [Pricing Calculator](https://azure.microsoft.com/en-US/pricing/calculator)
 
-### [Summary]()
+### [Managing Storage with Storage Explorer](https://app.pluralsight.com/course-player?clipId=400d59fa-ac26-4c21-b5c6-19451174e94d)
+
+- Storage account > `Overview` blade
+  - Blob storage > `Blob service endpoint`
+    - Need to create a container in order to store data.
+    - Probably want `Private (no anonymous access)`
+      - If referencing publicly-accessible content, use `Blob (anonymous read access for blobs only)` (or can grant to entire container)
+    - Can upload via portal or CLI.
+- Download [Azure Storage Explorer](https://azure.microsoft.com/en-us/features/storage-explorer/))
+  - Add account, select subscription (or can connect if given a connection string)
+  - Can view Cosmos DB
+
+### [Uploading a Blob from NodeJS](https://app.pluralsight.com/course-player?clipId=cb3f8a39-a33e-4c3c-ad59-4728ae302bd9)
+
+```sh
+npm install azure-storage uuid
+```
+
+```js
+// router code elsewhere
+
+var azure = require('azure-storage);
+var uuid = require('uuis/v1');
+
+// Get connection string from portal > storage account blade > access keys
+var connection = 'connection-string-data';
+var blobService = azure.createBlobService(connection);
+
+var saveImage = function(stream, size, callback) {
+  var id = uuid();
+
+  blobService.createBlockBlobFromStream("container-name", id, stream, streamSize, err => {
+    callback(err, id);
+  })
+}
+
+// Note that read access must be granted to the blob with a temporary access token.
+var getImageUri = function(imageId) {
+  var url = blobService.getUrl("container-name", imageId)
+  return url;
+}
+
+module.exports = {
+  saveImage: saveImage,
+  getImageUri: getImageUri
+}
+```
+
+### [Generating a Shared Access Signature](https://app.pluralsight.com/course-player?clipId=0338f380-bd17-4d3f-a929-90aa2af854f6)
+
+- Shared Access Signature
+  - Token, giving temporary access to a blob or container for a party
+  - Can create in portal.
+  - Can specify read/write/delete/list/add/create/update/process.
+    - Signed: Azure will reject the token if it's been modified.
+- Can create programmatically
+
+```js
+var getImageUri = function (imageId) {
+  var url = blobService.getUrl('container-name', imageId);
+  var sas = blobService.generateSharedAccessSignature(
+    'container-name',
+    imageId,
+    {
+      AccessPolicy: {
+        Permissions: azure.BlobUtilities.SharedAccessPermissions.READ,
+        Start: azure.date.minutesFromNow(-15),
+        End: azure.date.minutesFromNow(30),
+      },
+    },
+  );
+  // Add the access token as a query parameter.
+  return `${url}?${sas}`;
+};
+```
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=48b8282c-eead-4672-ad8f-666a75fec92f)
 
 ## Functions
 
