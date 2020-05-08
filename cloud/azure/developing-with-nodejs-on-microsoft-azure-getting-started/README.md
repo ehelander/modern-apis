@@ -297,25 +297,117 @@
 
 ## Using Cloud Databases
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=27d79a90-0ff3-4a31-a1d0-7546fb2e1dda)
 
-### [Databases in the Cloud]()
+### [Databases in the Cloud](https://app.pluralsight.com/course-player?clipId=05776de9-bf03-4fa2-9e5d-c2db98eeb648)
 
-### [Creating and Scaling an Azure SQL Database]()
+- `Azure SQL Database`
+  - RDBMS
+  - Adaptively tunes performance.
+  - Can work with SQL Server locally.
+- `Cosmos DB Database`
+  - Document-oriented database
+  - MongoDB-compatible API
 
-### [Connecting and Configuring an Azure SQL Database]()
+### [Creating and Scaling an Azure SQL Database](https://app.pluralsight.com/course-player?clipId=60615205-ba86-4c03-8bc6-9f638f7ab250)
 
-### [Reading and Writing Data to Azure SQL from NodeJS]()
+- `Home` > `SQL databases` > `SQL Database`
+  - `Database name`
+  - `Subscription`
+  - `Resource group`
+  - `Select source`
+    - `Blank`, `Adventureworks`, backup
+  - `Server`
+  - `SQL elastic pool`
+    - Effective way to scale processing when dealing with multiple databases
+  - `Pricing tier`
+    - Database size
+    - DTUs: Database Throughput Unit
+- A logical server needs to be associated with the database(s).
 
-### [Creating a Cosmos DB Account]()
+### [Connecting and Configuring an Azure SQL Database](https://app.pluralsight.com/course-player?clipId=e3bb2406-b6a6-4cb5-81a3-4194b1b1ec8d)
 
-### [Creating and Scaling a Cosmos DB Collection]()
+- `Home` > `SQL databases` > database
+  - Can see DTU usage
+  - Transparent data encryption
+  - Automatic tuning
+  - Threat detection
+  - Geo-replication
+- Ways to connect:
+  - Most tools that work with SQL Server or ODBC
+  - Portal query editor
+  - VS Code extension: `mssql`
+    - Click on `Disconnected` on bottom right &rarr; set up database connection.
+    - Can right click, `Execute query`
+- Note that firewall only allows access from within Azure. In `Firewall settings`, can `Add client IP`.
 
-### [Reading and Writing Documents with Cosmos DB and NodeJS]()
+### [Reading and Writing Data to Azure SQL from NodeJS](https://app.pluralsight.com/course-player?clipId=c87e28a6-9bd8-44f9-aad9-44d6133ac124)
 
-### [Monitoring Cosmos DB]()
+```sh
+npm install tedious
+```
 
-### [Summary]()
+```js
+var Connection = tedious.Connection;
+var Request = tedious.Request;
+var config = {
+  // Connection info
+};
+```
+
+### [Creating a Cosmos DB Account](https://app.pluralsight.com/course-player?clipId=6c6d7b71-b8dc-42e0-ace4-2e106193f98f)
+
+- Original name: Document DB
+- `Home` > `Azure Cosmos DB` > `Add`
+  - `ID`
+  - `API`
+    - SQL
+    - MongoDB
+    - Cassandra
+    - Azure Table
+    - Gremlin (graph)
+  - `Subscription`
+  - `Resource group`
+  - `Location`
+  - `Enable geo-redundancy`
+
+### [Creating and Scaling a Cosmos DB Collection](https://app.pluralsight.com/course-player?clipId=b53b3ee9-bbc5-494e-848c-f6a1e63ca991)
+
+- `Home` > `Azure Cosmos DB` > Cosmos account
+  - `Add Collection`
+    - Can create new database
+    - Consider segregating less-frequently-used items in tables with lower provisioned resources to save cost.
+    - 1 RU: Fetching 1 KB over HTTP
+    - Can specify unique keys
+
+### [Reading and Writing Documents with Cosmos DB and NodeJS](https://app.pluralsight.com/course-player?clipId=66d38527-3501-4bbb-93e9-044450ffeb68)
+
+- Everything with Cosmos DB is based on HTTP messaging.
+
+```sh
+npm install documentdb
+```
+
+```js
+var docdb = require('documentdb');
+var config = {
+  // Configuration info
+};
+var client = new docdb.DocumentClient(config.host, config.auth);
+client.createDocument(/* ... */);
+client.queryDocuments(/* ... */); // Returns a query iterator; can call .toArray() on it.
+```
+
+### [Monitoring Cosmos DB](https://app.pluralsight.com/course-player?clipId=c29adb36-82e5-423c-8b8d-2a3a2387440b)
+
+- Note that Cosmos DB has
+  - Stored Procedures (implemented in JavaScript)
+  - User Defined Functions
+  - Triggers
+- `Home` > `Azure Cosmos DB` > `Overview`
+  - Note that `429`s indicate that insufficient RUs are provisioned.
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=1bed435a-294b-43a5-836f-2cc40d0d2c4e)
 
 ## Cloud Storage
 
