@@ -25,31 +25,31 @@
 
 ### [Creating Your First Virtual Machine](https://app.pluralsight.com/course-player?clipId=17a939d4-1474-460a-9d2d-e312c58b5612)
 
-- Resources > Virtual machines
+- `Resources` > `Virtual machines`
   - Select image
     - E.g., Ubuntu Server
-    - Deployment model: Use Resource Manager (vs. Classic)
+    - Deployment model: Use `Resource Manager` (vs. `Classic`)
 
 ### [Configuring Your Virtual Machine](https://app.pluralsight.com/course-player?clipId=69b1191e-964e-4880-8362-a6cc34034318)
 
 - Configure basic settings
-  - Name
-  - VM disk type
+  - `Name`
+  - `VM disk type`
     - Options
-      - SSD
-      - HDD (cheaper, slower)
-  - User Name
-  - Authentication
+      - `SSD`
+      - `HDD` (cheaper, slower)
+  - `User Name`
+  - `Authentication`
     - Options
-      - SSH public key
+      - `SSH public key`
         - E.g., via `ssh-keygen`
           - Public key: `.ssh/id_rsa.pub` (start copying at `ssh-rsa` through end of key)
-      - Password
-  - Subscription
+      - `Password`
+  - `Subscription`
     - Subscriptions can use different credit cards (e.g., for separating clients)
-  - Resource group
+  - `Resource group`
     - A logical container for resources that simplifies management.
-  - Location
+  - `Location`
 - Choose virtual machine size
   - Can always scale up/down.
   - VMs are classified into series.
@@ -126,24 +126,24 @@
 
 ### [Introducing Azure App Services](https://app.pluralsight.com/course-player?clipId=3e388c56-6e1b-4106-a221-2bc7db3ffc0e)
 
-- App Services
+- `App Services`
   - Where you want to go to build a web app or web API
 
 ### [Creating an App Service](https://app.pluralsight.com/course-player?clipId=b09e09a9-102b-440b-aef3-6a3452cb0de1)
 
 - Create an app service in the portal
-  - App services
-    - Add
-    - Starting configuration
+  - `App Services`
+    - `Add`
+    - `Starting configuration`
       - E.g. Wordpress, Node.js empty web app
       - Or empty web app
-    - App name
+    - `App name`
       - Must be unique in the domain (`.azurewebsite.net`)
       - Can select operating system
         - Not much configuration to do.
-      - App service plan
+      - `App service plan`
         - See below
-      - Runtime stack (for Linux)
+      - `Runtime stack` (for Linux)
         - E.g., Node.js
       - Can build in a container also.
 
@@ -185,8 +185,8 @@
 - Prework: `nmp install -g express-generator`
 - Can set up a Git repo that lives inside the app service.
 - App service blade
-  - Deployment credentials
-  - Deployment options
+  - `Deployment credentials`
+  - `Deployment options`
     - Source
       - Local, Bitbucket, Github
     - Back on app service blade, note Git clone URL (`https://<app-service-name>.scm.azurewebsites.net:443`)
@@ -199,23 +199,101 @@
 
 ## Monitoring & Scaling Web Applications and APIs
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=6f77eb1f-bd1c-4163-bb08-850e45a7f799)
 
-### [Deployment Slots]()
+### [Deployment Slots](https://app.pluralsight.com/course-player?clipId=4472d2e8-ea42-4e5a-9121-b27b8c1ee732)
 
-### [Creating and Deploying Using a Deployment Slot]()
+- Deployment slots allow verifying that an application is working as expected before deploying to production.
+  - E.g., `QA`, `Staging`, `Production`
+- Swapping slots is easy, such as for zero-downtime deployments.
 
-### [Monitoring Your Application]()
+### [Creating and Deploying Using a Deployment Slot](https://app.pluralsight.com/course-player?clipId=12c3d2e7-337e-452f-8062-1862271f02cd)
 
-### [Creating Alerts for your Application]()
+- Portal > `App Services` > App blade service
+  - Could select a differnet tuntime stack, etc.
+  - Application settings
+    - Key-value pairs for environment variables (accessible by `process.env.<name>`)
+      - `Slot setting` makes it sticky: when swapping, these settings don't move.
+  - Deployment slots
+    - Add a slot
+- Or, via CLI:
 
-### [Scaling Your Application]()
+  ```sh
+  az webapp deployment slot create
+  ```
 
-### [Monitoring and Debugging with Application Insights]()
+- Convention: Take name of app service and append it with a `-` and a deployment slot type (e.g., `name-staging`).
+  - This effectively creates a new sub-app service.
+  - And then can add a new Git remote to deploy to the new slot.
+- Then can swap via portal (in deployment slots) or via CLI: `az webapp deployment slot swap -g <resrouce-group> -n <app-service-name> --slot <slot-name> --target-slot <target-slot-name>`
 
-### [Using Project Kudu]()
+### [Monitoring Your Application](https://app.pluralsight.com/course-player?clipId=c0b958dd-97b4-45a9-a3e3-3be05fb3ac4b)
 
-### [Summary]()
+- App service blade > `Overview` blade
+  - Can see errors, data coming in, data going out, request count, response time
+  - Can pin any to dashboard or modify charts.
+- `All services` > Monitor
+  - `Metrics` > resource
+
+### [Creating Alerts for your Application](https://app.pluralsight.com/course-player?clipId=eea82901-e340-4209-ba03-17aa1b64f5cb)
+
+- `All services` > `Monitor` > `Alerts`
+  - Could also create an alert from an app service.
+  - At tht time of this video, alerts classic was more appropriate for app services.
+  - 2 types
+    - `Metric alert`
+      - Errors, usage, etc.
+    - `Activity log alerts`
+      - When someone takes an action against a resource
+  - Can alert roles:
+    - Owners, contributors, readers.
+
+### [Scaling Your Application](https://app.pluralsight.com/course-player?clipId=cd246ec8-edcf-4792-a91e-f6ac3e76a85c)
+
+- Scaling in the portal
+  - App service blade > `Scale up (App Service plan)` or `Scale out (App Service plan)`
+  - Can `Enable autoscale`
+    - Can add conditions
+
+### [Monitoring and Debugging with Application Insights](https://app.pluralsight.com/course-player?clipId=071ab651-6233-48a6-9180-0c1337e40452)
+
+- `App Services` > `Monitoring`
+  - `Docker Container logging`
+    - Need `Quota`
+- `Application Insights`
+
+  - Performance management service
+    - Highly recommended. Cost when logging more than 2 GB (as of course date).
+  - Can use existing resource or create new
+  - Can query API with HTTP calls
+  - To start recording:
+
+    - In application, `npm install applicationinsights`
+    - Then in `app.js` near the top:
+
+      ```js
+      var appInsights = require('applicationinsights');
+      // Copy Instrumentation Key from portal and paste
+      appInsights.setup('some-guid');
+      appInsights.start();
+      ```
+
+    - Will log unhandled exceptions, etc.
+    - To log exceptions in production: In an error handler:
+
+      ```js
+      appInsights.defaultClient.trackException({ exception: err });
+      ```
+
+  - `Metrics Explorer`
+
+### [Using Project Kudu](https://app.pluralsight.com/course-player?clipId=4e38075c-6f9f-471f-981c-d99055b69123)
+
+- App service > `Advanced Tools` > `Go`
+  - Project Kudu
+  - Can SSH into server
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=b51df91b-3449-45b8-8818-a1ae7cd06c47)
 
 ## Using Cloud Databases
 
