@@ -11,36 +11,36 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/sessions")
 public class SessionsController {
-    @Autowired
-    private SessionRepository sessionRepository;
+  @Autowired private SessionRepository sessionRepository;
 
-    @GetMapping
-    public List<Session> list() {
-        return sessionRepository.findAll();
-    }
+  @GetMapping
+  public List<Session> list() {
+    return sessionRepository.findAll();
+  }
 
-    @GetMapping
-    @RequestMapping("{id}")
-    public Session get(@PathVariable Long id) {
-        return sessionRepository.getOne(id);
-    }
+  @GetMapping
+  @RequestMapping("{id}")
+  public Session get(@PathVariable Long id) {
+    return sessionRepository.getOne(id);
+  }
 
-    @PostMapping
-    public Session create(@RequestBody final Session session) {
-        return sessionRepository.saveAndFlush(session);
-    }
+  @PostMapping
+  public Session create(@RequestBody final Session session) {
+    return sessionRepository.saveAndFlush(session);
+  }
 
-    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
-    public void delete(@PathVariable Long id) {
-        // TODO: Check for children records before deleting. (Need to handle cascading deletes anytime working with JPA.)
-        sessionRepository.deleteById(id);
-    }
+  @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
+  public void delete(@PathVariable Long id) {
+    // TODO: Check for children records before deleting. (Need to handle cascading deletes anytime
+    // working with JPA.)
+    sessionRepository.deleteById(id);
+  }
 
-    @RequestMapping(value = "{id}", method = RequestMethod.PUT)
-    public Session update(@PathVariable Long id, @RequestBody Session session) {
-        // TODO: Validate that all attributes are passed in. Otherwise, return a 400.
-        Session existingSession = sessionRepository.getOne(id);
-        BeanUtils.copyProperties(session, existingSession, "session_id");
-        return sessionRepository.saveAndFlush(existingSession);
-    }
+  @RequestMapping(value = "{id}", method = RequestMethod.PUT)
+  public Session update(@PathVariable Long id, @RequestBody Session session) {
+    // TODO: Validate that all attributes are passed in. Otherwise, return a 400.
+    Session existingSession = sessionRepository.getOne(id);
+    BeanUtils.copyProperties(session, existingSession, "session_id");
+    return sessionRepository.saveAndFlush(existingSession);
+  }
 }

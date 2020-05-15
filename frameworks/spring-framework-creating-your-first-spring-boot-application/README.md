@@ -1084,6 +1084,7 @@
 
 - DELETE `http://localhost:8080/api/v1/sessions/93` (no children data on the session we just created)
 - Test out speaker endpoints.
+
   - GET `http://localhost:8080/api/v1/speakers`
   - GET `http://localhost:8080/api/v1/speakers/1`
   - POST `http://localhost:8080/api/v1/speakers`
@@ -1116,15 +1117,65 @@
 
 ## Working with Spring Boot Config and Environment Needs
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=59f49a40-9524-4a0a-8669-b40148107641)
 
-### [How to Customize and Override Spring Boot]()
+### [How to Customize and Override Spring Boot](https://app.pluralsight.com/course-player?clipId=de53b447-12bf-4db3-9e7a-c4ed17960192)
 
-### [Demo: Locating and Working with Config Files]()
+- In Spring Boot, there are a dozen ways to set a configuration property value. These are evaluated in an order of precedence.
+  - External sources
+    - Command line parameters
+    - JNDI
+    - OS environment variables
+  - Internal sources (which can then point to external sources)
+    - Servlet parameters
+    - Property files
+    - Java configuration
+- In general (except for Servlet config and Servlet parameters), external property sources override internal property sources.
+  - Suggestion:
+    - Pick 1 internal source to set default values (e.g., application property files)
+    - Pick 1 external source to handle overriding default values (e.g., OS environment variables).
+  - ![property-precedence](2020-05-04-15-05-47.png)
 
-### [Demo: How to Change Database Connections]()
+### [Demo: Locating and Working with Config Files](https://app.pluralsight.com/course-player?clipId=de53b447-12bf-4db3-9e7a-c4ed17960192)
 
-### [Demo: How to Handle Different Environments]()
+- `src/main/resources/application.properties`
+  - These are actually overrides of Spring Boot default properties. See [Common Application Properties](https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html) for more options.
+  - These start out with sensible defaults, but provide the ability to override.
+  - Can see where the defaults come from.
+  - To override `server.port=8080`, add `server.port=5000` (and restart).
+
+### [Demo: How to Change Database Connections](https://app.pluralsight.com/course-player?clipId=b623b18f-3900-4cba-863a-4400271b4494)
+
+- We obviously don't want database connection details hard-coded in the app.
+- Replace values wit placeholders that we'll supply from an external source via environment variables.
+- `src/main/resources/application.properties`
+
+  - Before:
+
+    ```properties
+    spring.datasource.url=jdbc:postgresql://localhost:5432/conference_app
+    ```
+
+  - After:
+
+    ```properties
+    spring.datasource.url=${DB_URL}
+    ```
+
+  - Then add an environment variable in IntelliJ: `Run` menu > `Edit configurations` > ensure current application is selected > `Environment` > `Environment variables:` > dialog > `+`
+    - `Name`: `DB_URL`
+    - `Value`: `jdbc:postgresql://localhost:5432/conference_app`
+    - Produces following `Environment variables:` value: `DB_URL=jdbc:postgresql://localhost:5432/conference_app`
+  - Would do the same for username & password values.
+  - Restart app to apply.
+
+- GET `http://localhost:5000/api/v1/sessions`
+  - `curl http://localhost:5000/api/v1/sessions`
+- To deploy to a different environment, just supply a different environment variable.
+
+### [Demo: How to Handle Different Environments](https://app.pluralsight.com/course-player?clipId=c7979996-87b0-45b8-9854-69b0ff1d6103)
+
+-
 
 ### [Demo: Setting Properties with YAML]()
 
