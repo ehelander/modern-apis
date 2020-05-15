@@ -15,6 +15,7 @@
 - [Spring Framework: Spring Fundamentals](frameworks/spring-framework-spring-fundamentals/)
 - [\*Spring Framework: Creating Your First Spring Boot Application](frameworks/spring-framework-creating-your-first-spring-boot-application/)
 - Spring Framework: Spring Data JPA
+- [\*Gradle Build Tool Fundamentals](frameworks/gradle-build-tool-fundamentals/)
 - [GraphQL: The Big Picture](frameworks/graphql-the-big-picture/)
 - [Building Scalable APIs with GraphQL](frameworks/building-scalable-apis-with-graphql/)
 - \*GraphQL
