@@ -1175,11 +1175,87 @@
 
 ### [Demo: How to Handle Different Environments](https://app.pluralsight.com/course-player?clipId=c7979996-87b0-45b8-9854-69b0ff1d6103)
 
--
+- How can I work with an app locally and then deploy it to different environments?
+  - Spring uses a combination of Spring profiles and profile-specific application property files for this.
+    - Add any profile suffix to the the `application` part of the filename, and Spring will use those properties instead of the default `application.properties` file.
+      - Format:
+        - `application-{profile}.properties`
+      - Example:
+        - `application-dev.properties`
+        - `application-prod.properties`
+  - To activate a profile, the profile must be specified on app startup.
+    - Format:
+      - `-Dspring.profiles.active={profile}`
+    - Example:
+      - `-Dspring.profiles.active=dev`
+        - Spring will look for `application-dev.properties` on the classpath (`src/main/resources`).
+- Create new file `src/main/resources/application-prod.properties`
 
-### [Demo: Setting Properties with YAML]()
+  ```properties
+  logging.level.org=WARN
+  ```
 
-### [Demo: How to Use Spring Properties in Code]()
+- When running the app, note that many `INFO` logs appear. Let's simulate we're in `prod` and only log `WARN`s.
+- Add a VM option: `IntelliJ`> `Run` > `Edit Configuration` > `VM options`: `-Dspring.profiles.active=prod`
+- When rerunning the app, we still see some `INFO` logs because we only set this `WARN` configuration for `.org` packages.
+  - ![loggiing](2020-05-15-10-19-26.png)
+- Cleanup: Remove this run configuration.
+
+### [Demo: Setting Properties with YAML](https://app.pluralsight.com/course-player?clipId=4c40bb7b-4289-4bcb-964e-989e0bfa3941)
+
+- We can use YAML files intsead of properties files (just need to be on classpath and be named appropriately).
+- Add `src/main/resources/application.yml`. Move `server.port=5000` from `application.properties` to `application.yml`
+
+  ```yml
+  server:
+    port: 5000
+  ```
+
+- Even though you can mix & match properties files and YAML files, it's likely best to pick one.
+
+### [Demo: How to Use Spring Properties in Code](https://app.pluralsight.com/course-player?clipId=3ca36e80-aed3-4fde-8d4a-22c4669f34d7)
+
+- We're going to create a custom `app.version` property and a controller to display it when called.
+- In `application.properties`, add `app.version=1.0.0`
+  - A custom property. No correlation to Spring properties.
+- Add new Java class: `src/main/java/com.pluralsight.conferencedemo/controllers/HomeController`
+
+  ```java
+  package com.pluralsight.conferencedemo.controllers;
+
+  import org.springframework.beans.factory.annotation.Value;
+  import org.springframework.web.bind.annotation.GetMapping;
+  import org.springframework.web.bind.annotation.RequestMapping;
+  import org.springframework.web.bind.annotation.RestController;
+
+  import java.util.HashMap;
+  import java.util.Map;
+
+  @RestController
+  public class HomeController {
+      // Inject the custom property we just created.
+      @Value("${app.version}")
+      private String appVersion;
+
+      @GetMapping
+      // Display this at the root of our application.
+      @RequestMapping("/")
+      public Map getStatus() {
+          Map map = new HashMap<String, String>();
+          map.put("app-version", appVersion);
+          // With Jackson as our marshaller, it will automarshall the Map's key-value pairs into JSON.
+          return map;
+      }
+  }
+  ```
+
+- GET `http://localhost:5000/`:
+
+  ```json
+  {
+    "app-version": "1.0.0"
+  }
+  ```
 
 ### [Demo: Overriding Spring Boot with Java Config]()
 
