@@ -1257,11 +1257,49 @@
   }
   ```
 
-### [Demo: Overriding Spring Boot with Java Config]()
+### [Demo: Overriding Spring Boot with Java Config](https://app.pluralsight.com/course-player?clipId=da26986b-3033-4a95-98d0-c04dc3c034ab)
 
-### [Creating Your Own Auto-configuration Class]()
+- Managing configuration wth Java code has been around for a while, but it's still often a (worthwhile) paradigm shift.
+  - Useful if you want to do something more complex:
+    - Log something
+    - Send an email when a transaction occurs
+    - Set up 2-phase transactions
+- Add a new package: `src/main.java/com.pluralsight.conferencedemo.config`
+- Add a new Java class: `src/main.java/com.pluralsight.conferencedemo.config/PersistenceController`:
 
-### [Summary]()
+```java
+package com.pluralsight.conferencedemo.config;
+
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import javax.sql.DataSource;
+
+// Any methods we define in here can return bean definitions that get stored in the Spring context.
+
+// Let Spring know this is a config file.
+@Configuration
+public class PersistenceConfiguration {
+    // Return the data source. Spring looks to see if it already exists; if it does, Spring will replace its definition the one it found.
+    @Bean
+    public DataSource datasource() {
+        DataSourceBuilder builder = DataSourceBuilder.create();
+        builder.url("jdbc:postgresql://localhost:5432/conference_app");
+        // Print on application startup.
+        System.out.println("My custom datasource bean has been initialized and set.");
+        return builder.build();
+    }
+}
+```
+
+### [Creating Your Own Auto-configuration Class](https://app.pluralsight.com/course-player?clipId=c0602afd-e594-4df0-a42b-afa6e939b2fc)
+
+- Auto-configuration classes are useful for providing common functionality (reusable util/helper classes via JAR files) across teams and organizations.
+  - Example: Configure a JDBC connection if the driver is present; otherwise, do nothing.
+- ![auto-configuration](2020-05-15-11-06-41.png)
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=ecba6494-2873-47de-a652-156da79f6196)
 
 ## Deploying Spring Boot Applications
 
