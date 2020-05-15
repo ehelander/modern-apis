@@ -1303,20 +1303,127 @@ public class PersistenceConfiguration {
 
 ## Deploying Spring Boot Applications
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=4f7d04a8-6df8-47ba-9bde-99cef22c6cdf)
 
-### [Spring Boot Containerless Architecture]()
+### [Spring Boot Containerless Architecture](https://app.pluralsight.com/course-player?clipId=abcb049f-3546-42c7-b748-e93dac0ef5df)
 
-### [Demo: Switching out the Spring Boot Embedded Container]()
+- With Spring Boot, apps are stand-alone.
+  - Instead of needing to deploy to a container (e.g., Tomcat, Glassfish, Websphere), Spring has embedded a container inside the framework.
+  - Default container: Tomcat
+    - Could use Jetty or Undertow
 
-### [Demo: Creating Executable JAR Deployments]()
+### [Demo: Switching out the Spring Boot Embedded Container](https://app.pluralsight.com/course-player?clipId=0f12ee0c-ae19-4274-9a7b-11b19b000c78)
 
-### [Common Cloud Supported Platforms]()
+- Switching out the default container:
+- In `pom.xml`
+  - `spring-boot-starter-web` brings in Tomcat.
+    - So we would first exclude Tomcat by adding the following to the `spring-boot-starter-web` dependency:
 
-### [Demo: Deploying Spring Boot to the Cloud]()
+```xml
+<exclusions>
+  <!-- Exclude the Tomcat dependency -->
+  <exclusion>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-tomcat</artifactId>
+  </exclusion>
+</exclusions>
+```
 
-### [What About WAR Deployments?]()
+- Bring in the new dependency
 
-### [Demo: Creating a Spring Boot  WAR Deployment]()
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-jetty</artifactId>
+</dependency>
+```
 
-### [Summary]()
+- Refresh Maven imports.
+- Now if we start the application, we are using Jetty.
+
+### [Demo: Creating Executable JAR Deployments](https://app.pluralsight.com/course-player?clipId=ee9a4fee-1ae8-46a4-b7b4-ced9f48e2c4f)
+
+- Packaging your app so you can run it outside of an IDE via a standalone JAR file.
+
+  - 2 ways
+
+    - Utilize Maven to create JAR files.
+
+      - IntelliJ > Maven popout > Execute Maven Goal > mvn package
+
+        - Maven places JAR file in `target` folder: `conference-demo-0.0.1-SNAPSHOT.jar`
+        - To run the application with the Java command (in any environment that has Java installed):
+
+          - Ensure app is not running in IDE.
+          - In terminal:
+
+            ```sh
+            cd target/
+            java -jar conference-demo.0.0.1-SNAPSHOT.jar
+            ```
+
+    - Create a standalone executable JAR file.
+
+      - In `pom.xml`, add a `configuration` to `spring-boot-maven-plugin`:
+
+        ```xml
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                  <executable>true</executable>
+                </configuration>
+              </plugin>
+            </plugins>
+          </build>
+        ```
+
+        - Import changes.
+        - Run Maven package again.
+        - In terminal:
+
+          ```sh
+          cd target
+          # On Unix/Linux/Mac systems, the JAR is executable:
+          ./conference-demo.0.0.1-SNAPSHOT.jar
+          ```
+
+### [Common Cloud Supported Platforms](https://app.pluralsight.com/course-player?clipId=e7eee6e1-fdc2-4e70-b232-2419387a900c)
+
+- Common Spring Boot cloud platforms
+  - Cloud Foundry
+  - Heroku
+  - Google Cloud
+  - Amazon Web Services
+  - Microsoft Azure
+- The standalone JAR file remains the same.
+  - Some configuration details differ.
+  - For logging, often best to use a centralized logging service.
+  - Need to deal with firewall & security.
+- Could Dockerize the app.
+  - Flexibility & portability.
+
+### [Demo: Deploying Spring Boot to the Cloud](https://app.pluralsight.com/course-player?clipId=6080ebda-fc11-49c5-a457-4ff07ab77b02)
+
+- Note: We had hard-coded a database URL. Remove this.
+
+### [What About WAR Deployments?](https://app.pluralsight.com/course-player?clipId=62885da4-bc73-4d2c-9671-ee85cad6c2fc)
+
+- Need to modify `pom.xml` in order to create a WAR file and tell Maven to create a WAR instead of a JAR.
+
+### [Demo: Creating a Spring Boot WAR Deployment](https://app.pluralsight.com/course-player?clipId=56826080-17fc-4ee6-920d-ae8f1db98586)
+
+- Need to flag embedded containers as `<scope>provided</scope>.
+- And add `<packaging>war</packaging>`.
+- One small Java change
+  - In `ConferenceDemoApplication.java`, make it extend `SpringBootServletInitializer`
+    - This class provides info for adding a context, `web.xml` file, etc.
+- Note Test error when trying to create a package:
+  - The tests are not getting supplied the `DB_URL` environment variable. It also wouldn't be available if we deployed to a Tomcat container.
+  - So, for now, re-enable the bean that's hard-coding the URL. (Though we'd supply this from some external source.)
+  - Build. We now have a `.war` file.
+    - Then we'd paste it in a `webapps` folder in a Tomcat server. The context is the name of the folder we just deployed.
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=59854961-5d29-4bb6-a57b-0aeef9178a86)
