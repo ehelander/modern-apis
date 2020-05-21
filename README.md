@@ -33,6 +33,7 @@
 
 ## Languages
 
+- [Java Fundamentals: The Java Language](languages/java/java-fundamentals-the-java-language)
 - [\*Golang](languages/golang/)
 
 ## Testing Frameworks
