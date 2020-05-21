@@ -46,7 +46,43 @@
 | SDK Manager (`curl -s "https://get.sdkman.io" | bash`) | \*nix (or Cygwin for Windows) |
 | Homebrew                                               | Mac                           |
 
-### [Running Gradle for the First TIme]()
+### [Running Gradle for the First Time](https://app.pluralsight.com/course-player?clipId=78eae5f1-3a44-41c2-8e28-c9643c3d5144)
+
+- The first thing we have to do with Gradle it to create a build script.
+
+  - 2 DSL options:
+    - Groovy
+      - Traditional.
+      - Supported everywhere.
+    - Kotlin
+      - A typed language, so more IDE help.
+  - A build script defines tasks.
+    - Build, clean, etc.
+  - A build script often contains plugins.
+    - Plugins define many tasks.
+  - We can then run the tasks from the command line or an IDE.
+
+- A simple (Groovy) build file (`build.gradle`):
+
+  ```groovy
+  task 'hello' {
+    doLast {
+      println "Hello Gradle"
+    }
+  }
+  ```
+
+- Tasks have a lifecycle
+  - Configuration phase
+  - Initialization phase
+- When you define a task, 2 methods are provided:
+  - `doFirst`
+  - `doLast`
+- The task above can be run as follows:
+
+  ```sh
+  gradle hello
+  ```
 
 ### [Initial Use of Plugins]()
 
