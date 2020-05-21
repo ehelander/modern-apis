@@ -84,11 +84,140 @@
   gradle hello
   ```
 
-### [Initial Use of Plugins]()
+### [Initial Use of Plugins](https://app.pluralsight.com/course-player?clipId=cb7e2c13-ea1a-4de1-9fcc-25b5a566ac69)
 
-### [Using the Gradle Wrapper]()
+- An even simpler build script (`build.gradle`): Applying a plugin
 
-### [Review]()
+  ```groovy
+  apply plugin: 'java'
+  ```
+
+- Plugins are a way of extending Gradle and introducing tasks to Gradle.
+- So now if we run `gradle tasks` (to see a list of tasks), we receive the following outpu:
+
+  ```txt
+  > Task :tasks
+
+  ------------------------------------------------------------
+  Tasks runnable from root project
+  ------------------------------------------------------------
+
+  Build tasks
+  -----------
+  assemble - Assembles the outputs of this project.
+  build - Assembles and tests this project.
+  buildDependents - Assembles and tests this project and all projects that depend on it.
+  buildNeeded - Assembles and tests this project and all projects it depends on.
+  classes - Assembles main classes.
+  clean - Deletes the build directory.
+  jar - Assembles a jar archive containing the main classes.
+  testClasses - Assembles test classes.
+
+  Build Setup tasks
+  -----------------
+  init - Initializes a new Gradle build.
+  wrapper - Generates Gradle wrapper files.
+
+  Documentation tasks
+  -------------------
+  javadoc - Generates Javadoc API documentation for the main source code.
+
+  Help tasks
+  ----------
+  buildEnvironment - Displays all buildscript dependencies declared in root project 'gradle-build-tool-fundamentals'.
+  components - Displays the components produced by root project 'gradle-build-tool-fundamentals'. [incubating]
+  dependencies - Displays all dependencies declared in root project 'gradle-build-tool-fundamentals'.
+  dependencyInsight - Displays the insight into a specific dependency in root project 'gradle-build-tool-fundamentals'.
+  dependentComponents - Displays the dependent components of components in root project 'gradle-build-tool-fundamentals'. [incubating]
+  help - Displays a help message.
+  model - Displays the configuration model of root project 'gradle-build-tool-fundamentals'. [incubating]
+  outgoingVariants - Displays the outgoing variants of root project 'gradle-build-tool-fundamentals'.
+  projects - Displays the sub-projects of root project 'gradle-build-tool-fundamentals'.
+  properties - Displays the properties of root project 'gradle-build-tool-fundamentals'.
+  tasks - Displays the tasks runnable from root project 'gradle-build-tool-fundamentals'.
+
+  Verification tasks
+  ------------------
+  check - Runs all checks.
+  test - Runs the unit tests.
+
+  Rules
+  -----
+  Pattern: clean<TaskName>: Cleans the output files of a task.
+  Pattern: build<ConfigurationName>: Assembles the artifacts of a configuration.
+  Pattern: upload<ConfigurationName>: Assembles and uploads the artifacts belonging to a configuration.
+
+  To see all tasks and more detail, run gradle tasks --all
+
+  To see more detail about a task, run gradle help --task <task>
+  ```
+
+  - Note the task categories.
+    - Build
+    - Build Step
+    - Documentation
+    - Help
+    - Verification
+
+- By convention, Gradle will look for files in the following:
+  - src/main
+  - src/tests
+- We can now build our Java code by running:
+
+  ```sh
+  gradle build
+  ```
+
+  - Creates classes, a JAR file, and a gradle folder.
+
+- We can run the following to see further information about the other tasks its running (`compileJava`, `jar`, `classes`, etc.):
+
+  ```sh
+  gradle -i build
+  ```
+
+- Multiple plugin syntax options. We can use either in this case.
+
+  ```groovy
+  // Option 1
+  apply plugin: 'java'
+
+  // Option 2
+  plugins {
+    id 'java'
+  }
+  ```
+
+### [Using the Gradle Wrapper](https://app.pluralsight.com/course-player?clipId=d04b4f32-8008-4d66-81fb-ff09d3c310f2)
+
+- The Gradle wrapper is another way of installing Gradle.
+- We can run the Gradle wrapper task.
+
+  ```sh
+  gradle wrapper
+  ```
+
+  - This creates the following:
+    - `gradlew`
+      - Shell script for Unix platforms
+    - `gradlew.bat`
+      - Batch script for Windows platforms.
+    - `gradle/`
+    - `gradle/wrapper`
+    - `gradle/wrapper/gradle-wrapper.jar`
+    - `gradle/wrapper/gradle-wrapper.properties`
+  - Now, instead of running Gradle directly, we can use the wrapper:
+
+    ```sh
+    ./gradlew build
+    ```
+
+    - Downloads a version of Gradle to the local machine.
+    - Then uses that version to execute the code.
+
+- This way, we can specify within the project the exact version of Gradle we want to use.
+
+### [Review](https://app.pluralsight.com/course-player?clipId=99525863-3ebb-4dff-b65e-6bda5d8ac338)
 
 ## Understanding Projects and Tasks
 
