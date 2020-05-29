@@ -233,7 +233,7 @@ public class Sign extends SecurityBase
     public byte[] signData(Signature signature, byte[] bytesToSign)
             throws SignatureException, InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException
     {
-        var pk = loadPrivateKey();
+        PrivateKey pk = loadPrivateKey();
         signature.initSign(pk);
         signature.update(bytesToSign);
         byte[] signedBytes = signature.sign();
