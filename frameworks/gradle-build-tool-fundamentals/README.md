@@ -170,7 +170,7 @@
 
   - Creates classes, a JAR file, and a gradle folder.
 
-- We can run the following to see further information about the other tasks its running (`compileJava`, `jar`, `classes`, etc.):
+- We can run the following to see further information about the other tasks it's running (`compileJava`, `jar`, `classes`, etc.):
 
   ```sh
   gradle -i build
@@ -221,9 +221,100 @@
 
 ## Understanding Projects and Tasks
 
-### [Introduction to Build Files]()
+### [Introduction to Build Files](https://app.pluralsight.com/player?course=gradle-build-tool-fundamentals&author=kevin-jones&name=93f68bdc-25f5-4aab-8f22-ddca35b2842f&clip=0&mode=live)
 
-### [Writing Tasks]()
+- Gradle mostly consists of
+  - Projects
+    - Defined by a build file (`build.gradle` or `build.gradle.kts`.
+    - Optional settings file.
+  - Tasks
+    - Executed as part of a `build.gradle` file.
+- A build has 1 or more projects.
+  - More complex builds will consist of many projects.
+- A project has 1 or more tasks.
+  - Some pre-defined tasks.
+  - Can add tasks directly or indirectly (through plugins).
+- If we create an empty `build.gradle.kts` file and run `gradle tasks`, we see the built-in tasks.
+
+  ```txt
+  > Task :tasks
+
+  ------------------------------------------------------------
+  Tasks runnable from root project
+  ------------------------------------------------------------
+
+  Build Setup tasks
+  -----------------
+  init - Initializes a new Gradle build.
+  wrapper - Generates Gradle wrapper files.
+
+  Help tasks
+  ----------
+  buildEnvironment - Displays all buildscript dependencies declared in root project 'gradle-build-tool-fundamentals'.
+  components - Displays the components produced by root project 'gradle-build-tool-fundamentals'. [incubating]
+  dependencies - Displays all dependencies declared in root project 'gradle-build-tool-fundamentals'.
+  dependencyInsight - Displays the insight into a specific dependency in root project 'gradle-build-tool-fundamentals'.
+  dependentComponents - Displays the dependent components of components in root project 'gradle-build-tool-fundamentals'. [incubating]
+  help - Displays a help message.
+  model - Displays the configuration model of root project 'gradle-build-tool-fundamentals'. [incubating]
+  outgoingVariants - Displays the outgoing variants of root project 'gradle-build-tool-fundamentals'.
+  projects - Displays the sub-projects of root project 'gradle-build-tool-fundamentals'.
+  properties - Displays the properties of root project 'gradle-build-tool-fundamentals'.
+  tasks - Displays the tasks runnable from root project 'gradle-build-tool-fundamentals'.
+  ```
+
+  - 2 types of tasks
+    - Setup
+      - wrapper
+      - init
+        - Allows us to initialize a project in a given runtime environment (e.g., a Java application).
+    - Help
+
+### [Writing Tasks](https://app.pluralsight.com/course-player?clipId=60f4a642-3cfa-4c01-ba88-f141e0747a3a)
+
+- Build phases
+  - Initialization
+    - Gradle looks up which project will be part of this build (e.g., in a multi-project build).
+  - Configuration
+    - Execute the build scripts of all the project that are part of this build.
+  - Execution
+    - Figure out which tasks should be executed (by the task name passed to Gradle via the command line).
+    - Execution phases
+      - `doFirst` closure
+        - Things that execute at the start of the task execution.
+      - `doLast` closure
+        - Things that execute at the end of the task execution.
+      - Can specify conditions also.
+- A simple hello task:
+
+  ```groovy
+  task hello {
+    doFirst {
+      print 'Hello'
+    }
+
+    doLast {
+      println(', World')
+    }
+  }
+  ```
+
+- Then if we run `gradle hello`, it prints `Hello, World`.
+
+  ```kts
+  // Kotlin has a tasks collection.
+  tasks.register("hello") {
+    doFirst {
+      print("Hello")
+    }
+
+    doLast {
+      println(", Gradle")
+    }
+  }
+  ```
+
+- `gradle hello`, &rarr; `Hello, World`.
 
 ### [Dependencies]()
 
