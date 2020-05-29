@@ -503,11 +503,154 @@
     }
     ```
 
-### [Basic Java Projects]()
+### [Basic Java Projects](https://app.pluralsight.com/course-player?clipId=7d018456-6c73-45fd-8f75-5ee39c69fe13)
 
-### [Java Build Tasks]()
+- Working directory: `groovy/jacket/Repository`
+- Starting `build.gradle`:
 
-### [Using Source Sets]()
+  ```groovy
+  plugins {
+      id 'java'
+  }
+  ```
+
+  ```sh
+  # Run build (2 tasks).
+  gradle build
+  # Creates a build directory (and build/libs/Repository.jar).
+
+  # Run clean then build.
+  gradle clean
+  gradle build
+
+  # Same as above (3 tasks).
+  gradle clean build
+
+  # Clean.
+  gradle clean
+  # Print information-level logging.
+  gradle build -i
+  ```
+
+### [Java Build Tasks](https://app.pluralsight.com/course-player?clipId=a1fa6764-a49d-46ca-ab3a-e47edd0a0998)
+
+- Working directory: `groovy/jacket/Repository`
+- To more closely examine the output: `gradle clean && gradle build -i > build.txt`
+  - We ran the build task, which as a bunch of dependent tasks.
+    - :compileJava
+      - Runs
+    - :processResources
+      - Skipped because it has no source files.
+    - :classes
+      - :classes is a lifecycle task. It depends on :compileJava and :processResources, so it forces those other 2 to run.
+      - Skipped because it has no actions
+    - :jar
+      - Part of the java plugin.
+      - The java plugin depends on this. It's the Java-specific task that assembles files together.
+    - :assemble
+      - The java plugin depends on this. It's a general purpose base task that assembles files together.
+      - In this case, :assemble is synonymous with :jar. Skipped because it has no actions.
+    - :compileTestJava
+      - Skipped because there are no test sources to compile.
+    - :processTestResources
+      - Skipped because there are no test resources.
+    - :testClasses
+      - No test classes
+    - :test
+      - No tests to run
+    - :check
+    - :build
+      - Completes
+- Working directory: `kts/jacket/Repository`
+
+  ```kts
+  plugins {
+      java
+  }
+
+  version = "1.0-SNAPSHOT"
+  ```
+
+  - Now running `gradle build` produces `build/libs/Repository-1.0-SNAPSHOT.jar`.
+
+### [Using Source Sets](https://app.pluralsight.com/course-player?clipId=4c4e0a41-2333-4e73-b4ba-28415151e247)
+
+- In `groovy/SecurityTools.Java`, it does not follow a standard format (i.e., no `src/main/`). Instead, the Java files are at `src/com/pluralsight/security`.
+
+  - Starting `build.gradle`:
+
+    ```groovy
+    plugins {
+      id 'java'
+    }
+
+    // Reference local files as dependencies.
+    dependencies {
+      implementation files ('lib/log4j-1.2.8.jar', 'lib/junit-3.8.1.jar', 'lib/jaxb-api-2.3.1.jar')
+    }
+    ```
+
+  - If we run the build task right now, it doens't know where to find the classes.
+  - So we can specify `sourceSets`:
+
+    ```groovy
+    sourceSets {
+      main {
+        java {
+          srcDir 'src'
+        }
+      }
+      test {
+        java {
+          srcDir 'test/src'
+        }
+      }
+    }
+    ```
+
+  - Now if we run `gradle build`, the `:compileJava` task runs and we get the classes in the JAR file.
+  - If we change the `java` plugin to the `application` plugin (which derives from the java plugin) and run `gradle tasks`, there's a new task: `run`.
+
+    - It will treat the Java code as an application, running any main method.
+    - So we have to specify the main class.
+
+    ```groovy
+    // mainClassName is a property brought in by the application plugin
+    mainClassName = 'com.pluralsight.security.Hash'
+    ```
+
+  - So now if we run `gradle run`, it executes that main class.
+
+- Working directory: `kts/SecurityTools.Java`:
+
+  - `build.gradle.kts`:
+
+    ```kts
+    plugins {
+      application
+    }
+
+    sourceSets {
+      main {
+        java {
+          setSrcDirs(listOf("src"))
+        }
+      }
+      test {
+        java {
+          setSrcDirs(listOf("test/src"))
+        }
+      }
+    }
+
+    application {
+        mainClassName = "com.pluralsight.security.Hash"
+    }
+
+    dependencies {
+      implementation(files ("lib/log4j-1.2.8.jar", "lib/junit-3.8.1.jar", "lib/jaxb-api-2.3.1.jar"))
+    }
+    ```
 
 ### [Extending Java Builds]()
 
