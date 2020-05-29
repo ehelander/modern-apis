@@ -20,9 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="170c87b6-6161-404f-b3d9-8a4ff643c59c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../groovy/SecurityTools.Java/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../groovy/SecurityTools.Java/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/pluralsight/security/Sign.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/pluralsight/security/Sign.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
