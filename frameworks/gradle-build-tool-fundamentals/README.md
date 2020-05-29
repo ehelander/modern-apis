@@ -1,4 +1,4 @@
-# [Gradle Build Tool Fundamentals](https://app.pluralsight.com/library/courses/gradle-build-tool-fundamentals/table-of-contents)
+# [Gradle Build Tool Fundamentals](https://app.pluralsight.com/library/courses/gradle-build-tool-fundamentals/table-of-contents) (2020-04-15, Kevin Jones)
 
 ## Course Overview
 
@@ -459,7 +459,49 @@
 
 ## Building Java and Kotlin Projects
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=fc212c04-24d2-46be-a7af-339a49f8b01c)
+
+- How do we create a build?
+  - We create a build file.
+  - We then apply the appropriate plugin(s).
+  - And then we override tasks and properties as needed.
+- Java plugin
+
+  - Base plugin
+    - `java`
+    - `java-library`
+      - We use this if we're building libraries (vs. applications).
+      - We'll talk about some of the subtleties later, such as specifying the APIs it uses.
+    - `application`
+      - Gives the ability to run the application within Gradle.
+      - Implicitly applies the `distribution` plugin.
+  - The java plugin expects to find source code in standard locations.
+
+    - Can change this using SourceSets.
+    - Standard code layout (same as Maven):
+      - `src/`
+        - `main/`
+          - `java/`
+          - `kotlin/`
+          - `resources/`
+        - `test/`
+          - `java/`
+          - `kotlin/`
+          - `resources/`
+    - If you need to change the structure (to support a non-standard layout), you can use SourceSets.
+
+    ```groovy
+    sourceSets {
+      main {
+        java {
+          srcDir 'src/java'
+        }
+        resources {
+          srcDir 'src/resources'
+        }
+      }
+    }
+    ```
 
 ### [Basic Java Projects]()
 
