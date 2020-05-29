@@ -1,16 +1,87 @@
+Initialized native services in: /Users/ehelander/.gradle/native
+The client will now receive all logging from the daemon (pid: 25225). The daemon log file: /Users/ehelander/.gradle/daemon/6.4.1/daemon-25225.out.log
+Starting 14th build in daemon [uptime: 2 hrs 9 mins 53.981 secs, performance: 99%, non-heap usage: 45% of 268.4 MB]
+Using 12 worker leases.
+Starting Build
+Settings evaluated using settings file '/Users/ehelander/repo/personal/modern-apis/frameworks/gradle-build-tool-fundamentals/groovy/jacket/Repository/settings.gradle'.
+Projects loaded. Root project using build file '/Users/ehelander/repo/personal/modern-apis/frameworks/gradle-build-tool-fundamentals/groovy/jacket/Repository/build.gradle'.
+Included projects: [root project 'Repository']
+
+> Configure project :
+Evaluating root project 'Repository' using build file '/Users/ehelander/repo/personal/modern-apis/frameworks/gradle-build-tool-fundamentals/groovy/jacket/Repository/build.gradle'.
+All projects evaluated.
+Selected primary task 'build' from project :
+Tasks to be executed: [task ':compileJava', task ':processResources', task ':classes', task ':jar', task ':assemble', task ':compileTestJava', task ':processTestResources', task ':testClasses', task ':test', task ':check', task ':build']
+Tasks that were excluded: []
+:compileJava (Thread[Execution worker for ':',5,main]) started.
+
 > Task :compileJava
+Caching disabled for task ':compileJava' because:
+  Build cache is disabled
 Task ':compileJava' is not up-to-date because:
+  Output property 'destinationDirectory' file /Users/ehelander/repo/personal/modern-apis/frameworks/gradle-build-tool-fundamentals/groovy/jacket/Repository/build/classes/java/main has been removed.
+  Output property 'destinationDirectory' file /Users/ehelander/repo/personal/modern-apis/frameworks/gradle-build-tool-fundamentals/groovy/jacket/Repository/build/classes/java/main/com has been removed.
+  Output property 'destinationDirectory' file /Users/ehelander/repo/personal/modern-apis/frameworks/gradle-build-tool-fundamentals/groovy/jacket/Repository/build/classes/java/main/com/pluralsight has been removed.
+The input changes require a full rebuild for incremental task ':compileJava'.
+Full recompilation is required because no incremental change information is available. This is usually caused by clean builds or changing compiler arguments.
+Compiling with JDK Java compiler API.
+Created classpath snapshot for incremental compilation in 0.0 secs.
+:compileJava (Thread[Execution worker for ':',5,main]) completed. Took 0.05 secs.
+:processResources (Thread[Execution worker for ':',5,main]) started.
+
 > Task :processResources NO-SOURCE
 Skipping task ':processResources' as it has no source files and no previous output files.
+:processResources (Thread[Execution worker for ':',5,main]) completed. Took 0.0 secs.
+:classes (Thread[Execution worker for ':',5,main]) started.
+
 > Task :classes
 Skipping task ':classes' as it has no actions.
+:classes (Thread[Execution worker for ':',5,main]) completed. Took 0.0 secs.
+:jar (Thread[Execution worker for ':',5,main]) started.
+
 > Task :jar
+Caching disabled for task ':jar' because:
+  Build cache is disabled
 Task ':jar' is not up-to-date because:
+  Output property 'archiveFile' file /Users/ehelander/repo/personal/modern-apis/frameworks/gradle-build-tool-fundamentals/groovy/jacket/Repository/build/libs/Repository-1.0-SNAPSHOT.jar has been removed.
+file or directory '/Users/ehelander/repo/personal/modern-apis/frameworks/gradle-build-tool-fundamentals/groovy/jacket/Repository/build/resources/main', not found
+:jar (Thread[Execution worker for ':',5,main]) completed. Took 0.006 secs.
+:assemble (Thread[Execution worker for ':',5,main]) started.
+
 > Task :assemble
 Skipping task ':assemble' as it has no actions.
+:assemble (Thread[Execution worker for ':',5,main]) completed. Took 0.0 secs.
+:compileTestJava (Thread[Execution worker for ':',5,main]) started.
+
 > Task :compileTestJava NO-SOURCE
+Skipping task ':compileTestJava' as it has no source files and no previous output files.
+:compileTestJava (Thread[Execution worker for ':',5,main]) completed. Took 0.003 secs.
+:processTestResources (Thread[Execution worker for ':',5,main]) started.
+
 > Task :processTestResources NO-SOURCE
+Skipping task ':processTestResources' as it has no source files and no previous output files.
+:processTestResources (Thread[Execution worker for ':',5,main]) completed. Took 0.0 secs.
+:testClasses (Thread[Execution worker for ':',5,main]) started.
+
 > Task :testClasses UP-TO-DATE
+Skipping task ':testClasses' as it has no actions.
+:testClasses (Thread[Execution worker for ':',5,main]) completed. Took 0.0 secs.
+:test (Thread[Execution worker for ':',5,main]) started.
+
 > Task :test NO-SOURCE
+file or directory '/Users/ehelander/repo/personal/modern-apis/frameworks/gradle-build-tool-fundamentals/groovy/jacket/Repository/build/classes/java/test', not found
+Skipping task ':test' as it has no source files and no previous output files.
+:test (Thread[Execution worker for ':',5,main]) completed. Took 0.001 secs.
+:check (Thread[Execution worker for ':',5,main]) started.
+
 > Task :check UP-TO-DATE
+Skipping task ':check' as it has no actions.
+:check (Thread[Execution worker for ':',5,main]) completed. Took 0.0 secs.
+:build (Thread[Daemon worker Thread 8,5,main]) started.
+
 > Task :build
+Skipping task ':build' as it has no actions.
+:build (Thread[Daemon worker Thread 8,5,main]) completed. Took 0.0 secs.
+
+BUILD SUCCESSFUL in 598ms
+2 actionable tasks: 2 executed
