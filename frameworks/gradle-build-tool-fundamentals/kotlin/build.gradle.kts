@@ -1,9 +1,4 @@
-tasks.register("hello") {
-  doFirst {
-    print("Hello")
-  }
-
-  doLast {
-    println(", Gradle")
-  }
+plugins {
+  java
+  id("org.flywaydb.flyway") version "6.3.2"
 }

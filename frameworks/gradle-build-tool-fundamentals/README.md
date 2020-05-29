@@ -314,13 +314,148 @@
   }
   ```
 
-- `gradle hello`, &rarr; `Hello, World`.
+- Run `gradle hello`, &rarr; `Hello, Gradle`.
 
-### [Dependencies]()
+### [Dependencies](https://app.pluralsight.com/course-player?clipId=e2ac148e-8fde-4053-a587-86f945ff267e)
 
-### [Adding Plugins]()
+- Tasks can have dependencies (and these dependencies can have dependencies).
 
-### [Review]()
+  - So we can have a hierarchy of dependencies.
+
+- With Kotlin:
+
+  ```kts
+  tasks.register("hello") {
+    doLast {
+      println("Hello, ")
+    }
+  }
+
+  tasks.register("world") {
+    doLast {
+      println(" World")
+    }
+  }
+  ```
+
+  - Running `gradle world` prints `World`.
+
+  ```kts
+  tasks.register("hello") {
+    doLast {
+      println("Hello, ")
+    }
+  }
+
+  tasks.register("world") {
+
+    dependsOn("hello")
+
+    doLast {
+      println(" World")
+    }
+  }
+  ```
+
+  - Now, running `gradle world` prints `Hello,` and `World`.
+
+- With Groovy:
+
+  ```groovy
+  task hello {
+    doLast {
+      println 'Hello, '
+    }
+  }
+
+  task world {
+
+    dependsOn hello
+
+    doLast {
+      println(' World')
+    }
+  }
+  ```
+
+- Note that `doFirst` and `doLast` execute within each task.
+
+  ```kts
+  tasks.register("hello") {
+    doFirst {
+      println("Hel")
+    }
+
+    doLast {
+      println("lo, ")
+    }
+  }
+
+  tasks.register("world") {
+
+    dependsOn("hello")
+
+    doFirst {
+      println(" Wo")
+    }
+
+    doLast {
+      println("rld")
+    }
+  }
+  ```
+
+  ```txt
+  > Task :hello
+  Hel
+  lo,
+
+  > Task :world
+  Wo
+  rld
+  ```
+
+### [Adding Plugins](https://app.pluralsight.com/course-player?clipId=295e944e-e172-4460-8ee6-48232f98e133)
+
+- A plugin extends the project's capabilities in some way.
+- Kotlin
+
+  ```kts
+  plugins { java }
+  ```
+
+- Groovy
+
+  ```groovy
+  // Option 1
+  plugins { id 'java' } // preferred
+
+  // Option 2
+  apply plugin: 'java'
+  ```
+
+- Java is a well-known tool, so we don't need to provide any further information about it.
+- But what if we wanted to use a community plugin that we can't simply add by name (i.e., where we have to supply a version)?
+
+  - Then we need the fully-qualified name of the plugin and the version.
+
+  ```groovy
+  plugins {
+    id 'java'
+    id "org.flywaydb.flyway" version "6.3.2"
+  }
+  ```
+
+  ```kts
+  plugins {
+    java
+    id("org.flywaydb.flyway") version "6.3.2"
+  }
+  ```
+
+  - Now if we run `gradle tasks`, it will try to download all the dependencies and plugins.
+
+### [Review](https://app.pluralsight.com/course-player?clipId=a0e5f606-9033-492f-bf7f-a1ab19a27856)
 
 ## Building Java and Kotlin Projects
 
