@@ -652,11 +652,87 @@
     }
     ```
 
-### [Extending Java Builds]()
+### [Extending Java Builds](https://app.pluralsight.com/course-player?clipId=265034a9-4cf5-4f4b-9f13-2e8e6de4b3eb)
 
-### [Building Kotlin Code]()
+- The java plugin is highly configurable.
+- Working directory: `groovy/SecurityTools.Java`
 
-### [Review]()
+  - If we're currently running Java 11 but we don't want to use all the facilities of Java 11, we can specify the target Java version in the build file.
+
+    ```groovy
+    // The java block lets us configure the java plugin (and the application plugin).
+    java {
+      sourceCompatibility = JavaVersion.VERSION_1_8
+      // If targetCompatibility is not set, it defaults to the same version as sourceCompatibility.
+      targetCompatibility = JavaVersion.VERSION_1_1
+    }
+    ```
+
+    - So if we were to use a `var`, for instance, we'd get a build error due to incompatibility with Java 8.
+
+  - We can generate Javadocs via `gradle javadoc`.
+
+    - So now we have `build/docs/javadoc`.
+      - Opening `index.html` pull up the standard Javadocs.
+
+  - We can add `withJavadocJar()` and `withSourcesJar()` so that, when we publish the project, we can publish it with the Javadocs and the sources if we need to.
+
+    ```groovy
+    java {
+      sourceCompatibility = JavaVersion.VERSION_1_8
+      targetCompatibility = JavaVersion.VERSION_1_8
+      withJavadocJar()
+      withSourcesJar()
+    }
+    ```
+
+  - So now `gradle build` produces 3 JAR files in `build/libs`:
+    - `SecurityTools.Java.jar`
+      - Standard JAR file.
+    - `SecurityTools.Java-javadoc.jar`
+      - Javadoc JAR file.
+    - `SecurityTools.Java-sources.jar`
+      - Sources JAR file.
+
+- Working directory: `kts/SecurityTools.Java`
+
+  ```kts
+  plugins {
+    application
+  }
+
+  java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    withJavadocJar()
+    withSourcesJar()
+  }
+
+  sourceSets {
+    main {
+      java {
+        setSrcDirs(listOf("src"))
+      }
+    }
+    test {
+      java {
+        setSrcDirs(listOf("test/src"))
+      }
+    }
+  }
+
+  application {
+      mainClassName = "com.pluralsight.security.Hash"
+  }
+
+  dependencies {
+    implementation(files ("lib/log4j-1.2.8.jar", "lib/junit-3.8.1.jar", "lib/jaxb-api-2.3.1.jar"))
+  }
+  ```
+
+### [Building Kotlin Code](https://app.pluralsight.com/course-player?clipId=8ee20eb5-98c8-4f61-a397-c0deffad4fce)
+
+### [Review](https://app.pluralsight.com/course-player?clipId=1f4d9f3e-3db5-4a2f-9f7b-6d969dd25a0a)
 
 ## Understanding Gradle Dependency Management
 

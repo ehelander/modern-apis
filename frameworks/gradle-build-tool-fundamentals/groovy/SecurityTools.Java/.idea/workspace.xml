@@ -20,18 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="21cbf64a-0c5e-4782-9146-b36094386e73" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/google-java-format.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../kts/SecurityTools.Java/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../kts/SecurityTools.Java/.idea/google-java-format.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../kts/SecurityTools.Java/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../kts/SecurityTools.Java/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../kts/SecurityTools.Java/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../kts/SecurityTools.Java/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../kts/SecurityTools.Java/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../kts/SecurityTools.Java/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../kts/SecurityTools.Java/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../kts/SecurityTools.Java/src/com/pluralsight/security/Sign.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../kts/SecurityTools.Java/src/com/pluralsight/security/Sign.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
