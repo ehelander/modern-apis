@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="c66541d2-e4a2-4cc1-8b74-87821e6dbf1d" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/.idea/google-java-format.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/gradlew.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/lib/jaxb-api-2.3.1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/lib/junit-3.8.1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/lib/log4j-1.2.8.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/src/com/pluralsight/security/Hash.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/src/com/pluralsight/security/Providers.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/src/com/pluralsight/security/SecurityBase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/src/com/pluralsight/security/Sign.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/test/src/com/pluralsight/security/TestCreateStreams.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/test/src/com/pluralsight/security/TestHashRunAndDigestMethod.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/test/src/com/pluralsight/security/TestParseArgs.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/test/src/com/pluralsight/security/TestProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/test/src/com/pluralsight/security/TestReadWriteBytes.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/test/src/com/pluralsight/security/TestResizeArray.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/test/src/com/pluralsight/security/TestSign.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.Java/test/testfiles/.keystore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/lib/jaxb-api-2.3.1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/lib/junit-3.8.1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/lib/log4j-1.2.8.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/src/Hash.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/src/Providers.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/src/SecurityBase.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/src/Sign.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/test/src/com/pluralsight/security/TestCreateStreams.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/test/src/com/pluralsight/security/TestHashRunAndDigestMethod.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/test/src/com/pluralsight/security/TestParseArgs.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/test/src/com/pluralsight/security/TestProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/test/src/com/pluralsight/security/TestReadWriteBytes.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/test/src/com/pluralsight/security/TestResizeArray.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/test/src/com/pluralsight/security/TestSign.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/SecurityTools.kotlin/test/testfiles/.keystore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/jacket/Repository/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/jacket/Repository/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/jacket/Repository/.idea/google-java-format.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../groovy/jacket/Repository/.idea/google-java-format.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/jacket/Repository/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../groovy/jacket/Repository/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/jacket/Repository/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/../../../groovy/jacket/Repository/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/jacket/Repository/build.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/jacket/Repository/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/jacket/Repository/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/jacket/Repository/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../groovy/jacket/Repository/gradlew.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/.idea/google-java-format.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/gradlew.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/lib/jaxb-api-2.3.1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/lib/junit-3.8.1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/lib/log4j-1.2.8.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/src/com/pluralsight/security/Hash.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/src/com/pluralsight/security/Providers.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/src/com/pluralsight/security/SecurityBase.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/src/com/pluralsight/security/Sign.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/test/src/com/pluralsight/security/TestCreateStreams.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/test/src/com/pluralsight/security/TestHashRunAndDigestMethod.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/test/src/com/pluralsight/security/TestParseArgs.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/test/src/com/pluralsight/security/TestProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/test/src/com/pluralsight/security/TestReadWriteBytes.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/test/src/com/pluralsight/security/TestResizeArray.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/test/src/com/pluralsight/security/TestSign.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.Java/test/testfiles/.keystore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/build.gradle.kts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/lib/jaxb-api-2.3.1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/lib/junit-3.8.1.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/lib/log4j-1.2.8.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/src/Hash.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/src/Providers.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/src/SecurityBase.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/src/Sign.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/test/src/com/pluralsight/security/TestCreateStreams.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/test/src/com/pluralsight/security/TestHashRunAndDigestMethod.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/test/src/com/pluralsight/security/TestParseArgs.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/test/src/com/pluralsight/security/TestProperties.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/test/src/com/pluralsight/security/TestReadWriteBytes.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/test/src/com/pluralsight/security/TestResizeArray.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/test/src/com/pluralsight/security/TestSign.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../SecurityTools.kotlin/test/testfiles/.keystore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/google-java-format.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/google-java-format.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../../.." />
+  </component>
+  <component name="ProjectId" id="1cbWJgm1tQSMVDTq91f7Gsyymg2" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="show.unlinked.gradle.project.popup" value="true" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c66541d2-e4a2-4cc1-8b74-87821e6dbf1d" name="Default Changelist" comment="" />
+      <created>1590797702391</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1590797702391</updated>
+    </task>
+    <servers />
+  </component>
+</project>

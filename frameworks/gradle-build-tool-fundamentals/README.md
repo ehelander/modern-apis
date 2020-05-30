@@ -736,17 +736,262 @@
 
 ## Understanding Gradle Dependency Management
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=01dda7a6-307f-46ce-ba38-ea5e3b0e67e2)
 
-### [File-based Repositories]()
+- Projects have dependencies.
+- Dependencies can be satisfied from multiple places:
+  - Other projects
+  - File system
+  - Maven repositories
+  - Ivy repositories (for Gradle)
+- Dependencies can be specified for different configurations:
+  - Compilation
+  - Runtime
+  - Test compilation
+  - Test runtime
+- Dependencies can be cached on the local filesystem.
+- A project may depend on:
+  - Other projects
+  - External libraries
+  - Internal libraries
+- Transitive Dependencies
+  - E.g., Spring Boot depends on many other libraries.
+- We can instruct Gradle to list the dependencies our project uses.
 
-### [Configuration Scopes]()
+  ```sh
+  # List all dependencies.
+  # Note that -q flag is for 'quiet'.
+  gradle -q dependencies
 
-### [Using Remote Repositories]()
+  # List the dependencies for a given configuration.
+  gradle -q dependencies --configuration implementation
+  ```
 
-### [The Gradle Cache]()
+  ```txt
+  ------------------------------------------------------------
+  Root project
+  ------------------------------------------------------------
 
-### [Review]()
+  annotationProcessor - Annotation processors and their dependencies for source set 'main'.
+  No dependencies
+
+  apiElements - API elements for main. (n)
+  No dependencies
+
+  archives - Configuration for archive artifacts. (n)
+  No dependencies
+
+  compileClasspath - Compile classpath for source set 'main'.
+  +--- log4j:log4j:1.2.17
+  \--- javax.xml.bind:jaxb-api:2.3.1
+      \--- javax.activation:javax.activation-api:1.2.0
+
+  compileOnly - Compile only dependencies for source set 'main'. (n)
+  No dependencies
+
+  default - Configuration for default artifacts. (n)
+  No dependencies
+
+  implementation - Implementation only dependencies for source set 'main'. (n)
+  +--- log4j:log4j:1.2.17 (n)
+  \--- javax.xml.bind:jaxb-api:2.3.1 (n)
+
+  runtimeClasspath - Runtime classpath of source set 'main'.
+  +--- log4j:log4j:1.2.17
+  \--- javax.xml.bind:jaxb-api:2.3.1
+      \--- javax.activation:javax.activation-api:1.2.0
+
+  runtimeElements - Elements of runtime for main. (n)
+  No dependencies
+
+  runtimeOnly - Runtime only dependencies for source set 'main'. (n)
+  No dependencies
+
+  testAnnotationProcessor - Annotation processors and their dependencies for source set 'test'.
+  No dependencies
+
+  testCompileClasspath - Compile classpath for source set 'test'.
+  +--- log4j:log4j:1.2.17
+  +--- javax.xml.bind:jaxb-api:2.3.1
+  |    \--- javax.activation:javax.activation-api:1.2.0
+  \--- junit:junit:3.8.1
+
+  testCompileOnly - Compile only dependencies for source set 'test'. (n)
+  No dependencies
+
+  testImplementation - Implementation only dependencies for source set 'test'. (n)
+  \--- junit:junit:3.8.1 (n)
+
+  testRuntimeClasspath - Runtime classpath of source set 'test'.
+  +--- log4j:log4j:1.2.17
+  +--- javax.xml.bind:jaxb-api:2.3.1
+  |    \--- javax.activation:javax.activation-api:1.2.0
+  \--- junit:junit:3.8.1
+
+  testRuntimeOnly - Runtime only dependencies for source set 'test'. (n)
+  No dependencies
+
+  (n) - Not resolved (configuration is not meant to be resolved)
+
+  A web-based, searchable dependency report is available by adding the --scan option.
+  ```
+
+  - We can see that `javax.xml.bind:jaxb-api:2.3.1` transitively depends on `javax.activation:javax.activation-api:1.2.0`.
+
+### [File-based Repositories](https://app.pluralsight.com/course-player?clipId=e48632ff-fa71-4ebd-ae2d-d6549337296b)
+
+- Dependencies are satisfied from repositories
+
+  - Remote
+    - Such as a remote Maven repository.
+  - Local
+    - Essentially a local Maven cache.
+    - Avoid
+  - File system
+
+    - Such as checking in a JAR rather than relying on remote repos.
+
+    ```kts
+    repositories {
+      flatDir {
+        dirs("lib")
+      }
+    }
+    ```
+
+    - So rather than hard-coding the dependencies:
+
+      ```groovy
+      dependencies {
+        implementation files ('lib/log4j-1.2.8.jar', 'lib/jaxb-api-2.3.1.jar')
+        testImplementation files ('lib/junit-3.8.1.jar')
+      }
+      ```
+
+    - We can specify a repository section:
+
+      ```groovy
+      buildscript {
+        ext {
+          log4j_version = '1.2.17'
+        }
+      }
+
+      repositories {
+        flatDir {
+          dirs 'lib'
+        }
+      }
+
+      dependencies {
+        // Syntax option 1:
+        implementation "log4j:log4j:$log4j_version"
+        // Syntax option 2:
+        implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+        testImplementation 'junit:junit:3.8.1'
+      }
+      ```
+
+### [Configuration Scopes](https://app.pluralsight.com/course-player?clipId=e2b039bd-1eb9-4696-9c28-175282fb8ef4)
+
+- When we resolve a dependency, we need to give it a configuration scope:
+  - `implementation`
+    - The main code.
+    - Two parts:
+      - `compileOnly`
+      - `runtimeOnly`
+    - The `implementation` scope covers both of these.
+  - `testImplementation`
+    - `testCompileOnly`
+    - `testRuntimeOnly`
+    - The test scopes derive from the non-test scopes. So any dependencies used for `implementation` are also used for `testImplementation`.
+- Note that Kotlin allows encapsulating version numbers (for instance) in a properties file.
+- Groovy, on the other hand, uses a `buildscript` section where we specify things to do when running the script. `ext` allows us to specify extended properties.
+
+  ```groovy
+  buildscript {
+    ext {
+      log4j_version = '1.2.17'
+    }
+  }
+
+  // ...
+
+  // Note that in Groovy, we can only do string interpolation in double-quoted strings.
+  dependencies {
+    implementation "log4j:log4j:$log4j_version"
+    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
+    testImplementation 'junit:junit:3.8.1'
+  }
+
+  ```
+
+### [Using Remote Repositories](https://app.pluralsight.com/course-player?clipId=7e76b90f-1b5d-4750-a5e4-f934bf319b89)
+
+- Ways of defining remote repositories:
+
+  - Can use well-known names (where we only need to specify the name):
+
+    ```groovy
+    repositories {
+      mavenCentral()
+    }
+
+    repositories {
+      jcenter()
+    }
+    ```
+
+  - We can also specify repositories by URLs:
+
+    ```groovy
+    repositories {
+      url "http://jcenter.bintray.com/"
+    }
+    ```
+
+  - Can specify a custom repository:
+
+    ```groovy
+    repositories {
+      // Use the cache on the local file system. Not recommended.
+      mavenLocal()
+    }
+
+    repositories {
+      maven {
+        url "http://repo.mycompany.com/maven2"
+      }
+    }
+    ```
+
+  - Ivy repositories:
+
+    ```groovy
+    repositories {
+      ivy {
+        url "http://repo.mycompany.com/repo"
+      }
+    }
+    ```
+
+- If we specify multiple repositories, any dependency will be searched in all specified repositories.
+- mavenCentral vs. jcenter is somewhat of a toss-up; it may come down to company standards or personal preference. jcenter is a superset of mavenCentral and has advantages in speed and security.
+- Note that we can see the fully-qualified dependency info at [https://mvnrepository.com/](https://mvnrepository.com/).
+
+### [The Gradle Cache](https://app.pluralsight.com/course-player?clipId=00f302c4-fee5-4e82-8cec-9e1a82b57317)
+
+- Modules are cached.
+  - File-based.
+  - Metadata and files are stored separately.
+  - Repository caches are independent.
+- When we do a build for the first time, it downloads them. On subsequent builds, they don't need to be downloaded.
+- When Gradle stores something in the cache, it takes a hash of the file, which it then compares to determine if a dependency needs to be downloaded.
+- We can ask Gradle to refresh dependencies (such as if the cache had gotten out of sync with the remote repository):
+  - `--refresh-dependencies`
+- We can safely delete cached files (e.g., `~/.gradle/caches`). Gradle will re-download previously-cached files.
+
+### [Review](https://app.pluralsight.com/course-player?clipId=7ee9c509-8c2e-46c1-b5a0-a2a516fee3be)
 
 ## Creating and Managing Multi-project Builds
 
