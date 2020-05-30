@@ -39,15 +39,15 @@
 
 ## Creating a Simple App
 
-### [Introduction]()
+### [Introduction](https://app.pluralsight.com/course-player?clipId=e5c907dc-10c4-4799-8f7a-7855f501fccc)
 
-### [Demo: Creating Your First IntelliJ Project]()
+### [Demo: Creating Your First IntelliJ Project](https://app.pluralsight.com/course-player?clipId=7e4f3268-9649-4891-bfe1-58764e5e11e9)
 
-### [Demo: Running from the Command Line]()
+### [Demo: Running from the Command Line](https://app.pluralsight.com/course-player?clipId=4937cf73-47a0-4ba3-ab08-56bc0646fad5)
 
-### [Statement Structure and Whitespace]()
+### [Statement Structure and Whitespace](https://app.pluralsight.com/course-player?clipId=579dcdc3-9dc9-4bcf-89b1-b0a93365d349)
 
-### [Comments]()
+### [Comments](https://app.pluralsight.com/course-player?clipId=7731e667-d165-4b71-9eed-06d066107f37)
 
 ### [Demo: Comments]()
 
