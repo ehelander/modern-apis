@@ -1,6 +1,6 @@
 # [Spring Boot Fundamentals](https://app.pluralsight.com/library/courses/spring-boot-fundamentals) (Kesha Williams, 2019-07-11)
 
-## Course Overv
+## Course Overview
 
 ### [Course Overview](https://app.pluralsight.com/course-player?clipId=71bb3c32-fe42-4a2c-922a-da46c1c0d413)
 
@@ -62,11 +62,57 @@
 
 ## Bootstrapping a Simple Application
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/course-player?clipId=0dd30120-25aa-44ff-8bea-abcefc5c7f65)
 
-### [Demo: Spring Initializr]()
+### [Demo: Spring Initializr](https://app.pluralsight.com/course-player?clipId=768e405d-4ffd-4855-b1de-abc477ba4349)
 
-### [Demo: Spring Boot CLI]()
+- Spring Initializr: [https://start.spring.io](https://start.spring.io)
+  - Will generate base code and dependencies.
+  - Maven
+  - Java
+  - Group: `com.pluralsight`
+  - Artifact: `fundamentals`
+  - Dependencies
+    - Spring Web Starter
+- Generate Project > Open in IDE
+
+### [Demo: Spring Boot CLI](https://app.pluralsight.com/course-player?clipId=aef75247-2d14-4c7e-910b-a006ae190f9a)
+
+- Can install via Homebrew.
+
+```sh
+# Check version.
+spring --version
+
+# Create a project.
+spring init fundamentals2
+
+# Create a project with dependencies.
+spring init --dependencies=web,data-jpa fundamentals3
+```
+
+- The Spring Boot CLI is self-contained, without needing any external Groovy scripts.
+- But Groovy scripts can be used:
+
+  - `app.groovy`
+
+  ```groovy
+  @RestController
+  class app{
+    @RequestMapping("/")
+    String home() {
+      "Hello Pluralsight!"
+    }
+  }
+  ```
+
+  ```sh
+  spring run app.groovy
+  ```
+
+  ```sh
+  curl http://localhost:8080
+  ```
 
 ### [Demo: Auto Configuration]()
 
