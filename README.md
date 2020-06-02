@@ -14,6 +14,7 @@
 - [Spring: The Big Picture](frameworks/spring-the-big-picture/)
 - [Spring Framework: Spring Fundamentals](frameworks/spring-framework-spring-fundamentals/)
 - [\*Spring Framework: Creating Your First Spring Boot Application](frameworks/spring-framework-creating-your-first-spring-boot-application/)
+- [\*Spring Boot Fundamentals](frameworks/spring-boot-fundamentals/)
 - Spring Framework: Spring Data JPA
 - [\*Gradle Build Tool Fundamentals](frameworks/gradle-build-tool-fundamentals/)
 - [GraphQL: The Big Picture](frameworks/graphql-the-big-picture/)
