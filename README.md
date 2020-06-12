@@ -30,6 +30,11 @@
   - [\*Introduction to Serverless on Azure](cloud/azure/introduction-to-serverless-on-azure/)
   - [Developing with Node.js on Microsoft Azure - Getting Started](cloud/azure/developing-with-nodejs-on-microsoft-azure-getting-started/)
 
+## \*Tools
+
+- [Postman](tools/postman/)
+- [Kibana](tools/kibana/)
+
 ## Data
 
 ## Languages
