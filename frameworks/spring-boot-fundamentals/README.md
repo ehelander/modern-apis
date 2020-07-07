@@ -38,7 +38,7 @@
     - Spring Core
     - Spring Test
   - `spring-boot-starter-data-jpa`
-    - Spring Data JPA with Hibrenate
+    - Spring Data JPA with Hibernate
     - JDBC
     - Entity Manager
     - Transactional API
@@ -46,7 +46,7 @@
     - Aspects
   - `spring-boot-starter-thymeleaf`
 - Command line dependencies
-  - An entire application cna be written with Groovy scripts.
+  - An entire application can be written with Groovy scripts.
   - The CLI is often used for rapid prototyping.
 - Actuator
   - Allows you to see inside the running application.
@@ -114,45 +114,249 @@ spring init --dependencies=web,data-jpa fundamentals3
   curl http://localhost:8080
   ```
 
-### [Demo: Auto Configuration]()
+### [Demo: Auto Configuration](https://app.pluralsight.com/course-player?clipId=2af408ea-79a2-46df-beaa-908c7ba8e9af)
 
-### [Spring Boot Annotations]()
+- Auto-configuration finds JARs on the classpath and auto-configures the beans.
+- Auto-configuration is always applied after user-supplied beans have been configured.
+- Auto-configuration insights:
+  - Start application with `--debug` switch.
+  - Add property to `application.properties`
+    - `logging.legel.org.springframework: DEBUG`
+  - Use Spring Boot Actuator
 
-### [Spring Boot Properties]()
+### [Spring Boot Annotations](https://app.pluralsight.com/course-player?clipId=c6443ea2-f014-4dec-b5bb-5563baf1d2a6)
 
-### [Spring Boot Profiles]()
+- `@SpringBootApplication`
+  - Has to be added to the main application class to indicate it is a Spring Boot application.
+  - Shortcut for 3 annotations:
+    - `@SpringBootConfiguration`
+      - Replaces `@Configuration` and annotates a class as a configuration.
+    - `@EnableAutoConfiguration`
+      - Tells Spring Boot to configure beans.
+    - `@ComponentScan`
+      - Tells Spring Boot to scan current package and subpackages.
 
-### [Summary]()
+### [Spring Boot Properties](https://app.pluralsight.com/course-player?clipId=3a1e843c-757f-4908-8c7b-0fb51fc8fc1f)
+
+- `application.properties`
+- [Common Application properties](https://docs.spring.io/spring-boot/docs/current/reference/html/appendix-application-properties.html)
+
+### [Spring Boot Profiles](https://app.pluralsight.com/course-player?clipId=1e2da449-55c3-46d5-aade-e1109cdea884)
+
+- Profiles are fundamental to the Spring framework for handling multiple environments.
+- `spring.profiles.active` is used to define the current profile.
+  - E.g., `spring.profiles.active = dev`
+- Spring Boot brings profile-specific properties files:
+  - `application-{profile}.properties`
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=cacd630c-29d6-4bd9-984c-dff3ed2d38f4)
 
 ## Accessing Data with Spring Boot and H2
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/course-player?clipId=3bf1296a-8a11-461d-84a8-f65356d9a874)
 
-### [H2 Database]()
+### [H2 Database](https://app.pluralsight.com/course-player?clipId=9ee5374c-df4f-407b-b0de-b39e467c6cc6)
 
-### [ORM with JPA]()
+- H2 is an in-memory database, not recommended for production environments.
+- H2 dependency:
 
-### [Entities]()
+  ```xml
+  <dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+  </dependency>
+  ```
 
-### [Demo: H2 Integration]()
+- H2 defaults:
+
+  ```properties
+  spring.datasource.url=jdbc:h2:mem:testdb
+  spring.datasource.driverClassName=org.h2.Driver
+  spring.datasource.username=sa
+  spring.datasource.password=
+  spring.h2.console.enabled=false
+  ```
+
+- We'll customize it:
+
+  ```properties
+  spring.h2.console.enabled=true
+  spring.h2.console.path=/h2
+  spring.datasource.url=jdbc:h2:mem:bugtracker
+  ```
+
+### [ORM with JPA](https://app.pluralsight.com/course-player?clipId=30deeb6d-5e8e-4794-8ebd-b59ccbfa2921)
+
+- Object Relational Mapping
+- Layers of abstraction:
+  - Persistence layer
+  - Java Database Connectivity (JDBC)
+  - Java Persistence API (JPA)
+  - JPA Implementation (or instance provider), e.g., Hibernate & Spring Data JPA
+- Quick way to get started, including 3 libraries:
+
+  - Hibernate
+  - Spring Data JPA
+  - Spring ORM
+
+  ```xml
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+  </dependency>
+  ```
+
+### [Entities](https://app.pluralsight.com/course-player?clipId=e1c0139d-f15d-4ba6-bfd9-a719d7756b23)
+
+- Entities are objects that live in a database (and can be mapped to a database).
+- Defined by `@Entity`.
+- Traditionally, entity classes were specified in `persistence.xml`. With Spring Boot, this is not necessary due to entity scanning (by default, all below the main application class).
+- Module4
+
+  - Dependencies:
+    - `spring-boot-starter`
+    - `spring-boot-starter-test`
+    - `h2`
+    - `spring-boot-starter-data-jpa`
+  - Trackzilla has 3 domain entities:
+
+    - Application
+
+      ```java
+      package com.pluralsight.entity;
+
+      import javax.persistence.*;
+
+      // Indicates it is a JPA entity. No Table annotation: Assumes it is mapped to an `Application` table.
+      @Entity
+      public class Application {
+
+          // ID
+          @Id
+          // Generate the ID automatically.
+          @GeneratedValue(strategy = GenerationType.AUTO)
+          @Column(name="application_id")
+          private Integer id;
+
+          @Column(name = "app_name", nullable = false)
+          private String name;
+
+          @Column(length = 2000)
+          private String description;
+          private String owner;
+
+          public Application() {
+          }
+
+          public Application(String name, String owner,
+                            String description) {
+              this.name = name;
+              this.owner = owner;
+              this.description = description;
+          }
+
+          // getters & setters
+
+          @Override
+          public String toString() {
+              return "Application{" +
+                      "id=" + id +
+                      ", name='" + name + '\'' +
+                      ", owner=" + owner +
+                      ", description='" + description + '\'' +
+                      '}';
+          }
+      }
+      ```
+
+    - Ticket
+    - Release
+
+  - The Spring Data JPA Repository abstraction greatly reduces the boilerplate code for working with a database.
+  - These 3 repositories are interfaces with no implementation. Spring Boot automatically provides the implementation.
+
+    - `ApplicationRepository`
+
+      ```java
+      package com.pluralsight.repository;
+
+      import com.pluralsight.entity.Application;
+      import org.springframework.data.repository.CrudRepository;
+
+      // We just need to extend `CrudRepository` and pass in the entity class to be managed and the ID of the domain class type.
+      public interface ApplicationRepository extends CrudRepository<Application, Long> {
+      }
+      ```
+
+- Run `FundamentalsApplication`.
+
+### [Demo: H2 Integration](https://app.pluralsight.com/course-player?clipId=2c6732f6-cebb-4d64-bde6-f505005b9789)
 
 ### [Demo: H2 Console]()
+
+- [http://localhost:8080/h2](http://localhost:8080/h2)
 
 ### [Summary]()
 
 ## Configuring a Spring MVC Application with Spring Boot
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/course-player?clipId=cf24786b-537b-481e-b073-4a926f5f55ff)
 
-### [MVC Design Pattern]()
+### [MVC Design Pattern](https://app.pluralsight.com/course-player?clipId=6046e1b4-f770-4f4f-afd9-fd7f975c5b76)
 
-### [Demo: MVC in Action]()
+- Dependency: `spring-boot-starter-web`
+  - Includes:
+    - Dispatcher servlet
+    - Default error page
+    - Servlet container (default: Tomcat)
+    - JARs
+- ![](2020-07-06-20-40-20.png)
+  - Model
+    - The representation of data in the system.
+    - Also known as an entity or domain model.
+  - View
+    - Responsible for displaying data.
+  - Controller
+    - Responsible for directing user requests to the correct resource and sending responses back to the user.
+- TymeLeaf
+  - Fragments allow reusing chunks of code.
 
-### [Packaging and Deployment]()
+### [Demo: MVC in Action](https://app.pluralsight.com/course-player?clipId=6cbbb0aa-7dfc-41c9-a10f-b9d5d985d96b)
 
-### [Demo: Uber Jar]()
+- Module5
+- TzaController
+  - Handles HTTP requests, mapping them to the service layer, which then retrieves data from the repositories.
+  - `@Controller`
+    - Spring will consider this class when handling incoming web requests.
+  - `@GetMapping` provides routing information.
+  - Typically, would add `@EnableWebMvc`; but Spring Boot adds this automatically when it sees the necessary dependencies on the classpath.
+- TymeLeaf `spring-boot-starter-thymeleaf`) is a simple rendering engine that supports serving HTML.
+- `application.properties`
 
-### [Summary]()
+  ```properties
+  # ThymeLeaf
+  spring.thymeleaf.template-loader-path: classpath:/templates
+  spring.thymeleaf.suffix: .html
+  spring.thymeleaf.cache: false
+  ```
+
+- http://localhost:8080/
+  - Uses Bootstrap.
+
+### [Packaging and Deployment](https://app.pluralsight.com/course-player?clipId=60320793-755e-495a-85c7-3fb6ef74099c)
+
+- Spring Boot applications can be packaged as a traditional web application in a `.war` file or an executable `.jar`.
+- Spring Boot Maven Plugin
+  - Repackages `.jar` and `.war` files to make them executable.
+  - Runs Spring Boot application, searching for public static main void.
+  - Manages Spring Boot application lifecycle.
+
+### [Demo: Uber Jar](https://app.pluralsight.com/course-player?clipId=98bf5704-9be1-4a35-80f6-49906aabd262)
+
+- When the app is deployed, it's packaged as an uber JAR with an embedded Tomcat web server.
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=75be2f94-da7e-48a6-8f7b-075b3fa7a253)
 
 ## Building a RESTful Web Application with Spring Boot
 
