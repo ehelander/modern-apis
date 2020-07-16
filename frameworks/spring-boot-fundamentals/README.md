@@ -360,21 +360,106 @@ spring init --dependencies=web,data-jpa fundamentals3
 
 ## Building a RESTful Web Application with Spring Boot
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/player?course=spring-boot-fundamentals&author=kesha-williams&name=aa764da3-7531-4be2-8010-4175cb1dba55&clip=0&mode=live)
 
-### [REST Architecture]()
+### [REST Architecture](https://app.pluralsight.com/course-player?clipId=56b992b5-5212-4322-b37e-6df37c7bf69c)
 
-### [Demo: RESTful Web Application]()
+- 4 principles:
+  - Data and functionality are considered resources and identified via the URI
+  - Resources are manipulated using a fixed set of operations
+  - Resources can be represented in multiple formats
+  - Communication between the client and endpoint is stateless
 
-### [Demo: Testing with cURL]()
+### [Demo: RESTful Web Application](https://app.pluralsight.com/course-player?clipId=db35fd68-193a-4a7b-93a4-bfd6a66ffccf)
 
-### [Response Formats]()
+- Module 6
+- TzaController
+  - `@RestController`
+    - Simplifies creating RESTful web services. It returns object data written as JSON.
+    - A convenience annotation, adding `@Controller` and `@ResponseBody`.
+    - Note that methods cannot return models because of `@ResponseBody`.
+      - So we use `ResponseEntity<T>`.
+        - This represents the entire HTTP response (including a status code, headers, and a response body)
+  - `@RequestMapping`
+    - Maps requests to the correct method.
+  - `@GetMapping`
+    - Specifically handles GET requests to the specified path.
 
-### [Exception Handling]()
+### [Demo: Testing with cURL](https://app.pluralsight.com/course-player?clipId=02ec241e-edd3-440d-b6c3-4154ace9b155)
 
-### [Demo: Exception Handling]()
+- Start Module6
+- `curl http://localhost:8080/tza/applications`
+- `curl http://localhost:8080/tza/application/1`
+- `curl http://localhost:8080/tza/tickets`
 
-### [Summary]()
+### [Response Formats](https://app.pluralsight.com/course-player?clipId=f8ba722e-a989-497d-9a17-94d98e4f9b28)
+
+### [Exception Handling](https://app.pluralsight.com/course-player?clipId=7c0e161e-490c-49c2-89fb-8bce59adcbfb)
+
+- Options for customizing exception handling
+- `ResponseStatusException`
+  - A programmatic alternative to `@ResponseStatus`
+  - Base class for exceptions, used for applying a status code to an HTTP response.
+  - Provide an HttpStatus and an optional reason and cause.
+  - Spring Boot provides a default error mapping.
+
+### [Demo: Exception Handling](https://app.pluralsight.com/course-player?clipId=2a071c82-4733-44b9-8413-3585bbfb70f9)
+
+- `ApplicationNotFoundException`
+
+  ```java
+  package com.pluralsight.exception;
+
+  public class ApplicationNotFoundException extends RuntimeException {
+
+      public ApplicationNotFoundException(String exception) {
+          super(exception);
+      }
+  }
+  ```
+
+- `TzaController`:
+
+  ```java
+      @GetMapping("/application/{id}")
+      public ResponseEntity<Application> getApplication(@PathVariable("id") long id) {
+          try {
+              return new ResponseEntity<Application>(applicationService.findApplication(id), HttpStatus.OK);
+          } catch (ApplicationNotFoundException exception) {
+              throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Application Not Found");
+          }
+      }
+  ```
+
+- `ApplicationServiceImpl`
+
+  ```java
+  @Service
+  public class ApplicationServiceImpl implements ApplicationService {
+      @Autowired
+      private ApplicationRepository applicationRepository;
+
+      @Override
+      public List<Application> listApplications() {
+          return (List<Application>) applicationRepository.findAll();
+      }
+
+      @Override
+      public Application findApplication(long id) {
+          Optional<Application> optionalApplication = applicationRepository.findById(id);
+
+          if(optionalApplication.isPresent())
+              return optionalApplication.get();
+          else
+              throw new ApplicationNotFoundException("Application Not Found");
+      }
+  }
+  ```
+
+- `curl http://localhost:8080/tza/application/123`
+  - `{"timestamp":"2020-07-16T20:23:39.733+0000","status":404,"error":"Not Found","message":"Application Not Found","path":"/tza/application/123"}%`
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=c334c897-6ba1-4ad3-939a-c1ff8dd295ac)
 
 ## Building a GraphQL Server with Spring Boot
 
