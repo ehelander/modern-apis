@@ -463,25 +463,351 @@ spring init --dependencies=web,data-jpa fundamentals3
 
 ## Building a GraphQL Server with Spring Boot
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/course-player?clipId=ace3c7aa-7054-42d0-a98a-485a03cd9e1a)
 
-### [GraphQL Overview]()
+### [GraphQL Overview](https://app.pluralsight.com/course-player?clipId=e7c87484-8ee6-4b69-8517-13995b116921)
 
-### [GraphQL Dependencies]()
+- GraphQL is a query language for APIs, or a syntax that describes how to ask for data.
+- Sample
 
-### [GraphQL Schemas]()
+  - Query
 
-### [Demo: Schemas]()
+    ```graphql
+    {
+      findAllApplications {
+        id
+      }
+    }
+    ```
 
-### [Query Operations]()
+- Response
 
-### [Mutations]()
+  ```json
+  {
+    "data": {
+      "findAllApplications": [{ "id": "1" }, { "id": "2" }]
+    }
+  }
+  ```
 
-### [Exceptions]()
+### [GraphQL Dependencies](https://app.pluralsight.com/course-player?clipId=de59c1ad-b187-4fb6-b4f2-11f4d888f9ca)
 
-### [Demo: GraphiQL]()
+```xml
+<!-- Adds and configures a GraphQL server that you can access at /graphql. Enables POST requests. -->
+<dependency>
+  <groupId>com.graphql-java</groupId>
+  <artifactId>graphql-spring-boot-starter</artifactId>
+  <version>5.0.2</version>
+</dependency>
 
-### [Summary]()
+<!-- Helpful for parsing GraphQL schema. -->
+<dependency>
+  <groupId>com.graphql-java</groupId>
+  <artifactId>graphql-java-tools</artifactId>
+  <version>5.2.4</version>
+</dependency>
+```
+
+### [GraphQL Schemas](https://app.pluralsight.com/course-player?clipId=184f821b-a5f8-4bd9-9d42-bb95bc5d1968)
+
+- For `graphql-java-tools`, schema files must be `.graphqls`
+
+### [Demo: Schemas](https://app.pluralsight.com/course-player?clipId=b3e12c42-b27c-4426-848c-5641384f218f)
+
+- Module7
+- `resources/graphql/application.graphqls`
+
+  ```graphql
+  type Application {
+    id: ID!
+    name: String!
+    owner: String!
+    description: String!
+  }
+
+  type Query {
+    findAllApplications: [Application]!
+    countApplications: Long!
+  }
+
+  type Mutation {
+    newApplication(
+      name: String!
+      owner: String!
+      description: String!
+    ): Application!
+    deleteApplication(id: ID!): Boolean
+    updateApplicationOwner(newOwner: String!, id: ID!): Application!
+  }
+  ```
+
+- `ApplicationRepository`
+
+  ```java
+  package com.pluralsight.repository;
+
+  import com.pluralsight.entity.Application;
+  import org.springframework.data.repository.CrudRepository;
+
+  public interface ApplicationRepository extends CrudRepository<Application, Long> {
+  }
+  ```
+
+- Each file can contain only 1 root `type Query` and `type Mutation`.
+- Every complex type in the GraphQL schema corresponds to a Java object.
+- `Application`
+
+  ```java
+  package com.pluralsight.entity;
+
+  import javax.persistence.*;
+
+  @Entity
+  public class Application {
+
+      @Id
+      @GeneratedValue(strategy = GenerationType.AUTO)
+      @Column(name="application_id")
+      private Long id;
+
+      @Column(name = "app_name", nullable = false)
+      private String name;
+
+      @Column(length = 2000)
+      private String description;
+      private String owner;
+
+      public Application() {
+      }
+
+      public Application(String name, String owner,
+                        String description) {
+          this.name = name;
+          this.owner = owner;
+          this.description = description;
+      }
+
+      public Long getId() {
+          return id;
+      }
+
+      public void setId(Long id) {
+          this.id = id;
+      }
+
+      public String getName() {
+          return name;
+      }
+
+      public void setName(String name) {
+          this.name = name;
+      }
+
+      public String getOwner() {
+          return owner;
+      }
+
+      public void setOwner(String owner) {
+          this.owner = owner;
+      }
+
+      public String getDescription() {
+          return description;
+      }
+
+      public void setDescription(String description) {
+
+          this.description = description;
+      }
+
+      @Override
+      public String toString() {
+          return "Application{" +
+                  "id=" + id +
+                  ", name='" + name + '\'' +
+                  ", owner=" + owner +
+                  ", description='" + description + '\'' +
+                  '}';
+      }
+  }
+  ```
+
+### [Query Operations](https://app.pluralsight.com/course-player?clipId=b37b1197-dcef-4141-882f-004f1a8a18c2)
+
+- First step: Implement a query resolver.
+- `Query`
+
+  ```java
+  package com.pluralsight.resolver;
+
+  import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+  import com.pluralsight.entity.Application;
+  import com.pluralsight.repository.ApplicationRepository;
+  import org.springframework.stereotype.Component;
+
+  @Component
+  public class Query implements GraphQLQueryResolver {
+      private ApplicationRepository applicationRepository;
+
+      public Query(ApplicationRepository applicationRepository) {
+          this.applicationRepository = applicationRepository;
+      }
+
+      public Iterable<Application> findAllApplications() {
+          return applicationRepository.findAll();
+      }
+
+      public long countApplications() {
+          return applicationRepository.count();
+      }
+  }
+  ```
+
+  - Allows Spring to detect/call the correct method based on the queries defined in the schema (`findAllApplications`, `countApplication`)
+
+### [Mutations](https://app.pluralsight.com/course-player?clipId=2872e232-76cf-4bf6-9662-6de5f19ca425)
+
+- `Mutation`
+
+  ```java
+  package com.pluralsight.mutator;
+
+  import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+  import com.pluralsight.entity.Application;
+  import com.pluralsight.exception.ApplicationNotFoundException;
+  import com.pluralsight.repository.ApplicationRepository;
+  import org.springframework.stereotype.Component;
+
+  import java.util.Optional;
+
+  @Component
+  public class Mutation implements GraphQLMutationResolver {
+      private ApplicationRepository applicationRepository;
+
+      public Mutation(ApplicationRepository applicationRepository) {
+          this.applicationRepository = applicationRepository;
+      }
+
+      public Application newApplication(String name, String owner,
+                                        String description) {
+          Application app = new Application(name, owner, description);
+          applicationRepository.save(app);
+          return app;
+      }
+
+      public boolean deleteApplication(Long id) {
+          applicationRepository.deleteById(id);
+          return true;
+      }
+
+      public Application updateApplicationOwner(String newOwner, Long id) {
+          Optional<Application> optionalApplication = applicationRepository.findById(id);
+
+          if(optionalApplication.isPresent()) {
+              Application application = optionalApplication.get();
+              application.setOwner(newOwner);
+              applicationRepository.save(application);
+              return application;
+          } else {
+              throw new ApplicationNotFoundException("Application Not Found", id);
+          }
+      }
+  }
+  ```
+
+  - `GraphQLMutationResolver` allows Spring to detect/call the correct mutation defined in the schema (`newApplication`, `deleteApplication`, `updateApplicationOwner`).
+
+### [Exceptions](https://app.pluralsight.com/course-player?clipId=66c9582e-2c46-43b7-909d-973728e58189)
+
+- `ApplicationNotFoundException`
+
+  ```java
+  package com.pluralsight.exception;
+
+  import graphql.ErrorType;
+  import graphql.GraphQLError;
+  import graphql.language.SourceLocation;
+
+  import java.util.HashMap;
+  import java.util.List;
+  import java.util.Map;
+
+  public class ApplicationNotFoundException extends RuntimeException implements GraphQLError {
+
+      private Map<String, Object> extensions = new HashMap<>();
+
+      public ApplicationNotFoundException(String message, Long invalidApplicationId) {
+          super(message);
+          extensions.put("invalidApplicationId", invalidApplicationId);
+      }
+
+      @Override
+      public List<SourceLocation> getLocations() {
+          return null;
+      }
+
+      @Override
+      public Map<String, Object> getExtensions() {
+          return extensions;
+      }
+
+      @Override
+      public ErrorType getErrorType() {
+          return ErrorType.DataFetchingException;
+      }
+  }
+  ```
+
+  - Need to extend `RuntimeException` and implement `GraphQLError`
+    - GraphQL provides `extensions`.
+
+### [Demo: GraphiQL](https://app.pluralsight.com/course-player?clipId=36a0eaf4-b9cf-4df1-a3cd-b125f5ee7d37)
+
+- `http://localhost:8080/graphiql`
+
+  ```graphql
+  {
+    findAllApplications {
+      id
+      owner
+      description
+    }
+  }
+  ```
+
+  ```graphql
+  mutation {
+    newApplication(
+      name: "Scheduler"
+      owner: "Jamey Doe"
+      description: "An application used to schedule appointments"
+    ) {
+      id
+      name
+      owner
+      description
+    }
+  }
+  ```
+
+  ```graphql
+  mutation {
+    updateApplicationOwner(newOwner: "Kim Jones", id: 1) {
+      id
+      name
+      owner
+      description
+    }
+  }
+  ```
+
+  ```graphql
+  mutation {
+    deleteApplication(id: 1)
+  }
+  ```
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=d188342f-9fea-419c-bca8-7a9c87db2f33)
 
 ## Enabling Actuators, Metrics, and Health Indicators
 
