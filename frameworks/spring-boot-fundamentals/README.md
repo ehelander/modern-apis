@@ -811,13 +811,126 @@ spring init --dependencies=web,data-jpa fundamentals3
 
 ## Enabling Actuators, Metrics, and Health Indicators
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/player?course=spring-boot-fundamentals&author=kesha-williams&name=2e754028-79c6-4b8a-b898-b4afa9445bfc&clip=0&mode=live)
 
-### [Actuator]()
+### [Actuator](https://app.pluralsight.com/course-player?clipId=8dc0c369-3fac-4798-81ce-200064d3f5ad)
 
-### [Custom Endpoints]()
+- Spring Boot Actuator:
+  - Health checks & monitoring
+  - Metrics & HTTP tracing
+  - HTTP/JMX endpoints
+- Can be enabled by adding dependency:
 
-### [Summary]()
+  ```xml
+  <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+  </dependency>
+  ```
+
+- This automatically adds a set of endpoints.
+
+  - http://localhost:8080/actuator
+
+  ```json
+  {
+    "_links": {
+      "self": {
+        "href": "http://localhost:8080/actuator",
+        "templated": false
+      },
+      "beans": {
+        "href": "http://localhost:8080/actuator/beans",
+        "templated": false
+      },
+      "health": {
+        "href": "http://localhost:8080/actuator/health",
+        "templated": false
+      },
+      "health-component": {
+        "href": "http://localhost:8080/actuator/health/{component}",
+        "templated": true
+      },
+      "health-component-instance": {
+        "href": "http://localhost:8080/actuator/health/{component}/{instance}",
+        "templated": true
+      },
+      "info": {
+        "href": "http://localhost:8080/actuator/info",
+        "templated": false
+      },
+      "loggers-name": {
+        "href": "http://localhost:8080/actuator/loggers/{name}",
+        "templated": true
+      },
+      "loggers": {
+        "href": "http://localhost:8080/actuator/loggers",
+        "templated": false
+      },
+      "metrics-requiredMetricName": {
+        "href": "http://localhost:8080/actuator/metrics/{requiredMetricName}",
+        "templated": true
+      },
+      "metrics": {
+        "href": "http://localhost:8080/actuator/metrics",
+        "templated": false
+      },
+      "mappings": {
+        "href": "http://localhost:8080/actuator/mappings",
+        "templated": false
+      }
+    }
+  }
+  ```
+
+- Since some of these endpoints could expose sensitive information, most of them are turned off by default.
+
+  - They can be turned on in the properties file:
+
+    ```properties
+    #Actuator
+    management.endpoints.web.exposure.include=info,health,metrics,loggers,beans,mappings
+    management.endpoint.health.show-details=always
+    ```
+
+- `/metrics`
+  - Shows available metrics. Can drill into specific metrics.
+- `/loggers`
+  - Shows configured loggers. Allows changing the log level at runtime.
+
+### [Custom Endpoints](https://app.pluralsight.com/course-player?clipId=d255e527-7fb1-4028-b5e5-939a5b9e703a)
+
+- Can add custom health indicators.
+
+```java
+package com.pluralsight.actuator;
+
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Component;
+
+@Component
+public class PeopleHealthIndicator implements HealthIndicator {
+    private final String message_key = "PeopleService";
+
+    @Override
+    public Health health() {
+        if (!isRunningServicePeopleService()) {
+            return Health.down().withDetail(message_key, "Not Available").build();
+        }
+        return Health.up().withDetail(message_key, "Available").build();
+    }
+    private Boolean isRunningServicePeopleService() {
+        Boolean isRunning = false;
+        // Add real logic here to test if People Service is running; skipped for demo purposes
+        return isRunning;
+    }
+}
+```
+
+- Just need to implement `HealthIndicator` and override `health()`.
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=93d81239-f183-447a-b7de-b2be9020a56c)
 
 ## Testing with Spring Boot
 
