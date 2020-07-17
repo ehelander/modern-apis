@@ -934,12 +934,159 @@ public class PeopleHealthIndicator implements HealthIndicator {
 
 ## Testing with Spring Boot
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/course-player?clipId=ec4935c4-e030-48eb-9332-1c4e4bd26f35)
 
-### [Testing Overview]()
+### [Testing Overview](https://app.pluralsight.com/course-player?clipId=55397e2d-3048-4b60-b882-e29a0c56e8cc)
 
-### [Unit Testing]()
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-test</artifactId>
+  <scope>test</scope>
+</dependency>
+```
 
-### [Integration Tests]()
+- `spring-boot-starter-test` imports
+  - Spring Boot test modules
+  - JUnit
+  - AssertJ
+  - Hamcrest
+  - others
 
-### [Course Recap]()
+### [Unit Testing](https://app.pluralsight.com/course-player?clipId=4bdc4813-258e-4492-8c01-f414953e7fb5)
+
+- JUnit, Mockito, Spring Test (aka MockMVC)
+- `@WebMvcTest`
+  - Used for controller-layer unit testing
+  - Scans only the controllers (`@Controller` and `@REstController`)
+  - Does not load full application context (i.e., faster testing).
+  - Dependent beans must be loaded or mocked.
+
+```java
+package com.pluralsight.web;
+
+import com.pluralsight.service.ApplicationService;
+import com.pluralsight.service.TicketService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+// Define runner class to use for the test cases.
+@RunWith(SpringRunner.class)
+// Pass controller class.
+@WebMvcTest(TzaController.class)
+public class TzaControllerUnitTest {
+    // MockMvc facilitates quickly testing HTTP controllers and provides methods for expectations.
+    @Autowired
+    private MockMvc mockMvc;
+
+    // @MockBean makes a Mockito mock of the service.
+    @MockBean
+    ApplicationService applicationService;
+
+    @MockBean
+    TicketService ticketService;
+
+    // .andExpect() allows us to specify expectations.
+    @Test
+    public void getAllApplications() throws Exception {
+        mockMvc.perform(get("/tza/applications/"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().json("[]"));
+
+        // verify() verifies the number of times the mocked method has been called.
+        verify(applicationService, times(1)).listApplications();
+    }
+
+    @Test
+    public void getAllTickets() throws Exception {
+        mockMvc.perform(get("/tza/tickets/"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().json("[]"));
+
+        verify(ticketService, times(1)).listTickets();
+    }
+}
+```
+
+### [Integration Tests](https://app.pluralsight.com/course-player?clipId=96211c2c-753a-4776-94cf-226daf83dbb5)
+
+- `@SpringBootTest`
+  - useful for integration testing.
+  - Uses entire application context.
+  - Looks for the main configuration class (`@SpringBootApplication`), and uses this to start a Spring application context.
+
+```java
+package com.pluralsight.web;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
+
+@RunWith(SpringRunner.class)
+// Passing in a random port is useful for avoiding conflicts.
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+// Simulates calling the code from the client.
+@AutoConfigureMockMvc
+public class TzaControllerIntegrationTest {
+    @LocalServerPort
+    private int port;
+
+    // Allows us to consume a REST API from this test base. Simply needs to be autowired.
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Test
+    public void getAllApplications() throws Exception {
+        ResponseEntity<List> response =
+                // getForEntity(): Invokes GET request on API, convert response, store in a ResponseEntity.
+                this.restTemplate.getForEntity("http://localhost:" + port + "/tza/applications/", List.class);
+
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+    }
+
+    @Test
+    public void getAllTickets() throws Exception {
+        ResponseEntity<List> response =
+                this.restTemplate.getForEntity("http://localhost:" + port + "/tza/tickets/", List.class);
+
+        assertThat(response.getStatusCode(), equalTo(HttpStatus.OK));
+    }
+}
+```
+
+### [Course Recap](https://app.pluralsight.com/course-player?clipId=97479b70-df07-404e-a49d-5b5858c89a4b)
