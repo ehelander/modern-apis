@@ -210,14 +210,40 @@ public class FooServiceHealthIndicator implements HealthIndicator {
 }
 ```
 
-### [Customizing the Info Endpoint]()
+### [Customizing the Info Endpoint](https://app.pluralsight.com/player?course=spring-framework-spring-boot-actuator&author=dustin-schultz&name=9edb9ebe-502f-4cda-be00-b3ec6f1ad260&clip=7&mode=live)
 
-### [Customizing the Metrics Endpoint]()
+- ![](2020-08-18-16-14-24.png)
+- ![](2020-08-18-16-15-43.png)
+  - These details would be quite useful on a production dashboard (e.g., for identifying which microservices team to contact regarding an issue).
 
-### [Demo: Writing a Custom Health Indicator]()
+### [Customizing the Metrics Endpoint](https://app.pluralsight.com/course-player?clipId=ff6d6466-29a8-4ba0-9fbf-863d0ea69e5b)
 
-### [Creating Your Own Actuator Endpoints]()
+- ![](2020-08-18-16-16-49.png)
+- ![](2020-08-18-16-17-33.png)
 
-### [Demo: Implementing a Custom Actuator Endpoint]()
+### [Demo: Writing a Custom Health Indicator](https://app.pluralsight.com/course-player?clipId=73f01ae1-7d80-4192-8573-1cbccae7fd07)
 
-### [Summary]()
+- MaxMemoryHealthIndicator
+  - ![](2020-08-18-16-21-14.png)
+- Helpful to configure a property to see details in health endpoint call:
+  - `management.endpoint.health.show-details=always` (but only set to `always` if endpoint is sufficiently secured)
+- ![](2020-08-18-16-22-23.png)
+  - Note `maxMemory.status`
+
+### [Creating Your Own Actuator Endpoints](https://app.pluralsight.com/course-player?clipId=c2e1356b-a99d-44d6-a1c2-3ef7cf85578e)
+
+- ![](2020-08-18-16-23-12.png)
+  - `@Endpoint`
+  - `@ReadOperation`, `@WriteOperation`, `@DeleteOperation`
+- ![](2020-08-18-16-25-06.png)
+
+### [Demo: Implementing a Custom Actuator Endpoint](https://app.pluralsight.com/course-player?clipId=4ad4a4af-8b1c-4a1d-a0e8-7ce247b86804)
+
+- Spring Boot Actuator has a built-in endpoint for checking health, but not readiness (whether the application is able to receive traffic).
+- Invoked at `actuator/readiness` (when Spring sends the `ApplicationReadyEvent`)
+  - ![](2020-08-18-16-28-13.png)
+- Need to expose endpoint:
+  - ![](2020-08-18-16-28-41.png)
+- ![](2020-08-18-16-29-05.png)
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=3aa2a3ae-b730-4c89-bd45-e10d64a46d8a)
