@@ -18,6 +18,7 @@
 - Spring Framework: Spring Data JPA
 - [\*Gradle Build Tool Fundamentals](frameworks/gradle-build-tool-fundamentals/)
 - [\*Spring Framework: Spring Boot Actuator](frameworks/spring-framework-spring-boot-actuator/)
+- [\*Spring Framework: Spring Expression Language (SpEL)](frameworks/spring-framework-spring-expression-language-spel/)
 - [GraphQL: The Big Picture](frameworks/graphql-the-big-picture/)
 - [Building Scalable APIs with GraphQL](frameworks/building-scalable-apis-with-graphql/)
 - \*GraphQL
