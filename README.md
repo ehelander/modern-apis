@@ -39,6 +39,15 @@
 
 ## Data
 
+- Apache Kafka Resource Guide (Curated by Neil Buesing)
+- [Getting Started with Apache Kafka](/data/getting-started-with-apache-kafka/)
+- Introduction to MongoDB
+- Elasticsearch: The Complete Guide
+- Introduction to Graph Databases, Cypher, and Neo4j
+- Cassandra for Developers
+- Snowflake? Why Should I Care?
+- Snowflake Decoded - Fundamentals and hands on Training
+
 ## Languages
 
 - [Java Fundamentals: The Java Language](languages/java/java-fundamentals-the-java-language)
