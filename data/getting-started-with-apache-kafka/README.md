@@ -75,13 +75,58 @@
 
 ### Apache Kafka as a Messaging System
 
+- Kafka: A pub/sub (producer/consumer) messaging system.
+- Messages are sent to topics.
+- Kafka keeps and maintains topics in the broker.
+  - The broker is an executable process or daemon. Could be called a 'server'.
+
 ### The Apache Kafka Cluster
+
+- With Kafka, brokers can scaled out as much as is necessary.
+  - LinkedIn: 1400 brokers (as of recording).
+- Kafka cluster: A grouping of multiple Kafka brokers across 1 or more machines.
+  - Apache Zookeeper comes into play for managing grouping of brokers.
 
 ### Principles of Distributed Systems
 
+- A system is a collection of resources that have instructions to achieve a specific goal or function.
+- A distributed system involves multiple workers or nodes.
+  - Coordination is required to ensure consistency and progress toward a common goal.
+- Controller: A worker node, elected to officiate in the lead capacity.
+  - Often the oldest node.
+  - Responsibilities
+    - Maintain an inventory of available workers.
+    - Maintain a list of work items.
+    - Maintain a status of workers and tasks.
+
 ### Reliable Work Distribution
 
+- Controller needs to consider worker available and health and must consider the risk policy in effect (replication factor).
+  - Leaders & followers.
+- "Work" in Kafka:
+  - Receiving messages.
+  - Categorizing messages into topics.
+  - Persisting messages for eventual retrieval.
+- Components
+  - Producers
+  - Consumers
+- Consumers add a more substantial load than producers.
+
 ### Distributed Consensus with Apache Zookeeper
+
+- Distributed systems require a consensus.
+  - Worker node membership and naming
+  - Configuration management
+  - Leader election
+  - Health status
+- Apache Zookeeper
+  - Used in a variety of distributed systems.
+  - Serves as a centralized service for maintaining metadata about a cluster of distributed nodes:
+    - Configuration information
+    - Health status
+    - Group membership
+  - A distributed system itself; to run reliably, require multiple nodes (an "ensemble")
+- ![](2020-09-16-14-30-06.png)
 
 ## Understanding Topics, Partitions, and Brokers
 
