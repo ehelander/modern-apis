@@ -132,21 +132,275 @@
 
 ### Introduction and Apache Kafka Setup Demo
 
+- Basic Apache Kafka installation
+- Prerequisites
+
+  - Familiarity with Linux
+  - JDK 8 installed
+    <!-- - `sdk list java`
+    - `sdk install java 8.0.265.hs-adpt`
+    - `sdk use java 8.0.265.hs-adpt` -->
+    <!-- - `brew tap adoptopenjdk/openjdk` -->
+    - `brew cask install homebrew/cask-versions/adoptopenjdk8`
+  - Scala (2.11.x) installed
+    - `sdk install scala`
+      - https://sdkman.io/sdks#scala
+  - Kafka
+
+    ```sh
+    # https://gist.github.com/jarrad/3528a5d9128fe693ca84#gistcomment-2323553
+    # Install java 1.8, zookeeper, and kafka
+    brew install kafka
+
+    # Start Zookeeper & Kafka:
+    brew services start zookeeper
+    brew services start kafka
+
+    # Stop Kafka:
+    brew services stop kafka
+    brew services stop zookeeper
+    ```
+
+- `/usr/local/Cellar/kafka/2.6.0/libexec`
+  - `libs`
+    - Note that Zookeeper is included among `libs`, allowing a standalone installation (not requiring a separate Zookeeper installation).
+  - `config`
+    - All the files we'll use to configure Kafka.
+    - `server.properties`: The broker properties.
+  - `bin`
+    - All the programs to get Kafka up and running.
+
 ### Apache Kafka Topics in Detail
+
+- A messaging topis is the primary abstraction of Kafka.
+  - A topic is a named feed or category of messages that producers produce to, and consumers consume from.
+  - Topics are logical entities that span the entire cluster of brokers.
+    - Behind the scenes, Kafka physically represents a topic as 1 or more logs.
+- Messages are appended to a time-ordered, sequential stream.
+- Each message represents an event or "fact".
+- Messages are immutable.
+  - If an incorrect/outdated message is sent, the only correction option is for the producer to publish a new event with the updated information.
+    - It's up to consumers to digest these appropriately.
+- Event sourcing
+  - An architectural style or approach to maintaining an application's state by capturing all changes as a sequence of time-ordered, immutable events.
+- (Logical) message content
+  - Timestamp
+    - When the message was received.
+  - ID
+    - Referenceable by the consumers.
+  - Data content
+    - Binary payload.
+- Consumers simply read messages from a topic.
+  - Messages can be read by a theoretically unlimited number of autonomous consumers.
+  - Each consumer maintains its own operational boundary. A consumer's error or crash doesn't affect other consumers.
 
 ### The Consumer Offset and Message Retention Policy
 
+- How do consumers maintain their autonomy?
+  - The message offset.
+  - Allows consumers to read messages at their own pace and process them independently.
+  - Basically a bookmark: The last read message.
+  - Established and maintained by the consumer.
+  - Corresponds to a message identifier.
+- When a consumer decides to read from a topic (that it either has not read from previously, or for which it wants to start over), it starts from the beginning ('offset: 0').
+- The consumer chooses to advance its position, stay put, or re-read a previous message.
+- When a new message arrives, consumers receive an event that a new message is available.
+- Kafka is immune from a major challenge with messaging systems: slow consumers.
+  - Message retention period is configurable (in hours).
+    - Default: 168 hours (7 days).
+    - After the retention period, old messages fall off.
+    - Retention period is set on a per-topic basis.
+  - All published Kafka messages are retained, regardless of consumption.
+
 ### Demo: Starting Apache Kafka and Producing and Consuming Messages
+
+- Demo:
+
+  - Set up a simple Kafka cluster.
+  - Create a topic.
+  - Publish some messages.
+  - Consume the message.
+
+- Change into Kafka directory (though we'll be using Homebrew for some services)
+
+  ```sh
+  cd /usr/local/Cellar/kafka/2.6.0/
+  ```
+
+- Start Zookeeper (standalone: 1 instance)
+
+  - ![](2020-09-22-14-15-26.png)
+
+    ```sh
+    bin/zookeeper-server-start.sh config/zookeeper.properties
+    ```
+
+- Using Homebrew instead:
+
+  ```sh
+  brew services start zookeeper
+  ```
+
+- Test that Zookeeper is running:
+
+```sh
+# Install telnet, since MacOS removed it.
+brew install telnet
+telnet localhost 2181
+stat
+```
+
+- https://osxdaily.com/2018/07/18/get-telnet-macos/
+- `telnet towel.blinkenlights.nl`
+
+- ![](2020-09-22-14-33-14.png)
+
+  - With Homebrew:
+
+    ```sh
+    brew services start kafka
+    ```
+
+- Create a topic:
+
+  ```sh
+  # bin/kafka-topics.sh
+  bin/kafka-topics --create --topic my_topic --zookeeper localhost:2181 --replication-factor 1 --partitions 1
+  ```
+
+  - We need to specify the Zookeeper-managed cluster.
+  - Note the replication factor and partition flags.
+
+- Logs are accessible at `/usr/local/var/lib/kafka-logs`:
+  - See https://stackoverflow.com/questions/40369238/which-directory-does-apache-kafka-store-the-data-in-broker-nodes
+  - ![](2020-09-22-15-12-28.png)
+- Inquire which topics are available:
+
+  ```sh
+  # bin/kafka-topics.sh --list --zookeeper localhost:2181
+  bin/kafka-topics --list --zookeeper localhost:2181
+  ```
+
+  - ![](2020-09-22-15-14-09.png)
+
+- Instantiate a producer
+
+  ```sh
+  # bin/kafka-console-producer.sh
+  # bin/kafka-console-producer --broker-list localhost:9092 --topic my_topic
+  bin/kafka-console-producer --bootstrap-server localhost:9092 --topic my_topic
+  ```
+
+  - Everything we type (and follow by 'enter') becomes a message that the producer sends to the broker.
+
+- Instantiate a consumer
+
+  ```sh
+  # bin/kafka-console-consumer.sh
+  # bin/kafka-console-consumer --zookeeper localhost:2181 --topic my_topic --from-beginning
+  # bin/kafka-console-consumer --bootstrap-server localhost:2181 --topic my_topic --from-beginning
+  bin/kafka-console-consumer --bootstrap-server localhost:9092 --topic my_topic --from-beginning
+  ```
+
+  - See also https://medium.com/@at_ishikawa/getting-started-with-kafka-on-mac-f6aa8924fcda
 
 ### Apache Kafka as a Distributed Commit Log
 
+- The simple-yet-powerful concept upon which Kafka is built: The commit (or transaction) log.
+  - The source of truth.
+  - Physically stored & maintained.
+  - Higher-order data structures derive from the log (tables, indexes, view, etc.).
+    - Useful for point-of-recovery: Can replay past events.
+    - Basis for replication & distribution (redundancy, fault-tolerance, and scalability).
+- What Kafka really is, at its heart, is a _distributed commit log_.
+
 ### Apache Kafka Partitions in Detail
+
+- A topic, as a logical concept, is represented by 1 or more physical log files.
+- The number of partitions per topic is highly configurable.
+- Partitions enable:
+  - Scalability
+  - Fault-tolerance
+  - High throughput
+- Each partition is maintained on 1 or more brokers.
+- When we created a topic topic, we specified 1 partition and a replication factor of 1.
+- At a minimum, each topic must have at least 1 topic.
+- The partition's logs are on the broker's file system at `/tmp/kafka-logs/{topic}-{partition}` (by default).
+- Tradeoffs related to the number of partitions:
+  - Scalability
+    - Eventually, scaling out requires multiple partitions.
+  - Each partition must fit on a single machine.
+- If we had created our topic with 3 partitions, we would be splitting our topic across 3 log files (ideally, across multiple machines). This enables each partition to share the burden of the message load.
+  - But the logs are still a time-ordered sequence or events.
+    - A partitioning scheme can be specified.
 
 ### Distributed Partition Management in Apache Kafka
 
+- Zookeeper looks at the available brokers and establishes leaders for a topic.
+- Each broker creates a log for the new partition.
+- As partition assignments are broadcast, each broker maintains a subset of the metadata from Zookeeper (enabling each broker to direct producers to the correct broker).
+- A producer must have knowledge of at least 1 broker in each topic so it can find the leaders.
+- A consumer inquires of Zookeeper to determine which brokers own which topic.
+- Consumers working with multiple partitions are likely going to consumer messages in a different order (and will be responsible for handling the messages in the different orders).
+- Partitioning trade-offs:
+  - More partitions
+    - Greater Zookeeper overhead
+      - I.e., ensure proper Zookeeper ensemble provisioning.
+    - Message ordering can become complex.
+      - There will not be a global order to messages across partitions.
+      - To get a global order (without forcing consumers to manage the ordering), a single partition would be required.
+    - Longer leader fail-over time.
+
 ### Achieving Reliability with Apache Kafka Replication
 
+- What about fault tolerance?
+  - Broker failure
+  - Network issue
+  - Disk failure
+- When Zookeeper determines that a broker is down, it will find another broker to take its place.
+  - But without redundancy between brokers, there could be data loss.
+- Replication factor
+  - We had set this to 1 in our demo.
+  - Enables reliable work distribution
+    - Ensures redundancy of messages
+    - Enhances system resiliency and fault-tolerance
+  - Guarantees
+    - Up to n-1 broker failure tolerance
+      - Minimum of 2 or 3
+  - Configured on a per-topic basis
+  - It is the leader's job to get the peer brokers to participate in a quorum for the purposes of replicating the log to achieve the intended redundancy level.
+  - ISR: In-sync replicas
+    - When the ISR is equal to the replication factor, the topic, and each partition within that topic, is considered to be in a healthy state.
+- View topic's state:
+
+  - PartitionCount
+  - ReplicationFactor
+
+  ```sh
+  bin/kafka-topics --describe --topic my_topic --zookeeper localhost:2181
+  ```
+
 ### Demo: Fault-tolerance and Resiliency in Apache Kafka
+
+- Multi-broker (3) Kafka setup with a single partition and a replication factor of 3.
+- To configure a multi-broker setup on a single machine, create a new `server.properties` file for each broker you want to instantiate:
+
+  - ![](2020-09-22-16-08-17.png)
+
+- ![](2020-09-22-16-09-15.png)
+- ![](2020-09-22-16-09-44.png)
+- ![](2020-09-22-16-10-18.png)
+- ![](2020-09-22-16-11-57.png)
+- Simulate a broker failure (by ending the terminal process for the leader)
+  - ![](2020-09-22-16-12-55.png)
+    - The leader changed.
+    - There are still 3 replicas.
+    - But note that there are only 2 ISRs.
+  - If another broker were available, Kafka would have replaced the one we killed.
+- The producer doesn't indicate anything happened; the consumer shows WARNs - but it didn't cause the consumer to fail.
+  - ![](2020-09-22-16-14-50.png)
+  - ![](2020-09-22-16-15-54.png)
+    - Nothing was lost, due to the replication factor.
 
 ### Module 3 Summary
 
