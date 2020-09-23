@@ -195,11 +195,120 @@
 
 ### Pre-built Tests
 
+- ![](2020-09-23-12-22-19.png)
+- ![](2020-09-23-12-26-11.png)
+- ![](2020-09-23-12-28-17.png)
+- ![](2020-09-23-12-28-57.png)
+- ![](2020-09-23-12-29-18.png)
+- Multiple tests can be performed on a single request/response combination.
+
 ### Test Syntax
+
+- ![](2020-09-23-12-43-21.png)
+- `pm` works like a Postman namespace.
+- `test()` takes 2 parameters
+  - Test name
+  - Function
+    - Body: Verifies data
+    - Can mentally prepend 'expect'
+  - `info`
+    - Information about script being executed (e.g., request ID)
+  - pm.globals
+  - pm.environment
+  - Response
+    - assertions
+      - have.status
+      - have.header
+      - have.body
+      - have.jsonBody
+  - https://learning.postman.com/docs/writing-scripts/
 
 ### Basic Tests
 
+- ![](2020-09-23-12-54-33.png)
+
+  ```js
+  pm.test('Status code is 200', function () {
+    pm.response.to.have.status(200);
+  });
+
+  pm.test('Status code name has string', function () {
+    pm.response.to.have.status('OK');
+  });
+
+  pm.test('Returns 8 books', function () {
+    const books = pm.response.json();
+    pm.expect(books.length).to.equal(8);
+  });
+
+  pm.test('All books should have a title', function () {
+    const books = pm.response.json();
+    pm.expect(
+      books.every((book) => {
+        return book.title !== undefined;
+      }),
+    ).to.be.true;
+  });
+
+  const titleIsDefined = (book) => {
+    return book.title !== undefined;
+  };
+
+  pm.test('All books should have a title, more concise', function () {
+    const books = pm.response.json();
+    pm.expect(books.every(titleIsDefined)).to.be.true;
+  });
+  ```
+
 ### Using Other Libraries
+
+- Example: Use moment.js to verify creation timestamp.
+
+- POST http://localhost:3000/books
+
+  ```json
+  {
+    "title": "The Drama of Doctrine",
+    "author": "Kevin Vanhoozer",
+    "publicationDate": "2005-08-02",
+    "isbn": "064223273"
+  }
+  ```
+
+- ![](2020-09-23-13-11-35.png)
+
+  ```js
+  const moment = require('moment');
+
+  pm.test('Create date is equal to today', function () {
+    const data = pm.response.json();
+
+    pm.expect(moment(data.createdAt).format('MM/DD/YYYY')).to.equal(
+      moment().format('MM/DD/YYYY'),
+    );
+  });
+  ```
+
+- Lodash is already exposed via a global `_`. E.g.:
+
+  ```js
+  const moment = require('moment');
+
+  pm.test('Create date is equal to today', function () {
+    // const data = pm.response.json();
+    const data = _.result(pm, 'response.json');
+
+    pm.expect(moment(data.createdAt).format('MM/DD/YYYY')).to.equal(
+      moment().format('MM/DD/YYYY'),
+    );
+  });
+  ```
+
+- Available libraries
+  - ![](2020-09-23-13-13-26.png)
+  - Note that Postman is limited to these (or [these](https://postman-quick-reference-guide.readthedocs.io/en/latest/libraries.html)) libraries.
+  - Available Node.js modules:
+    - ![](2020-09-23-13-15-29.png)
 
 ### Summary
 
