@@ -83,26 +83,107 @@
 
 ### History
 
+### Authorization
+
 - DELETE `localhost:3000/books/6`, with `G-TOKEN` header `ROM831ESV`.
   - Returns `401 Unauthorized`.
 - `Authorization` tab &rarr; Basic Auth
-  -
-
-### Authorization
-
--
+  - Username: `admin`
+  - Password: `admin`
+- Note that an `Authorization` header was added.
+  - Key: `Authorization`
+  - Value: `Basic YWRtaW46YWRtaW4=` (base64-encoded `admin` and `admin`)
+- Now it returns a 204 (nothing to return). Book 6 was deleted.
 
 ### Preset Headers
 
+- If you re-use tabs, the headers will be preset.
+- But if you open a new tab, you have to re-supply the headers.
+- Postman provides a way to
+- Headers > Presets > Manage Presets
+  - Add Header Preset
+    - ![](2020-09-23-10-06-24.png)
+    - ![](2020-09-23-10-07-43.png)
+
 ### Environments
+
+- What if you need different values by environment?
+- Run the test environment in a new terminal: `npm run start:test`
+  - Launches a new instance at localhost:3030.
+- We can control parts of the URL via environments.
+  - We're not currently in an environment.
+    - ![](2020-09-23-10-16-10.png)
+  - Manage Environments
+    - ![](2020-09-23-11-39-32.png)
+    - ![](2020-09-23-11-40-27.png)
+    - Can copy, download, or delete
+      - ![](2020-09-23-11-41-01.png)
+      - Download: Can save, share, import.
+  - Supply `host` environment variable in URL via `{{host}}`, use preset `Library` headers, and select an environment.
+    - ![](2020-09-23-11-42-16.png)
+    - ![](2020-09-23-11-45-21.png)
+  - Note `Environment quick look`
+    - ![](2020-09-23-11-46-15.png)
+  - Team (pro) version: Can share environments with team members.
 
 ### Import
 
+- Navigate to http://localhost:3000/ui
+- Open up devtools > Network
+- Add a book
+  - ![](2020-09-23-11-50-34.png)
+- Right click on request > `Copy` > `Copy as cURL`
+
+  - ![](2020-09-23-11-51-40.png)
+
+    ```sh
+    curl 'http://localhost:3000/books' \
+      -H 'Connection: keep-alive' \
+      -H 'Accept: */*' \
+      -H 'g-token: ROM831ESV' \
+      -H 'cache-control: no-cache' \
+      -H 'Content-Type: application/json' \
+      -H 'Origin: http://localhost:3000' \
+      -H 'Sec-Fetch-Site: same-origin' \
+      -H 'Sec-Fetch-Mode: cors' \
+      -H 'Sec-Fetch-Dest: empty' \
+      -H 'Referer: http://localhost:3000/ui' \
+      -H 'Accept-Language: en-US,en;q=0.9' \
+      -H 'dnt: 1' \
+      --data-binary '{"title":"The Bruised Reed","author":"Richard Sibbes","isbn":"0851518404","releaseDate":"1994-03-01"}' \
+      --compressed
+    ```
+
+  - In Postman: `Import` > `Paste Raw Text`
+    - Can be quite helpful when debugging API calls.
+    - ![](2020-09-23-11-53-29.png)
+
 ### Proxy
+
+- Another way to generate/capture requests
+- Postman > `Capture API requests with Postman`
+  - ![](2020-09-23-11-55-55.png)
+  - Proxy Settings
+    - Port the proxy wil run on and where to store requests
+      - ![](2020-09-23-11-56-43.png)
+      - Click `Connect
+    - Can filter requests
+      - ![](2020-09-23-11-57-05.png)
+- Get IP address for local computer (e.g., `ipconfig getifaddr en0`)
+  - Then we can use this machine as a proxy from a different device (e.g., 192.168.0.10:5555)
+  - Could troubleshoot requests from an app, etc.
+- (Turn proxy off.)
 
 ### Generating Code
 
+- ![](2020-09-23-12-07-21.png)
+
 ### Sync
+
+- Syncing information across multiple Postman instances
+- `Sign In`
+  - ![](2020-09-23-12-10-19.png)
+- Once signed in, Postman will sync (presets, environments, etc.) across multiple computers.
 
 ### Summary
 
