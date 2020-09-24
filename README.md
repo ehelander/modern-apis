@@ -11,20 +11,22 @@
 
 ## Frameworks
 
-- [Spring: The Big Picture](frameworks/spring-the-big-picture/)
-- [Spring Framework: Spring Fundamentals](frameworks/spring-framework-spring-fundamentals/)
-- [\*Spring Framework: Creating Your First Spring Boot Application](frameworks/spring-framework-creating-your-first-spring-boot-application/)
-- [\*Spring Boot Fundamentals](frameworks/spring-boot-fundamentals/)
-- Spring Framework: Spring Data JPA
 - [\*Gradle Build Tool Fundamentals](frameworks/gradle-build-tool-fundamentals/)
-- [\*Spring Framework: Spring Boot Actuator](frameworks/spring-framework-spring-boot-actuator/)
-- [\*Spring Framework: Spring Expression Language (SpEL)](frameworks/spring-framework-spring-expression-language-spel/)
-- [GraphQL: The Big Picture](frameworks/graphql-the-big-picture/)
-- [Building Scalable APIs with GraphQL](frameworks/building-scalable-apis-with-graphql/)
-- \*GraphQL
+- GraphQL
+  - [GraphQL: The Big Picture](frameworks/graphql-the-big-picture/)
   - [\*GraphQL](frameworks/graphql/graphql-org-learn/)
-- [Serverless Computing: The Big Picture](frameworks/serverless-computing-the-big-picture/)
-- Using the Serverless Framework with Node.js on AWS
+  - [Building Scalable APIs with GraphQL](frameworks/building-scalable-apis-with-graphql/)
+- Serverless
+  - [Serverless Computing: The Big Picture](frameworks/serverless-computing-the-big-picture/)
+  - Using the Serverless Framework with Node.js on AWS
+- Spring
+  - [Spring: The Big Picture](frameworks/spring-the-big-picture/)
+  - [Spring Framework: Spring Fundamentals](frameworks/spring-framework-spring-fundamentals/)
+  - [\*Spring Framework: Creating Your First Spring Boot Application](frameworks/spring-framework-creating-your-first-spring-boot-application/)
+  - [\*Spring Boot Fundamentals](frameworks/spring-boot-fundamentals/)
+  - [\*Spring Framework: Spring Boot Actuator](frameworks/spring-framework-spring-boot-actuator/)
+  - [\*Spring Framework: Spring Expression Language (SpEL)](frameworks/spring-framework-spring-expression-language-spel/)
+  - Spring Framework: Spring Data JPA
 
 ## \*Cloud
 
@@ -35,13 +37,13 @@
 ## \*Tools
 
 - [Postman](tools/postman/)
-- Postman Fundamentals
 - [Kibana](tools/kibana/)
 
 ## Data
 
-- Apache Kafka Resource Guide (Curated by Neil Buesing)
-- [Getting Started with Apache Kafka](/data/getting-started-with-apache-kafka/)
+- Kafka
+  - Apache Kafka Resource Guide (Curated by Neil Buesing)
+  - [Getting Started with Apache Kafka](/data/getting-started-with-apache-kafka/)
 - Introduction to MongoDB
 - Elasticsearch: The Complete Guide
 - Introduction to Graph Databases, Cypher, and Neo4j
