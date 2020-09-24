@@ -36,8 +36,10 @@
 
 ## \*Tools
 
-- [Postman](tools/postman/)
 - [Kibana](tools/kibana/)
+- Postman
+  - [Postman](tools/postman/)
+  - [Postman Fundamentals](tools/postman-fundamentals/)
 
 ## Data
 
