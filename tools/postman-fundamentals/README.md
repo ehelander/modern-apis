@@ -316,15 +316,154 @@
 
 ### Collections
 
+- So far, everything we have done in Postman has been one-offs: Single requests that we'd lose if we closed the tab.
+  - We can save requests into collections.
+
 ### Using Tests on the Front End
 
 ### Creating Collections
 
+- POST `http://localhost:3000/households`
+  - Use Library preset headers
+  - Body:
+    ```json
+    {
+      "name": "Taylor Household"
+    }
+    ```
+  - Send
+  - Note ID: `2`
+  - Click `Save`
+    - ![](2020-09-24-09-19-29.png)
+    - ![](2020-09-24-09-19-54.png)
+    - ![](2020-09-24-09-20-04.png)
+- New tab
+
+  - POST `http://localhost:3000/users`
+  - Preset headers
+  - Body:
+
+    ```json
+    {
+      "email": "taylonr@gmail.com",
+      "firstName": "Nate",
+      "lastName": "Taylor",
+      "householdId": 2
+    }
+    ```
+
+  - Send
+  - Note `wishlistId`: 2
+  - Save
+    - ![](2020-09-24-09-24-37.png)
+
+- New tab
+  - POST `http://localhost:3000/wishlists/2/books/1`
+    - Using the wishlistId from above.
+    - Using bookId of 1, just because.
+  - Preset headers
+  - No body
+  - Don't execute
+  - Save as `Add Book to User`
+- New tab
+  - GET `http://localhost:3000/households/2/wishlistBooks`
+  - Preset headers.
+  - Don't execute.
+  - Save as `Get Household Books`
+- Can duplicate a request.
+  - ![](2020-09-24-09-29-06.png)
+
 ### Collection Runner
+
+- Run the collection
+  - ![](2020-09-24-09-40-36.png)
+  - ![](2020-09-24-09-42-24.png)
+  - ![](2020-09-24-09-42-40.png)
+- GET `http://localhost:3000/users`.
+  - Should see duplicates now.
 
 ### Using Variables
 
+- So far, our IDs are hard-coded.
+- Send a `Create Household` request. Note `id` in response.
+- In tests, click `Set a global variable`:
+
+  ```js
+  pm.globals.set('variable_key', 'variable_value');
+  ```
+
+- Change to:
+
+  ```js
+  pm.globals.set('householdId', pm.response.json().id);
+  ```
+
+- After executing the request, we can now see that we have a global `householdId` variable.
+  - ![](2020-09-24-09-48-22.png)
+- Save this request.
+- For each request that creates a user, replace the `householdId` value in the body with `{{householdId}}`.
+- Add a test for each created user that sets a wishlistId variable.
+  - ![](2020-09-24-09-51-29.png)
+- Replace IDs in URLs.
+- Run the collection.
+- ![](2020-09-24-09-53-27.png)
+- Using our `{{host}}` variable, we can send requests to `3000` or `3030` by selecting our environment.
+  - ![](2020-09-24-09-55-18.png)
+
 ### Pre-request Scripts
+
+- Until now, we've used the following flow:
+  - Request &rarr; Response &rarr; Test
+- To take advantage of collections, we can use pre-request scripts:
+  - Pre-Request Scripts &rarr; Request &rarr; Response &rarr; Test
+    - Allow us to set up data for our requests or tests.
+- We can define a list of users, get one at random (`_.sample()`), and set email, firstName, and lastName.
+
+  - ![](2020-09-24-09-58-00.png)
+
+    ```js
+    const users = [
+      {
+        email: 'taylonr@gmail.com',
+        firstName: 'Nate',
+        lastName: 'Taylor',
+      },
+      {
+        email: 'jon@mailinator.com',
+        firstName: 'Jonathan',
+        lastName: 'Edwards',
+      },
+      {
+        email: 'brooks@mailinator.com',
+        firstName: 'Thomas',
+        lastName: 'Brooks',
+      },
+      {
+        email: 'stott@mailinator.com',
+        firstName: 'John',
+        lastName: 'Stott',
+      },
+    ];
+
+    const user = _.sample(users);
+
+    pm.globals.set('email', user.email);
+    pm.globals.set('firstName', user.firstName);
+    pm.globals.set('lastName', user.lastName);
+    ```
+
+  - And then we can replace the values in our user creation body:
+
+    - ![](2020-09-24-09-58-51.png)
+
+    ```js
+    {
+        "email": "{{email}}",
+        "firstName": "{{firstName}}",
+        "lastName": "{{lastName}}",
+        "householdId": {{householdId}}
+    }
+    ```
 
 ### Data Files
 
