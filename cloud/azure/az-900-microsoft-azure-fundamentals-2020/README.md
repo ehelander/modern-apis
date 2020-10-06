@@ -207,7 +207,153 @@
 
 ## Azure Architecture
 
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-architecture/introduction/watch)
+
+- Regions
+  - Paired Regions
+- Availability Zones
+- Resource Groups
+- Azure Resource Manager
+
+### [Regions and Availability Zones](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-architecture/regions-and-availability-zones/watch)
+
+- "A region is a set of datacenters deployed within a latency-defined perimeter and connected through a dedicated regional low-latency network."
+  - Each region has more than 1 datacenter.
+  - Not too far from each other
+  - A fiber connection between data centers in the region.
+  - &rarr; Two or more data centers not too far from each other connected via fiber.
+- How to choose a region?
+  - Location
+    - Closest to users (to minimize latency)
+  - Features
+    - More recent regions are less likely to have all features
+  - Price
+    - Varies by region (e.g., 20-30% different).
+- Each region is paired with another region within the same geographic area
+  - 1 exception: Brazil South, paired with South-Central US
+  - If the primary region experiences an outage, you can failover to secondary region.
+  - Across region pairs, Azure serializes updates: Only 1 paired region is updated at a time.
+  - Some replication across pairs.
+- Availability Zones
+  - Unique physical locations within a region
+  - Independent: 1 or more data center, with unique power, cooling, and networking.
+  - Each region (that supports AZs - not all do) has a minimum of 3 zones.
+- For VMs, you need to select how many zones you want to be in.
+  - Zone-redundant storage, on the other hand, is automatically replicated across zones.
+
+### [Resource Groups and Azure Resource Manager](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-architecture/resource-groups-and-azure-resource-manager/watch)
+
+- Resource Groups
+  - Essential to architecture on Azure.
+  - _Everything_ (no exceptions) on Azure is inside a Resource Group.
+  - A Resource Group is _not_ a resource.
+    - Think of it like a container.
+  - Key facts
+    - Each resource can only exist in 1 resource group.
+      - No exceptions.
+    - Can add/remove resources to/from a Resource Group at any time.
+    - Can move a resource from one Resource Group to another.
+    - Can contain resources located in different regions.
+    - Can be used to manage access control.
+    - A resource can interact with resources in other Resrouce Groups.
+    - A Resource Group does need a location (for storing metadata).
+- Azure Resource Manager (ARM)
+  - The underpinning of everything on Azure, in terms of creating/updating/deleting resources.
+  - When interacting with any resources, it goes through the ARM (portal, CLI, PowerShell, SDKs, etc.).
+  - Benefits
+    - Can deploy/manage/monitor resources as a group.
+    - Deploying from various tools results in a consistent state.
+    - Built-in access control.
+    - Can logically organize resource via tags.
+    - Tagging can group billing.
+- ![](2020-10-06-12-12-38.png)
+
+### [Lab: Creating Azure Resources](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-architecture/creating-azure-resources/watch)
+
+- Ways to create a resource
+  - `+ Create a Resource` &rarr; virtual machine
+  - Or by search bar &rarr; virtual machine
+  - Or from favorites
+- First: Create a resource group
+  - A container holding other resources.
+  - `+ Add`
+    - Select a subscription, provide a resource group, and select a region
+  - We can now place resources in the resource group
+- Create a virtual machine
+  - Select our resource group
+  - Give it a name
+  - Place it in a region
+  - Select an image
+  - Give it an admin username & password
+  - (Many more options; none additional needed right now.)
+  - Can `Go to resource`
+    - VM overview
+      - Status
+      - Location
+      - Public/private IP addresses
+- Then delete to prevent using up credits.
+  - Note how many resources were created as part of the VM.
+- And delete the resource group.
+
+### Quiz
+
+- When a resource group is removed or deleted, all of the resources within it are deleted with it. You can remove resource groups at any time.
+
 ## Compute
+
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/compute/introduction/watch)
+
+- Any service that enables a computation in the cloud.
+  - Virtual Machines
+  - Scale Sets
+  - App Services
+  - Container Instances
+  - Kubernetes Service
+  - Functions
+
+### [Virtual Machines](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/compute/virtual-machines/watch)
+
+- VMs were the first service to take off in the cloud.
+- VM: A server/computer that you have exclusive access to - but that doesn't have its own hardware.
+  - Virtualized hardware.
+  - Part of IaaS.
+  - Blueprints (templates for creating VMs) can be used to ensure compliance with company guidelines.
+- Pricing
+  - Calculated hourly, based on resources.
+- Use cases:
+  - When you need to control all aspects of an environment or machine.
+  - When you want to install specific applications on your Windows or Linux machines.
+  - When you want to move existing resources and VMs to Azure from on-prem or another cloud provider.
+- Cons:
+  - Requires maintenance.
+
+### [Scale Sets](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/compute/scale-sets/watch)
+
+- Scale Sets let you manage a group of _identical_ load-balanced VMs.
+  - Based on a baseline VM.
+- Benefits
+  - Managing multiple VMs in a scale set is simple via a load balancer.
+  - If one VM fails or stops, the others in the scale set keep working.
+  - Can auto-scale to match demand.
+  - Can run up to 1k VMs in a single set.
+  - No extra costs for the scale set itself.
+
+### [App Service](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/compute/app-service/watch)
+
+- Part of the PaaS part of Azure.
+  - Fuly-managed platform
+
+### [Azure Container Instances]
+
+### [Azure Kubernetes Service]
+
+### [Function]
+
+### [Lab: Azure App Services]
+
+### [Summary]
+
+### [Function]
 
 ## Networking
 
