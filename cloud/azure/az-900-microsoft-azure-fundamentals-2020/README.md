@@ -341,21 +341,215 @@
 ### [App Service](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/compute/app-service/watch)
 
 - Part of the PaaS part of Azure.
-  - Fuly-managed platform
+  - App Services are a fully-managed platform: servers, network, and storage are handled by Azure
+- 3 categories
+  - Web Apps
+    - Windows or Linux
+    - .NET, Java, Node.js, PHP, Python, Ruby
+    - Easy integration with other Azure tools
+    - Auto-scaling & load balancing
+  - Web Apps for Containers
+    - Deploy & run containerized applications on Azure
+    - All dependencies are shipped inside the container: Deploy an image anywhere with a consistent experience.
+    - Reliability between environments.
+  - API Apps
+    - Expose and connect backend data
 
-### [Azure Container Instances]
+### [Azure Container Instances](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/compute/073df3cc-6a38-14dd-741a-7643d465935e/watch)
 
-### [Azure Kubernetes Service]
+- Containers:
+  - Provide a simplified way to manage dependencies
+  - Require less overhead
+  - Increase portability
+  - Enhance efficiency
+  - Ensure consistency
+- Can publish to something like Azure Container Instances (ACI)
+  - The primary service on Azure for hosting/running workloads in a container.
+  - Can run containers on-demand: no management of VMs required.
+  - Can use Portal, CLI, PowerShell.
 
-### [Function]
+### [Azure Kubernetes Service](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/compute/39f7c614-6a31-f743-026c-125a01473815/watch)
 
-### [Lab: Azure App Services]
+- Greek: "governor" or "captain" (thus, the wheel symbol)
+  - K8s
+- "Kubernetes is an open-source container orchestration system for automating application deployment, scaling, and management."
+- Benefits
+  - Can reuse your container architecture
+  - Managed service (with IAM, elastic provisioning, etc.)
+  - Global Reach via Azure Stack
+- The images come from the Azure Container Registry (ACR)
+  - Keeps track of current valid images
+  - Manages files and artifacts for containers
+    - Managed service
+  - Feeds container images to ACI and AKS.
+- A cluster: A set of machines (nodes) that run containerized applications managed by K8s.
+  - A pod is a group of 1 or more containers, with a shared storage network and a specification for how to run the containers.
+  - ![](2020-10-06-15-55-46.png)
 
-### [Summary]
+### [Function](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/compute/functions/watch)
 
-### [Function]
+- The smallest compute service on Azure.
+- A single function of compute that happens when its address (URL) is hit.
+- The function runs once, processes the request, and stops.
+- Functions still use a VM, but this is abstracted away.
+- Benefits
+  - Only runs when there is data to process &rarr; saves money.
+  - Failures are isolated to the run on which it fails.
+
+### [Lab: Azure App Services](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/compute/lab-azure-app-services/watch)
+
+- Add a (Web App) `App Service`
+  - Create a resource group
+  - Give it a name
+    - Must be globally unique (for URL)
+  - .NET core
+  - We'll use defaults
+  - App Service Plan
+    - An App Service is always within an App Service Plan. Think of the App Service Plan as being like the server.
+      - Can change size (throughput).
+      - Can select `Dev/Test` (a free option on shared infrastructure) or `Production`.
+- Can `Go to resource`
+  - ![](2020-10-06-16-25-03.png)
+  - Note: `URL`
+    - https://<name>.azurewebsites.net
+    - Default website
+- Delete resource group
+
+### [Summary](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/compute/summary/watch)
+
+- ![](2020-10-06-16-27-39.png)
 
 ## Networking
+
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/networking/introduction/watch)
+
+### [Virtual Network](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/networking/59630503-b6a1-c098-c843-85ace8707b36/watch)
+
+- Most fundamental part of Azure networking.
+- Often called a VNet
+- Enables resources to communicate with each other and the Internet.
+- Physical hardware is abstracted.
+- A VNet is similar to a traditional network
+  - Address space
+    - Range of IP addresses available
+    - Each service or resource connected will get its own unique IP address
+  - Subnets
+    - Enable segmenting the VNet into multiple portions.
+    - Enables multiple networks on a single VNet.
+      - Groups resources
+      - Enables more efficient address space allocation.
+      - Can use subnet security groups.
+  - Each VNet belongs to a single region.
+    - All resources must be in that region.
+    - They can communicate across regions if need be.
+  - A VNet belongs to just one subscription (though a subscription can have multiple VNets).
+- Cloud advantages
+  - Scalability (VNets or addresses)
+  - High availability for resources
+    - E.g., peering VNets through a load balancer, or a VPN gateway
+  - Isolation
+
+### [Load Balancer](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/networking/8bdfa276-ae9d-713b-2787-eaf61b8e64ee/watch)
+
+- A "Load Balancer distributes new inbound flows that arrive on the Load Balancer's frontend to backend pool instances, according to rules and health probes."
+  - Inbound flows
+    - Traffic from the Internet or local network
+  - Frontend
+    - The access point for the load balancer. All traffic goes here first.
+  - Backend pool
+    - VM instances receiving the traffic
+  - Rules & health probes
+    - Checks to ensure the backend instances can receive the data
+- Scenarios
+  - Incoming Internet traffic
+  - Incoming traffic from internal networks
+  - Port forwarding
+  - Outbound connectivity for backend pool VMs
+
+### [VPN Gateway](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/networking/dcaddb12-3a0c-64a1-04a6-bddd86075de5/watch)
+
+- A Virtual Network Gateway is 1 or more VMs deployed to a Gateway Subnet.
+- A VPN Gateway is a specific type of VNet Gateway, used to send encrypted traffic between an Azure VNet and an on-prem location across the public Internet.
+  - A core part of a hybrid solution.
+- Main components: A Site-to-Site Connection (or can have a multi-site connection)
+  - An Azure VNet with an VPN Gateway attached (will have its own public IP address)
+  - Tunnel
+    - A secure, encrypted connection
+  - On-Prem network with a gateway that can accept the encrypted data
+- ![](2020-10-06-17-00-51.png)
+
+### [Application Gateway](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/networking/a5b8496d-4af7-8ad6-eef8-9ec04f34103c/watch)
+
+- Vs. a load balancer
+  - ![](2020-10-06-17-01-28.png)
+    - Routes based on IP address & port number
+  - ![](2020-10-06-17-02-16.png)
+    - Can route based on additional criteria
+- Benefits
+  - Can scale up/down based on traffic
+  - End-to-end encryption for all traffic
+    - Can disable encryption to backend tool to speed up processing
+  - Zone redundancy
+  - Multi-site hosing for up to 100 websites.
+- An application gateway is a higher level load balancer.
+  - Works on HTTP request (vs. IP address and port).
+  - Traffic from a specific web address can go to a specific machine.
+
+### [Content Delivery Network](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/networking/a432a83c-34ce-e8a3-7434-a8824b738e78/watch)
+
+- CDN: A distributed network of servers that can deliver web content close to users.
+  - Content can be cached on edge nodes (locations closer to users).
+    - Expiration & cache invalidation
+- Benefits
+  - Better performance, especially with multiple round trips.
+  - Scaling, and it protects your backend.
+  - Distribution of user requests & serving of content.
+- Cache
+  - A collection of temporary copies of original files.
+  - Primary purpose: Speed things up.
+- Origin Server
+  - Master copy.
+
+### [Lab: Create a Virtual Network Connection](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/networking/lab-virtual-network-connection/watch)
+
+- Portal > Virtual networks > Add
+  - Name
+  - Address space
+    - 192.168.0.0/24
+      - &rarr; 192.168.0.0 - 192.168.0.255
+        - We can have 256 resources attached to this network.
+      - Don't need to know CIDR notation right now.
+  - Create a resource groupo
+  - Location
+  - Subnet
+    - Name
+    - Address range
+      - 192.168.0.0/28
+        - &rarr; 192.168.0.0 - 192.168.0.15
+- Add resources to the VNet
+  - Virtual machines > Add
+    - Resource group
+      - Normally, when you create a VM, it creates a VNet for you.
+      - Here, we'll specify the VNet.
+    - Windows
+    - Admin Username & PW
+    - Next: Disks
+    - Next: Networking
+      - Virtual network
+      - Use the subnet we created
+      - Create a new public IP address
+      - Use defaults
+- Everything on Azure is part of a VNet (so the service can talk to each other and to the Internet).
+- Delete resource group.
+- Delete VNet.
+
+### [Summary](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/networking/06b44b42-ba1c-e4d4-dba2-2f54714a27ba/watch)
+
+- ![](2020-10-07-09-06-55.png)
+
+### Quiz
+
+- A Virtual Network connects Azure services to allow them to communicate with each other and with the outside world. Some resources, such as Virtual Machines, must have a Virtual network connection, where others, such as App Services, are not required to. The type of Azure subscription has no influence on how a Virtual Network is used.
 
 ## Storage
 
