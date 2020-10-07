@@ -415,24 +415,213 @@ stat
   - Access to a test Kafka cluster (at least 1 running broker)
 - Create new project
   - Maven
+- Add Kafka dependency:
+
+  ```xml
+  <dependencies>
+      <dependency>
+          <groupId>org.apache.kafka</groupId>
+          <artifactId>kafka-clients</artifactId>
+          <version>0.10.0.1</version>
+      </dependency>
+  </dependencies>
+  ```
+
+- Note the `clients` libraries. These are the objects we'll be working with directly.
+  - ![](2020-10-07-15-59-54.png)
+  - In particular: `KafkaProducer` and `KafkaProducerRecord`.
+- So far, we've covered Kafka's externals:
+  - ![](2020-10-07-16-46-53.png)
+- Next, we'll start looking at what goes on inside a producer:
+  - ![](2020-10-07-16-47-17.png)
 
 ### Basics of Creating an Apache Kafka Producer
 
+- When creating a KafkaProducer client application, you'll first need an object to represent the required configuration properties to start up a producer.
+  - 3 properties are required
+    - `bootstrap.servers`
+      - The producer connects to the first available broker, which it then uses to discover the full membership of the cluster. This list is used to determine the partition owners (leaders) so it can send messages immediately when needed.
+        - Best practice: Supply more than 1 broker in this list so that messages can be sent if 1 is unavailable.
+    - `key.serializer` & `value.serializer`
+      - Classes used for message serialization & deserialization.
+      - StringSerializer is the most common.
+  - Full list: https://kafka.apache.org/documentation/#producerconfigs
+  - ![](2020-10-07-16-54-45.png)
+  - Creating a producer (with the simplest approach):
+    - ![](2020-10-07-17-00-36.png)
+    - In the implementation, the properties instantiate an instance of ProducerConfig.
+      - Establishing a type-safe contract that extends to the consumer.
+      - ![](2020-10-07-17-02-52.png)
+
 ### Creating and Preparing Apache Kafka Producer Records
+
+- From the point of view of a Kafka Producer, it doesn't really send "messages". Instead, it sends Records.
+  - Important class: `ProducerRecord`.
+    - Only 2 required values:
+      - `Topic`
+      - `Value`
+    - Optional values
+      - Partition
+      - Timestamp
+      - Key
+    - ![](2020-10-07-17-04-22.png)
+    - ![](2020-10-07-17-04-30.png)
+    - KafkaProducer instances can only send ProducerRecords that match the key and value serializer's types it is configured with.
 
 ### Apache Kafka Producer Record Properties
 
+- `ProducerRecord` optional properties
+  - `partition`
+    - Can set to a specific partition you want messages to be sent to.
+  - `timestamp`
+    - Allows for explicit setting of a timestamp to the `ProducerRecord`, submitted with the record.
+      - Carries an additional 8 bytes, which can affect performance.
+    - The actual timestamp logged is based on `server.properties`:
+      - ![](2020-10-07-17-08-27.png)
+  - `key`
+    - A value used as the basis for determining the partitioning strategy to be employed by the Kafka Producer.
+    - Best practice: Define a key.
+      - 2 purposes
+        - Can be used as additional information in the message, used for processing decisions later.
+        - Can determine the manner in which messages are routed to partitions.
+      - Possible downsides
+        - Introduces additional payload overhead
+          - Depends on serializer type used
+
 ### The Process of Sending Messages, Part One
+
+- ![](2020-10-07-17-11-15.png)
+  - The send operation can be unsuccessful.
+- Metadata is used to instantiate a `Metadata` object, which it keeps up to date with information about the cluster.
+- ![](2020-10-07-17-15-12.png)
+- The partition routing step is determined by 4 strategies
+  - ![](2020-10-07-17-19-06.png)
 
 ### The Process of Sending Messages, Part Two
 
+- ![](2020-10-07-17-20-53.png)
+  - RecordAccumulator: A queue-like, fairly low-level object.
+- ![](2020-10-07-17-22-59.png)
+- The RecordAccumulator enables batching/sending messages.
+  - ![](2020-10-07-17-24-21.png)
+
 ### Message Buffering and Micro-batching
+
+- Each `RecordBatch` has a buffering limit: `batch.size` (the max bytes that can be buffered per batch).
+  - Across all buffers, the `buffer.memory` establishes a ceiling for how much memory can be used to buffer records waiting to be sent to the brokers.
+    - If the ceiling is reached, then the `max.block.ms` setting determines for how many milliseconds the send method will be blocked.
+  - ![](2020-10-07-17-25-57.png)
+  - When records are sent to a RecordBatch, they wait until either:
+    - A RecordAccumulation occurs and the total buffer size reaches the per buffer batch size limit, the records are sent immediately in a batch &rarr; optimizing the overhead in transferring the page cache bytes to the network socket.
+      - New records are dispatched to other accumulators and other record buffers.
+    - `linger.ms`: The number of milliseconds a not-full buffer should wait before transmitting.
+  - ![](2020-10-07-17-29-17.png)
+- When the batched records get transmitted to the brokers, the result of the transmission is sent as a gets sent as a `RecordMetadata` object (containing information about records that were successfully or unsuccessfully received).
+  - ![](2020-10-07-17-30-38.png)
 
 ### Message Delivery and Ordering Guarantees
 
+- To ensure the best chance of delivery, additional producer settings can be used.
+  - `acks`
+    - What level of acknowledgement the producer expects from the broker.
+    - Options:
+      - `0`
+        - Fire and forget
+        - Fastest.
+        - Not very reliable.
+      - `1`
+        - Producer asks for the leader broker to confirm receipt (rather than waiting for all replicas).
+        - Good balance of performance & reliability.
+      - `2`
+        - Replication quorum acknowledged.
+        - Highest assurance, but lowest performance.
+- When an error is sent back, the producer needs to decide what to do.
+  - Options:
+    - `retries`
+      - Producer retries
+    - `retry.backoff.ms`
+      - Wait time in milliseconds before retrying.
+- Ordering guarantees
+  - Message order is only preserved _within_ a given partition.
+  - Errors can complicate ordering.
+    - E.g., `retries` with `retry.backoff.ms`
+      - Such as a second message getting sent during a retry for the first one.
+      - Only way to avoid: setting `max.in.flight.request.per.connection` to `1`.
+        - Note that this has a high cost to throughput, however.
+  - Based on delivery semantics (configured at producer, broker, and the consumer), we can achieve:
+    - At-most-once
+    - At-least-once
+    - Only-once
+
 ### Demo: Creating and Running an Apache Kafka Producer Application in Java
 
+- ![](2020-10-07-17-53-11.png)
+- ![](2020-10-07-17-53-27.png)
+
+```java
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+
+import java.util.Properties;
+import java.util.stream.IntStream;
+
+public class KafkaProducerApp {
+    public static void main(String[] args) {
+        Properties props = new Properties();
+        props.put("bootstrap.servers", "localhost:9092,localhost:9093");
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+
+        // Important: Close resource to avoid memory leak.
+        try (KafkaProducer<String, String> producer = new KafkaProducer<>(props)) {
+            IntStream.range(0, 150).forEachOrdered(i -> {
+                ProducerRecord<String, String> record = new ProducerRecord<>("my-topic", Integer.toString(i), "MyMessage: " + Integer.toString(i));
+                producer.send(record);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+- Approximate setup:
+
+  ```sh
+  cd /usr/local/Cellar/kafka/2.6.0/
+  /usr/local/Cellar/kafka/2.6.0/libexec/config
+
+  # Create 2 new server.properties files:
+  cp libexec/config/server.properties libexec/config/server-1.properties
+  cp libexec/config/server.properties libexec/config/server-2.properties
+
+  # Second terminal - start broker:
+  cd /usr/local/Cellar/kafka/2.6.0/
+  bin/kafka-server-start libexec/config/server.properties
+  # Third terminal - start broker:
+  cd /usr/local/Cellar/kafka/2.6.0/
+  bin/kafka-server-start libexec/config/server-1.properties
+  # Fourth terminal - start broker:
+  cd /usr/local/Cellar/kafka/2.6.0/
+  bin/kafka-server-start libexec/config/server.properties
+
+  # Create topic
+  bin/kafka-topics --zookeeper localhost:2181 --create --topic my-topic --partitions 3 --replication-factor 3
+  # View topics
+  bin/kafka-topics --describe --topic my_topic --zookeeper localhost:2181
+  # Create consumer
+  bin/kafka-console-consumer --bootstrap-server localhost:9092 --topic my-topic --from-beginning
+  ```
+
+- Note that messages are not ordered, due to (default, based on key) partitioning.
+
 ### Advanced Topics and Module 4 Summary
+
+- Custom serializers
+- Custom partitioners
+- Asynchronous (callback & future) send
+- Compression
+- Advanced settings
 
 ## Consuming Messages with Kafka Consumers and Consumer Groups
 
