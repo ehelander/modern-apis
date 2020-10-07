@@ -408,6 +408,14 @@ stat
 
 ### Introduction and Setting up an Apache Kafka Development Environment
 
+- Prerequisites:
+  - IDE
+  - Java 8 JDK
+  - Maven
+  - Access to a test Kafka cluster (at least 1 running broker)
+- Create new project
+  - Maven
+
 ### Basics of Creating an Apache Kafka Producer
 
 ### Creating and Preparing Apache Kafka Producer Records
