@@ -553,6 +553,120 @@
 
 ## Storage
 
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/introduction/watch)
+
+- An Azure Storage Account: A unique Azure namespace
+  - Each object in Azure has its own web address
+    - E.g., `acloudguru.<storagetype>.core.windows.net`
+
+### [Blob](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/a221d327-720c-b36f-c3ab-7c6e44da8ed4/watch)
+
+- Blob: Binary Large Object
+  - Pretty much anything
+  - _Blobs_ are stored in _containers_ in a _storage account_.
+  - Use cases
+    - Images
+    - Files
+    - Streaming content
+    - Log files
+    - Data store
+  - 3 types of blobs
+    - Block
+      - Up to 4.7 TB
+      - Made up of blocks that can be managed individually
+    - Append
+      - Optimized for append operations (e.g., logs)
+    - Page
+      - Up to 8 TB
+      - Any part of the file can be accessed at any time (e.g., virtual hard drive)
+  - 3 pricing tears
+    - Hot
+      - For frequently-accessed files.
+      - Lowest access times.
+      - Highest access costs.
+    - Cool
+      - Intended for data that will remain in the cool tier for at least 30 days.
+      - Lower storage costs.
+      - Higher access times.
+    - Archive
+      - Lowest cost.
+      - Highest access times.
+
+### [Disk](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/e720bc20-99cb-e818-5c62-11e6cb38253d/watch)
+
+- A _managed_ disk is what you attach to your VMs.
+  - Azure manages backups and uptime
+  - Azure guarantees size and performance.
+  - Can easily upgrade disk size and disk type.
+  - 4 main disk types:
+    - HDD
+      - Old-school spinning hard drive.
+      - Low cost.
+      - Good for infrequent access.
+        - Backups, development.
+    - Standard SSD
+      - For production environments
+    - Premium SSD
+      - Super fast, high performance.
+      - Recommended for databases.
+    - Ultra Disk
+      - For the most demanding, data-intensive workloads.
+        - Transactions, analytics, gaming, rendering, etc.
+      - Up to 64 TB
+
+### [File](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/34b96e05-93e0-8ea6-6c31-31acb1e22e54/watch)
+
+- Typical issues with fileshares
+  - Constraints (e.g., size)
+  - Backups
+  - Security
+  - Extending access to other teams, etc.
+- Benefits with a File Storage Account on Azure
+  - Can share across multiple machines
+  - Fully-managed
+  - Resilient
+- Scenarios
+  - Hybrid with on-prem (such as to expand space, or replace on-prem)
+  - Lift & shift
+    - Move all infrastructure to Azure
+
+### [Archive](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/e003f503-30df-a142-73aa-376548a6242c/watch)
+
+- Use case: For policies, legislation, and recovery
+- Lowest-priced storage tier within Azure (e.g., TBs for a few dollars per month)
+- Azure Archive provides durable, encrypted, and stable data storage.
+- Can be used to free-up more valuable storage (e.g., on-prem).
+- Archive Storage is a blob storage tier.
+
+### [Lab: Creating a Storage Account](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/lab-creating-storage-account/watch)
+
+- Azure Portal &rarr; Storage Accounts &rarr; Add
+  - Choose a subscription
+  - Create (or select) a resource group
+  - Provide a `Storage account name`
+    - All lower-case, no special characters.
+  - Location
+  - Performance
+    - Standard or premium
+  - Defaults for others
+  - Create
+  - Go to resource
+    - ![](2020-10-13-16-10-27.png)
+    - Containers
+      - `+ Container`
+        - Name
+        - Public access level
+      - Upload a file
+      - If we change it to `Blob (anonymous read access for blobs only)`, the file is accessible on the Internet.
+        - ![](2020-10-13-16-12-23.png)
+        - ![](2020-10-13-16-12-59.png)
+          - storageacgtest.blog.core.windows.net/acgcontainer/Lars.png
+- Clean up resources (delete resource group)
+
+### [Summary](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/d66b9bf1-2fc4-1120-be59-6a6491aa7be6/watch)
+
+- ![](2020-10-13-16-16-18.png)
+
 ## Database
 
 ## Authentication and Authorization
