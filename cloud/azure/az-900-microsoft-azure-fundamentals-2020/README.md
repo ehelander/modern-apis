@@ -770,6 +770,64 @@
 
 ## Authentication and Authorization
 
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/introduction/watch)
+
+### [Identity Services](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/4ac19019-2948-808d-0fbc-d95f1ee15cb3/watch)
+
+- Authentication
+  - Confirming identity (e.g., via username and password)
+- Authorization
+  - Follows authentication
+  - Answers the question: Do you get access?
+  - The granular portion of identity services
+
+### [Azure Active Directory](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/55266f32-abe0-a704-a7a9-03c0f37027de/watch)
+
+- Active Directory (AD)
+  - Designed for a traditional office (on-preim users)
+    - Hosted by companies
+  - The 'web' wasn't in mind.
+  - AD is quite different from AAD
+- Azure Active Directory (AAD)
+  - You can't have an Azure account without an AAD service.
+    - Each account needs a first user in the initial AAD instance.
+  - Tenant
+    - Represents an organization.
+    - A dedicated instance of AAD that an organization receives when signing up for Azure.
+    - Each AAD tenant is completely distinct and separate.
+    - A user belongs to a single tenant (but can be guests of others).
+  - Subscription
+    - A billing entity.
+    - All resources within a subscription are billed together.
+      - Can be used to separate costs.
+      - If a payment isn't paid, the services stop working.
+- Hybrid cloud architecture
+  - AAD can help manage users both in the cloud and on-prem.
+
+### [Multi-Factor Authentication](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/a7e72f27-af51-8793-778a-c1a31fc460a6/watch)
+
+- A layered approach to authentication
+  - Usually at least 2 of the following:
+    - Something you know
+    - Something you have
+    - Something you are
+- Enabled through AAD
+
+### [Lab: Azure Active Directory](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/lab-azure-active-directory/watch)
+
+- Azure portal &rarr; Azure Active Directory
+  - ![](2020-10-13-17-33-33.png)
+  - ![](2020-10-13-17-33-49.png)
+  - Add a new user
+    - ![](2020-10-13-17-33-59.png)
+    - ![](2020-10-13-17-34-42.png)
+    - ![](2020-10-13-17-35-04.png)
+      - Can use this user to assign roles, etc.
+
+### [Summary](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/e3ca3d3d-d1de-dd17-f837-fdaa0db5e5eb/watch)
+
+- ![](2020-10-13-17-36-20.png)
+
 ## Azure Solutions
 
 ## Security
