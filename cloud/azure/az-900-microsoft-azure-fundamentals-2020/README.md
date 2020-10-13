@@ -669,6 +669,105 @@
 
 ## Database
 
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/introduction/watch)
+
+### [Cosmos DB](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/9a1b830a-ea75-00b4-e6cb-3023e92dccfb/watch)
+
+- Cosmos is global (from the start, with the click of a button)
+  - Traditional databases are notoriously bad at distribution and synchronization
+  - With Cosmos, it's one click to add a region. Azure takes care of the rest.
+- Cosmos DB promises single-digit millisecond latency anywhere in the world.
+- Cosmos DB can be set to automatically scale.
+- 'Infinite' resources.
+- You only pay for what you use.
+- Connectivity
+  - Cosmos supports a wide range of ways to work with it (SDKs and APIs).
+  - Support for most modern languages.
+  - Support for a variety of platforms
+    - SQL
+    - MongoDB
+    - Cassandra
+- Warning
+  - It can get quite expensive (as Cosmos scales up)
+
+### [Azure SQL](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/579b4230-fe11-3bc8-4115-0ba488607dac/watch)
+
+- Microsoft's SQL database was launched in 1989.
+- Azure SQL
+  - A database as a service
+    - Azure handles your hardware and IaaS needs.
+- On-prem SQL Server instances can be seamlessly migrated to Azure SQL.
+- Built-in machine learning
+  - Optimization
+  - Warnings (e.g., degradation or anomalies)
+- Cloud benefits
+  - Scalability
+  - Space
+    - Up to 100 TB
+  - Security
+    - Built-in Azure security
+
+### [Azure Database for MySQL](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/2fcd0912-e8c5-3649-11ee-bb2ada82ba92/watch)
+
+- Context
+  - Open source
+  - Relational
+  - Mature and stable
+- Azure advantages
+  - Paas: The infrastructure is managed by Azure
+  - Can focus on development (instead of managing servers and networks)
+  - Choice of language and framework (e.g., PHP and WordPress)
+  - High availability and scalability
+  - Azure security features
+    - Treat detection, identity management, monitoring
+  - Automatic patching, backups, etc.
+
+### [Azure Database for PostgreSQL](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/770ce200-697b-7a43-11b9-c57f6347867f/watch)
+
+- Name: Because the first version was based on Ingres.
+- Free & stable (since 1996).
+  - Default database for MacOS
+- Lots of extensions
+  - JSONB
+  - Geospatial functions
+  - Indexing
+  - Integration with VS Code
+- Horizontal scaling with hyperscale
+  - Can scale easily to hundreds of nodes
+- Performance recommendations based on usage
+- Fully-managed cloud capabilities
+- Use cases
+  - Financial applications
+    - Can be integrated with Matlab and R
+  - PostGIS
+  - Automated failover and full redundancy
+
+### [Database Migration Services](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/d19abb9b-9683-1cbe-e631-080b49d43838/watch)
+
+- One-step migration from Microsoft SQL to Azure SQL
+- Comprehensive guides
+  - Including for migrating from non-MS databases.
+
+### [Lab: Creating Cosmos DB](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/lab-creating-cosmos-db/watch)
+
+- Azure portal &rarr; Cosmos DB &rarr; Add
+  - Subscription & resource group
+  - Account name
+    - For the DB
+  - Location, etc.
+  - Create
+  - Go to resource
+    - Note URI
+      - ![](2020-10-13-16-58-24.png)
+    - Note: `Replicate Data Globally`
+      - Can enable more data centers with a click.
+        - ![](2020-10-13-16-59-03.png)
+- Clean up resources
+
+### [Summary](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/75aea0f1-552b-69b9-9630-3954ce4cae3f/watch)
+
+- ![](2020-10-13-17-02-48.png)
+
 ## Authentication and Authorization
 
 ## Azure Solutions
