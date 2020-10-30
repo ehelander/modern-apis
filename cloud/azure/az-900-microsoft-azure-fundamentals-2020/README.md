@@ -830,6 +830,110 @@
 
 ## Azure Solutions
 
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/introduction/watch)
+
+### [Internet of Things](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/internet-of-things/watch)
+
+- Wikipedia: "A system of interrelated computing devices, mechanical and digital machines, objects, animals or people that are provided with unique identifiers and the ability to transfer data over a network without requiring human-to-human or human-to-computer interaction."
+- Azure IoT services
+  - IoT Hub
+    - A hub (backend) to collect data feeds from all your 'things'.
+      - Up to "billions" of devices.
+    - Ensures devices are managed and secure, new devices can be deployed with ease.
+    - PaaS
+      - More control over whole process.
+  - IoT Central
+    - The SaaS IoT offering on Azure.
+      - Simplifies IoT setup.
+      - No code needed.
+      - Receives feeds from devices; provides dashboards and metrics.
+      - Pre-made connectors.
+
+### [Big Data](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/big-data/watch)
+
+- Azure tools
+  - Azure Data Lake Analytics
+    - Includes parallel processing.
+  - Azure HDInsights
+    - Similar to Azure Data Lake Analytics, but uses entirely open source tools.
+    - Includes Apache Hadoop, Spark, and Kafka.
+  - Azure Databricks
+    - Based on Apache Spark.
+    - Provides the computing power and integration points with Azure storage services.
+  - Azure Synapse Analytics
+    - Azure's data warehouse offering
+    - Used to be called Azure SQL Data Warehouse
+    - Use the Synapse SQL language
+- Outcomes
+  - ![](2020-10-14-10-12-58.png)
+
+### [Artificial Intelligence](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/artificial-intelligence/watch)
+
+- Microsoft: "Artificial Intelligence is the capability of a machine to imitate intelligent human behavior. Through AI, machines can analyse, images, comprehend speech, interact in natural ways and make predictions using data."
+- On Azure, AI is often called Machine Learning
+- Azure focuses on 3 tasks:
+  - Models
+    - A set of rules of how to use the data provided. The model finds patterns.
+  - Knowledge Mining
+    - Using Azure Search to find relationships in your data.
+  - Built-in Apps
+    - Can be used out-of-the box.
+- Azure services
+  - Azure Cognitive Services
+    - Vision Service
+      - Recognize, identify, and caption videos and images.
+    - Decision Service
+      - Make informed decisions based on content.
+      - Detect potential offensive language, detect IoT anomalies, leverage data analytics.
+    - Speech Service
+      - Takes spoken stream and converts to transcript.
+      - Can track multiple voices and identify a speaker based on speech.
+  - Azure Machine Learning Studio
+    - A visual tool to manage ML needs.
+    - Supports all Azure ML tools.
+    - Includes pre-made modules.
+    - Use cases: tweet sentiment analysis, photo grouping, and movie recommendations.
+  - Azure Machine Learning Service
+    - End-to-end service for using ML almost anywhere on Azure.
+    - A range of tools for helping you build AI applications.
+    - Automatically recognizes trends in applications and creates models.
+
+### [Serverless](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/serverless/watch)
+
+- No management of servers.
+  - An extreme version of PaaS.
+- 3 serverless products from Azure
+  - Azure Functions
+    - Original 'serverless' service on Azure.
+    - Designed for a single task: a single function.
+    - Basic compute action.
+  - Logic Apps
+    - Connect systems inside and outside Azure.
+    - Integrate apps, data flows, services, and entire systems.
+    - Schedule, automate, and orchestrate tasks and processes.
+    - No coding required.
+    - Can use templates.
+    - Use cases
+      - When a new order is created, track how long it took, insert a record into a database, email a person conditionally.
+  - Event Grid
+    - Event: When an application or process wants the world to know that something happened.
+    - Most Azure products can be connected to Event Grid.
+    - A routing services for connecting applications for sending/receiving events.
+    - Serverless.
+    - Simplify complex cloud architecture.
+- Exam tips
+  - ![](2020-10-14-10-24-37.png)
+
+### [DevOps](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/f6a11fed-abab-aa9a-7e14-180214c8dc4e/watch)
+
+- DevOps: The work between development and production.
+- No official definition...
+  - Lars Klint: DevOps is at its core about people: how developers, engineers and system administratos organize themselves and work as a team to deliver better products faster.
+
+### [Lab: Using Azure AI]()
+
+### [Summary]()
+
 ## Security
 
 ## Privacy, Compliance and Trust
