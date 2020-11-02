@@ -211,29 +211,245 @@
 
 ## Getting Kubernetes
 
-### [Module Overview]()
+### [Module Overview](https://app.pluralsight.com/course-player?clipId=52cafc02-4ea0-46f4-9b68-0bb16c51ea0c)
 
-### [Getting kubectl]()
+### [Getting kubectl](https://app.pluralsight.com/course-player?clipId=c17148b7-1d71-4d3c-9421-2278fd19378e)
 
-### [Getting K8s on Your Laptop]()
+- Homebrew:
 
-### [Getting K8s in the Cloud]()
+  ```sh
+  brew install kubectl
+  kubectl version --short
+  ```
 
-### [Recap]()
+- Windows options:
+  - ![](2020-11-02-14-03-48.png)
+- kubectl works with contexts.
+  - There's a hidden file (e.g., `~/.kube/config`), such as the following:
+    - ![](2020-11-02-14-04-56.png)
+  - It groups clusters and users into context.
+
+### [Getting K8s on Your Laptop](https://app.pluralsight.com/course-player?clipId=bf421c1c-d767-408a-8c7e-ba5a122aee8c)
+
+- Docker Desktop is perhaps the simplest way to get started
+- Notes:
+  - Any desktop install is for dev/test only (not production).
+  - You'll need to enable virtualization in your BIOS/OS.
+  - Some of these installation methods change over time.
+- Can switch contexts via Docker Desktop:
+  - ![](2020-11-02-14-08-20.png)
+  - Preferences
+    - Ensure Kubernetes is enabled
+      - ![](2020-11-02-14-09-13.png)
+- Recommendation: Use a client that's no more than 1 minor version above or below the cluster you're managing.
+
+### [Getting K8s in the Cloud](https://app.pluralsight.com/course-player?clipId=a70f5169-311e-45a7-a63f-c748c99b9540)
+
+- Linode Kubernetes Engine (LKE)
+
+  - May be the easiest K8s cloud service available (and used for course examples).
+  - cloud.linode.com
+  - ![](2020-11-02-14-30-43.png)
+  - Very clear with pricing (e.g., \$30/month for 3 nodes).
+  - Note config file for connecting kubectl to the cluster
+    - ![](2020-11-02-14-32-39.png)
+    - Can rename context
+    - Can download the full file or copy/paste the subjected into a larger config file.
+  - See nodes:
+
+    ```sh
+    kubectl get nodes
+    ```
+
+- Google Kubernetes Engine (GKE)
+  - ![](2020-11-02-14-47-20.png)
+  - Can enable Istio service mesh with the click of a button:
+    - ![](2020-11-02-14-47-35.png)
+
+### [Recap](https://app.pluralsight.com/course-player?clipId=ec01d8be-3b53-44d1-bf1b-5532ab0929c4)
 
 ## Working with Pods
 
-### [Module Overview]()
+### [Module Overview](https://app.pluralsight.com/course-player?clipId=713a3492-3e28-4954-b83d-fe681010542b)
 
-### [App Deployment Workflow]()
+### [App Deployment Workflow](https://app.pluralsight.com/course-player?clipId=6e9ca383-d943-4138-91ec-f29534f0967d)
 
-### [Creating a Pod Manifest]()
+- Process
+  1. Start with your app code.
+     - E.g., A Node.js web app listening on port 8080 (https://github.com/nigelpoulton/getting-started-k8s/tree/master/App).
+  2. Build app code into a container image.
+  3. Store the image in an image registry.
+  4. Create a K8s manifest file.
+  5. POST it to the API Server.
+- We'll focus primarily on 4 & 5. For more information on 1-3, check out Pluralsight courses:
+  - Getting Started with Docker
+  - Docker Deep Dive
+- Clone repo:
 
-### [Deploying a Pod]()
+  ```sh
+  git clone https://github.com/nigelpoulton/getting-started-k8s.git
+  cd getting-started-k8s/App
+  ```
 
-### [Multi-container Pod Example]()
+- `App/Dockerfile`:
 
-### [Recap]()
+  ```Dockerfile
+  FROM node:current-slim
+
+  LABEL MAINTAINER=nigelpoulton@hotmail.com
+
+  # Copy source code to /src in container
+  COPY . /src
+
+  # Install app and dependencies into /src in container
+  RUN cd /src; npm install
+
+  # Document the port the app listens on
+  EXPOSE 8080
+
+  # Run this command (starts the app) when the container starts
+  CMD cd /src && node ./app.js
+  ```
+
+- Ensure Docker is running:
+
+  ```sh
+  docker --version
+  ```
+
+- Build a Docker image:
+
+  ```sh
+  # Tag: ehelander/getting-started-k8s:1.0
+  # Build the image using everything from the current directory.
+  # Use your own Docker Hub account or private repository.
+  docker image build -t ehelander/getting-started-k8s:1.0 .
+  # Push it to a registry:
+  docker image push ehelander/getting-started-k8s:1.0
+  ```
+
+- Can use from Docker Hub:
+
+  - https://hub.docker.com/r/nigelpoulton/getting-started-k8s
+
+  ```sh
+  docker pull nigelpoulton/getting-started-k8s
+  ```
+
+### [Creating a Pod Manifest](https://app.pluralsight.com/course-player?clipId=18df36b4-2512-4516-82f4-4d49f8a6bfbe)
+
+- Basic K8s manifest file (https://github.com/nigelpoulton/getting-started-k8s/blob/master/Pods/pod.yml):
+
+  - ![](2020-11-02-15-18-00.png)
+    - `v1` indicates GA/stable (vs. `v1alpha1`, `v1alpha2`, `v1beta1`, `v1beta2`)
+
+  ```yaml
+  # A wrapper around our container.
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: hello-pod
+    labels:
+      app: web
+  spec:
+    # The container running our app:
+    containers:
+      - name: web-ctr
+        # By default, images are pulled from Dockerhub. (Otherwise, a DNS name is required.)
+        image: nigelpoulton/getting-started-k8s:1.0
+        ports:
+          # This port must match the port the app listens on.
+          - containerPort: 8080
+  ```
+
+  - Pods are so old, they're bundled in the original ('core') API group.
+    - Newer features are in API sub-groups.
+      - Workload APIs
+        - `apps`
+          - ![](2020-11-02-15-30-33.png)
+        - `batch`
+          - ![](2020-11-02-15-31-25.png)
+      - `storage.k8s.io`
+      - `networking.8s.io`
+      - core (before there was grouping)
+        - ![](2020-11-02-15-34-03.png)
+  - ![](2020-11-02-15-34-59.png)
+    - API object definition & Pod manifest
+
+### [Deploying a Pod](https://app.pluralsight.com/course-player?clipId=d01fe61d-f8e9-4745-b41f-83a903e32fbd)
+
+```sh
+# See cluster info
+kubectl cluster-info
+
+cd Pods
+
+# Apply the manifest file to the cluster.
+# -f: Indicate we're using the declarative approach.
+kubectl apply -f pod.yml
+```
+
+- Two commands we'll use a lot: `kubectl get` and `kubectl describe`
+
+  - See basic info:
+
+    ```sh
+    kubectl get pods --watch
+    # See more columns
+    kubectl get pods -o wide
+    ```
+
+  - See detailed info:
+
+```sh
+kubectl describe pods hello-pod
+```
+
+### [Multi-container Pod Example](https://app.pluralsight.com/course-player?clipId=68cceebb-2e13-4301-a2b9-865fd0cbabdc)
+
+- A bit of an advanced scenario: https://github.com/nigelpoulton/getting-started-k8s/blob/master/Pods/multi-pod.yml
+
+  ```yaml
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: nginx
+  spec:
+    containers:
+      - name: main-ctr
+        image: nigelpoulton/nginxadapter:1.0
+        ports:
+          - containerPort: 80
+      - name: helper-ctr
+        image: nginx/nginx-prometheus-exporter
+        args: ['-nginx.scrape-uri', 'http://localhost/nginx_status']
+        ports:
+          - containerPort: 9113
+  ```
+
+- Sidenote:
+
+  - Installed https://github.com/jonmosco/kube-ps1/ to show context in terminal.
+    ```sh
+    brew update
+    brew install kube-ps1
+    source "/usr/local/opt/kube-ps1/share/kube-ps1.sh"
+    PS1='$(kube_ps1)'$PS1
+    ```
+
+- For cleaning up:
+
+  - Option 1:
+
+    ```sh
+    kubectl delete <NAME OF POD>
+    ```
+
+    ```sh
+    kubectl delete -f <MANIFEST FILE>
+    ```
+
+### [Recap](https://app.pluralsight.com/course-player?clipId=7de5349f-5e5c-4745-a855-194402333f32)
 
 ## Kubernetes Services
 
