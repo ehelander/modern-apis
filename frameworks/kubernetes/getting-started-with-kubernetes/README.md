@@ -613,18 +613,186 @@ kubectl describe pods hello-pod
 
 ## Kubernetes Deployments
 
-### [Module Overview]()
+### [Module Overview](https://app.pluralsight.com/course-player?clipId=232497e4-aa41-4d72-992e-02732740cbf3)
 
-### [Kubernetes Deployment Theory]()
+- Here's where k8s starts to shine.
 
-### [Creating a Deployment YAML]()
+### [Kubernetes Deployment Theory](https://app.pluralsight.com/course-player?clipId=7d774153-2a43-42cf-b6f6-ac25132159a9)
 
-### [Deploying a Deployment]()
+- Deployments are objects in the k8s API.
+  - ![](2020-11-03-11-28-12.png)
+- Purpose: A useful app.
+  - Self-healing
+    - (Actually handled by the Replica Set)
+  - Scaling
+    - (Actually handled by the Replica Set)
+  - Rolling updates
+  - Rollbacks
+- ![](2020-11-03-11-29-05.png)
+  - We never deal directly with Replica Sets; Deployments wrap them, so it's easy to forget the Replica Sets even exist.
+- Flow:
+  - Create deployment YAML with the desired state of the app.
+  - POST it as a request to the API Server.
+  - Config is stored in the cluster store as a record of desired state.
+  - Pods get scheduled for nodes i the cluster.
+  - A Replica Set controller watches the cluster, ensuring there are always the desired number of pods of the right spec.
+  - To make an update:
+    - We change the same YAML file and POST it.
+      - E.g., in a source code repository.
+    - K8s creates a new Replica Set.
+      - Though old Replica Sets don't get deleted. We can use them to revert to previous versions.
+    - K8s starts up the new one and decomissions the old old (rolling update).
+  - Rollback
+    - Wind up the old Replica Set and wind down the new one.
 
-### [Self-healing and Scaling]()
+### [Creating a Deployment YAML](https://app.pluralsight.com/course-player?clipId=167e2bb2-44c4-4a2c-895f-db32e56dd680)
 
-### [Rolling Updates and Rollbacks]()
+```sh
+# Keep the services; delete the pod
+kubectl get svc
+kubectl get pods
+kubectl delete pod hello-pod
+```
+
+- `deployments/deploy.yaml`:
+
+  ```yaml
+  # Older versions may have extensions/v1beta1 or extensions/v1beta2
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: web-deploy
+    # This label isn't about selecting pods.
+    labels:
+      app: web
+  # The spec for our deployment:
+  spec:
+    # Create 5 pods running the image specified below.
+    replicas: 5
+    # This is how the deployment knows which pods to work on (e.g., rolling updates).
+    # This must match the labels in the template below. The deployment needs to know which pods it's managing.
+    selector:
+      matchLabels:
+        app: web
+    # The spec for our pod:
+    template:
+      metadata:
+        labels:
+          app: web
+      spec:
+        terminationGracePeriodSeconds: 1
+        # The spec for our container (our app):
+        containers:
+          - name: hello-pod
+            image: nigelpoulton/getting-started-k8s:1.0
+            # Always pull the image from the registry. E.g., Docker Deep Dive.
+            imagePullPolicy: Always
+            ports:
+              - containerPort: 8080
+  ```
+
+### [Deploying a Deployment](https://app.pluralsight.com/course-player?clipId=c107e4e3-e3b2-42d0-a296-0446817e4761)
+
+```sh
+cd deployments
+kubectl apply -f deploy.yaml
+# We now have 5 pods running our app:
+kubectl get pods
+kubectl get deploy
+# RS is appended with a hash of the pod spec:
+kubectl get rs
+kubectl get svc
+# If we're running a load balancer:
+kubectl describe svc ps-lb
+kubectl get pods --show-labels
+# The new pods are added to the endpoints object:
+kubectl describe ep ps-lb
+# Get external IP, if running load balancer:
+kubectl get svc
+```
+
+### [Self-healing and Scaling](https://app.pluralsight.com/course-player?clipId=b56d1285-fe88-47e2-b646-2be12e8cd07b)
+
+```sh
+# We have 5 pods managed by a deployment controller and a replica set controller.
+kubectl get pods
+# Delete one pod:
+kubectl delete pod <POD NAME>
+# We're back up to 5 via self-healing
+kubectl get pods
+
+# Can see which node pods are running on and delete a node, and the load balancer will heal.
+kubectl get pods -o wide
+```
+
+- Scaling:
+  - We can increase/decrease the `replicas`.
+  - And autoscaling based on metrics (e.g, CPU and memory usage)
+    - Horizontal Pod Autoscaler & Cluster Autoscaler
+
+### [Rolling Updates and Rollbacks](https://app.pluralsight.com/course-player?clipId=2cdd96c2-61ae-4c8b-be6b-ad6ece11467e)
+
+- Create `deployments/deploy-complete.yaml`:
+
+  ```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: web-deploy
+    labels:
+      app: web
+  spec:
+    # To help with demo: Increase replicas to `10`.
+    replicas: 10
+    selector:
+      matchLabels:
+        app: web
+
+    # Add a new section:
+    minReadySeconds: 5
+    strategy:
+      # When we update the image (or anything in the container spec), k8s will deploy one pod to the new version at a time.
+      type: RollingUpdate
+      rollingUpdate:
+        # When doing an update, we can have, at most, 0 fewer than 10 replicas.
+        maxUnavailable: 0
+        # When doing an update, we can have, at most, 1 more than 10 replicas.
+        maxSurge: 1
+
+    template:
+      metadata:
+        labels:
+          app: web
+      spec:
+        terminationGracePeriodSeconds: 1
+        containers:
+          - name: hello-pod
+            # Bump up to `2.0`.
+            image: nigelpoulton/getting-started-k8s:2.0
+            imagePullPolicy: Always
+            ports:
+              - containerPort: 8080
+  ```
+
+```sh
+# Terminal 1:
+kubectl rollout status deploy web-deploy
+# Terminal 2:
+kubectl get pods --watch
+# Terminal 3:
+kubectl apply -f deployments/deploy-complete.yaml
+
+# We still have the old Replica Set:
+kubectl get rs
+# Note which image it was managing replicas for:
+kubectl describe rs <REPLICA SET NAME>
+kubectl rollout history deploy web-deploy
+# Roll back:
+kubectl rollout undo deploy web-deploy --to-revision=1
+
+kubectl get rs
+```
 
 ## What Next?
 
-### [What Next?]()
+### [What Next?](https://app.pluralsight.com/course-player?clipId=d93b0b93-9ba0-42ec-9ef5-7f53479229af)
