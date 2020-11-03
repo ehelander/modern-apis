@@ -1,0 +1,16 @@
+# A wrapper around our container.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-pod
+  labels:
+    app: web
+spec:
+  # The container running our app:
+  containers:
+    - name: web-ctr
+      # By default, images are pulled from Dockerhub. (Otherwise, a DNS name is required.)
+      image: nigelpoulton/getting-started-k8s:1.0
+      ports:
+        # This port must match the port the app listens on.
+        - containerPort: 8080

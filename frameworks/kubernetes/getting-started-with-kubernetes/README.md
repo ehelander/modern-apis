@@ -343,6 +343,8 @@
   - ![](2020-11-02-15-18-00.png)
     - `v1` indicates GA/stable (vs. `v1alpha1`, `v1alpha2`, `v1beta1`, `v1beta2`)
 
+- Create `pods/pod.yaml`:
+
   ```yaml
   # A wrapper around our container.
   apiVersion: v1
@@ -434,7 +436,7 @@ kubectl describe pods hello-pod
     brew update
     brew install kube-ps1
     source "/usr/local/opt/kube-ps1/share/kube-ps1.sh"
-    PS1='$(kube_ps1)'$PS1
+    PROMPT='$(kube_ps1)'$PROMPT
     ```
 
 - For cleaning up:
@@ -453,17 +455,161 @@ kubectl describe pods hello-pod
 
 ## Kubernetes Services
 
-### [Module Overview]()
+### [Module Overview](https://app.pluralsight.com/course-player?clipId=bc28033b-b135-4773-9f1e-06acb0390224)
 
-### [Kubernetes Service Theory]()
+- The K8s service object is the way to expose an application to the network and outside world.
 
-### [Creating Services Imperatively]()
+### [Kubernetes Service Theory](https://app.pluralsight.com/course-player?clipId=1156a94e-eeb1-4658-915c-01009b81096d)
 
-### [Creating Services Declaratively]()
+- Getting up to speed:
 
-### [Creating Internet LoadBalancer Services]()
+  ```sh
+  cd pods
+  kubectl apply -f pod.yaml
+  ```
 
-### [Recap]()
+- Get pods
+
+  ```sh
+  kubectl get pods
+  kubectl get pods -o wide
+  ```
+
+  - ![](2020-11-02-16-57-39.png)
+    - But this IP is an _internal_ IP address. And IPs aren't reliable.
+    - How do we connect? Services.
+
+- In K8s-speak, a service is a REST object in the API.
+  - ![](2020-11-02-16-59-14.png)
+  - Services are an abstraction, providing a reliable endpoint.
+    - 'Front' end of the service: Name, IP, and port
+      - Guaranteed by K8s to never change.
+    - ClusterIP is automatically assigned by K8s.
+      - It's only for use within the cluster.
+      - The name of the server gets registered with cluster DNS.
+        - Behind the scenes: CoreDNS.
+      - Every service name gets registered with DNS, and every container knows about the cluster DNS - so every container in every pod can resolve service names.
+      - This is mainly about _labels_.
+        - ![](2020-11-02-17-03-08.png)
+      - Whenever you create a service, K8s creates an endpoint object or endpoint slice (depending on k8s versino): A dynamic list of healthy pods that match the service's label selector.
+        - ![](2020-11-03-09-14-41.png)
+- Types main of service
+  - Cluster IP for internal access
+    - Accessing a service from within the cluster (internal):
+      - The pods needs to know the _name_ of the service (what you provide). The Cluster DNS service resolves this to an IP.
+        - ![](2020-11-03-09-15-49.png)
+        - ![](2020-11-03-09-15-54.png)
+  - NodePort for external access
+    - Accessing from outside the cluster (external):
+      - A NodePort: Every node gets the port mapped:
+        - ![](2020-11-03-09-16-44.png)
+  - LoadBalancer
+    - K8s does all the heavy lifting.
+      - ![](2020-11-03-09-18-02.png)
+
+### [Creating Services Imperatively](https://app.pluralsight.com/course-player?clipId=0ea334db-74e8-4579-b8df-5913a20bc481)
+
+- We don't trust pods. We need to wrap them in a service.
+- Simplest option (imperative):
+
+  ```sh
+  kubectl expose pod hello-pod --name=hello-svc --target-port=8080 --type=NodePort
+  kubectl get services
+  ```
+
+  - ![](2020-11-03-09-20-47.png)
+    - `kubernetes` is a system service, exposing the API inside the cluster.
+  - Resulting public IPs:
+    - ![](2020-11-03-09-43-24.png)
+      - If running on Docker Desktop or minikube, try localhost + NodePort
+    - Default allocation by k8s: 30000 to 32767
+
+### [Creating Services Declaratively](https://app.pluralsight.com/course-player?clipId=1bb2e201-30da-4db3-b09f-7bb62c6c0836)
+
+- Remove our previously-created service:
+
+  ```sh
+  kubectl get svc
+  kubectl delete svc hello-svc
+  # We still have our app running:
+  kubectl get pods
+  ```
+
+- Define a service as `services/svc-nodeport.yaml`:
+
+  ```yaml
+  apiVersion: v1
+  kind: Service
+  metadata:
+    # Name registered with DNS.
+    name: ps-nodeport
+  spec:
+    type: NodePort
+    ports:
+      # The port the services listens on inside the cluster.
+      - port: 80
+        # The port the app is listening on.
+        targetPort: 8080
+        # The external port that would be mapped on every cluster node.
+        nodePort: 31111
+        # Default is TCP, so we could omit this.
+        protocol: TCP
+    selector:
+      # The list of labels that has to match the labels on the pod we deployed earlier.
+      app: web
+  ```
+
+  - Types of services (layered):
+    - ClusterIp (default)
+      - Internal cluster connectivity
+      - How we access a set of pods from inside the cluster.
+    - NodePort
+      - External access via nodes
+      - Allow access from outside the cluster.
+    - LoadBalancer
+      - External access via cloud load balancer
+      - On top of a NodePort.
+  - ![](2020-11-03-09-53-18.png)
+
+- Create the service:
+
+  ```sh
+  kubectl get pods
+  kubectl get pods --show-labels
+  cd services
+  kubectl apply -f svc-nodeport.yaml
+  kubectl describe svc ps-nodeport
+  ```
+
+  - ![](2020-11-03-09-59-53.png)
+
+### [Creating Internet LoadBalancer Services](https://app.pluralsight.com/course-player?clipId=e9deb057-c233-471a-9e18-a21bdbeec0cb)
+
+- The easiest of the 3 service types.
+  - But only on supported (cloud) platforms. Not Docker Desktop or minikube.
+- ![](2020-11-03-11-19-53.png)
+
+  - Map traffic back to the app listening on port 80.
+  - Use the same `app=web` selector.
+
+  ```yaml
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: ps-lb
+  spec:
+    type: LoadBalancer
+    ports:
+      - port: 80
+        targetPort: 8080
+    selector:
+      app: web
+  ```
+
+### [Recap](https://app.pluralsight.com/course-player?clipId=2c0e3e96-fc3e-442e-95b0-36ccb61d008e)
+
+- ![](2020-11-03-11-24-00.png)
+- ![](2020-11-03-11-25-10.png)
 
 ## Kubernetes Deployments
 
