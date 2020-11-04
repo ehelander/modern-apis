@@ -6,19 +6,41 @@
 
 ## What You Need to Know About Infrastructure as Code
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/course-player?clipId=4ffc60c2-9f03-40d8-a6df-b7668efe8466)
 
-### [Infrastructure as Code Defined]()
+### [Infrastructure as Code Defined](https://app.pluralsight.com/course-player?clipId=b34394c1-d8d9-4a18-90ca-3827e5bd6355)
 
-### [Declarative vs. Imperative]()
+- Infrastructure as Code:
+  - Provisioning infrastructure through software to achieve consistent and predictable environments.
+    - Software: Not a manual process
+- Core concepts of Iac:
+  - Defined in code
+  - Stored in source control
+  - 2 approaches:
+    - Declarative
+    - Imperative
+  - Idempotent & consistent
+  - Push or pull
+    - Terraform is a push model
+    - Pull: E.g., a running agent that pull from a central source.
 
-### [Idempotence and Consistency]()
+### [Declarative vs. Imperative](https://app.pluralsight.com/course-player?clipId=b13f5368-0050-4740-8999-db3b051f0192)
 
-### [Push or Pull]()
+### [Idempotence and Consistency](https://app.pluralsight.com/course-player?clipId=72b97ae7-2a61-4c7f-9433-3a290dcb63a4)
 
-### [IaC Benefits]()
+### [Push or Pull](https://app.pluralsight.com/course-player?clipId=eab60448-8849-44a6-872a-17104d35c59c)
 
-### [Summary]()
+### [IaC Benefits](https://app.pluralsight.com/course-player?clipId=48775898-6b30-4b77-b8b1-937dd4667e7f)
+
+- Automated deployment
+- Consistent environments
+- Repeatable process
+- Reusable components
+- Documented architecture
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=8e138525-577a-4482-99c5-232210097165)
+
+- Manual processes are the enemy.
 
 ## Deploying Your First Terraform Configuration
 
