@@ -9,6 +9,7 @@ variable "key_name" {}
 variable "region" {
   default = "us-east-1"
 }
+# 2 new variables.
 variable "network_address_space" {
   default = "10.1.0.0/16"
 }
@@ -30,6 +31,7 @@ provider "aws" {
 # DATA
 ##################################################################################
 
+# Because we're spinning up a subnet in an AZ, we need to get the list of AZs.
 data "aws_availability_zones" "available" {}
 
 data "aws_ami" "aws-linux" {
@@ -72,6 +74,7 @@ resource "aws_subnet" "subnet1" {
   cidr_block              = var.subnet1_address_space
   vpc_id                  = aws_vpc.vpc.id
   map_public_ip_on_launch = "true"
+  # Refer to the data source we created. Get a list of the AZ names. Use the first element in the list.
   availability_zone       = data.aws_availability_zones.available.names[0]
 
 }

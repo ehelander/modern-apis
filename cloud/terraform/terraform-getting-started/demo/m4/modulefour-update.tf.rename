@@ -168,8 +168,10 @@ resource "aws_elb" "web" {
   instances       = [aws_instance.nginx1.id, aws_instance.nginx2.id]
 
   listener {
+    # Connect to this port on the instances.
     instance_port     = 80
     instance_protocol = "http"
+    # Open this port to serve up traffic.
     lb_port           = 80
     lb_protocol       = "http"
   }
@@ -203,6 +205,7 @@ resource "aws_instance" "nginx1" {
 resource "aws_instance" "nginx2" {
   ami                    = data.aws_ami.aws-linux.id
   instance_type          = "t2.micro"
+  # Different subnet than above.
   subnet_id              = aws_subnet.subnet2.id
   vpc_security_group_ids = [aws_security_group.nginx-sg.id]
   key_name               = var.key_name
@@ -216,6 +219,7 @@ resource "aws_instance" "nginx2" {
   }
 
   provisioner "remote-exec" {
+    # We're also using green instead of blue.
     inline = [
       "sudo yum install nginx -y",
       "sudo service nginx start",
@@ -229,5 +233,6 @@ resource "aws_instance" "nginx2" {
 ##################################################################################
 
 output "aws_elb_public_dns" {
+  # We'll use the ELB DNS instead of the instances.
   value = aws_elb.web.dns_name
 }
