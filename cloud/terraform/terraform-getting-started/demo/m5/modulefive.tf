@@ -18,7 +18,9 @@ variable "subnet1_address_space" {
 variable "subnet2_address_space" {
   default = "10.1.1.0/24"
 }
+# S3 bucket prefix
 variable "bucket_name_prefix" {}
+# Tags
 variable "billing_code_tag" {}
 variable "environment_tag" {}
 
@@ -36,12 +38,15 @@ provider "aws" {
 # LOCALS
 ##################################################################################
 
+# Allows us to define local values to use in the configuration.
 locals {
+  # Create a common set of tags.
   common_tags = {
     BillingCode = var.billing_code_tag
     Environment = var.environment_tag
   }
 
+  # Use two of our variables and a random integer (using the random_integer resource).
   s3_bucket_name = "${var.bucket_name_prefix}-${var.environment_tag}-${random_integer.rand.result}"
 }
 
@@ -75,7 +80,8 @@ data "aws_ami" "aws-linux" {
 # RESOURCES
 ##################################################################################
 
-#Random ID
+# The random_integer resource we're using above for our S3 bucket.
+# It exposes a `result` property, hence `random_integer.rand.result`.
 resource "random_integer" "rand" {
   min = 10000
   max = 99999
@@ -86,6 +92,8 @@ resource "random_integer" "rand" {
 resource "aws_vpc" "vpc" {
   cidr_block = var.network_address_space
 
+  # We're applying the common_tags via a `merge` function.
+  # It combines 2 map objects into a single map.
   tags = merge(local.common_tags, { Name = "${var.environment_tag}-vpc" })
 }
 
@@ -223,8 +231,10 @@ resource "aws_instance" "nginx1" {
   subnet_id              = aws_subnet.subnet1.id
   vpc_security_group_ids = [aws_security_group.nginx-sg.id]
   key_name               = var.key_name
+  # To grant this instance access to an S3 bucket, we're creating a profile for it.
   iam_instance_profile   = aws_iam_instance_profile.nginx_profile.name
 
+  # Because we're using provisioners, the provisioners are relying on this connection.
   connection {
     type        = "ssh"
     host        = self.public_ip
@@ -233,6 +243,8 @@ resource "aws_instance" "nginx1" {
 
   }
 
+  # A file provisioner.
+  # We're defining the content for the file inline using the Heredoc syntax.
   provisioner "file" {
     content = <<EOF
 access_key =
@@ -242,9 +254,13 @@ use_https = True
 bucket_location = US
 
 EOF
+    # Where we want the file to live once it's copied.
     destination = "/home/ec2-user/.s3cfg"
   }
 
+  # Another inline file content provisioner.
+  # Using logrotate: The ability to run a script after the log rotate action happens.
+  # Get the INSTANCE_ID. Synchronize files to an S3 bucket destination based on a source directory.
   provisioner "file" {
     content = <<EOF
 /var/log/nginx/*log {
@@ -265,17 +281,22 @@ EOF
     destination = "/home/ec2-user/nginx"
   }
 
+  # A remote-exec provisioner, using our 2 files from above.
   provisioner "remote-exec" {
     inline = [
       "sudo yum install nginx -y",
       "sudo service nginx start",
+      # Copy the S3 config file to the root directory.
+      # When running the file provisioner, it doesn't have sudo access.
       "sudo cp /home/ec2-user/.s3cfg /root/.s3cfg",
       "sudo cp /home/ec2-user/nginx /etc/logrotate.d/nginx",
       "sudo pip install s3cmd",
+      # Download files from S3 bucket.
       "s3cmd get s3://${aws_s3_bucket.web_bucket.id}/website/index.html .",
       "s3cmd get s3://${aws_s3_bucket.web_bucket.id}/website/Globo_logo_Vert.png .",
       "sudo cp /home/ec2-user/index.html /usr/share/nginx/html/index.html",
       "sudo cp /home/ec2-user/Globo_logo_Vert.png /usr/share/nginx/html/Globo_logo_Vert.png",
+      # Force a rotation of the logs so we can see them being copied from the instance to the S3 bucket.
       "sudo logrotate -f /etc/logrotate.conf"
       
     ]
@@ -353,7 +374,7 @@ EOF
 
 }
 
-# S3 Bucket config#
+# Create a role that EC2 instances can assume.
 resource "aws_iam_role" "allow_nginx_s3" {
   name = "allow_nginx_s3"
 
@@ -374,11 +395,13 @@ resource "aws_iam_role" "allow_nginx_s3" {
 EOF
 }
 
+# Define the instance profile we're handing to each instance so they can assume the role above.
 resource "aws_iam_instance_profile" "nginx_profile" {
   name = "nginx_profile"
   role = aws_iam_role.allow_nginx_s3.name
 }
 
+# Create a policy for the role: What is it allowed to do?
 resource "aws_iam_role_policy" "allow_s3_all" {
   name = "allow_s3_all"
   role = aws_iam_role.allow_nginx_s3.name
@@ -401,35 +424,40 @@ resource "aws_iam_role_policy" "allow_s3_all" {
 }
 EOF
 
-  }
+}
 
-  resource "aws_s3_bucket" "web_bucket" {
-    bucket        = local.s3_bucket_name
-    acl           = "private"
-    force_destroy = true
+# Create the S3 bucket itself.
+resource "aws_s3_bucket" "web_bucket" {
+  bucket        = local.s3_bucket_name
+  # Not a public bucket.
+  acl           = "private"
+  # Terraform will be able to destroy the bucket, even if it's not empty.
+  force_destroy = true
 
-    tags = merge(local.common_tags, { Name = "${var.environment_tag}-web-bucket" })
+  tags = merge(local.common_tags, { Name = "${var.environment_tag}-web-bucket" })
 
-  }
+}
 
-  resource "aws_s3_bucket_object" "website" {
-    bucket = aws_s3_bucket.web_bucket.bucket
-    key = "/website/index.html"
-    source = "./index.html"
+# Upload the website files to the S3 bucket.
+resource "aws_s3_bucket_object" "website" {
+  bucket = aws_s3_bucket.web_bucket.bucket
+  key = "/website/index.html"
+  source = "./index.html"
 
-  }
+}
 
-  resource "aws_s3_bucket_object" "graphic" {
-    bucket = aws_s3_bucket.web_bucket.bucket
-    key = "/website/Globo_logo_Vert.png"
-    source = "./Globo_logo_Vert.png"
+resource "aws_s3_bucket_object" "graphic" {
+  bucket = aws_s3_bucket.web_bucket.bucket
+  key = "/website/Globo_logo_Vert.png"
+  source = "./Globo_logo_Vert.png"
 
-  }
+}
 
-  ##################################################################################
-  # OUTPUT
-  ##################################################################################
+##################################################################################
+# OUTPUT
+##################################################################################
 
-  output "aws_elb_public_dns" {
-    value = aws_elb.web.dns_name
-  }
+# The output of our configuration: The DNS name of our ELB.
+output "aws_elb_public_dns" {
+  value = aws_elb.web.dns_name
+}

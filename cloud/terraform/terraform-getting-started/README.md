@@ -440,27 +440,178 @@ terraform output
 
 ## Configuring a Resource After Creation
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/course-player?clipId=ecd9703b-544b-4531-be54-6f12f858f55b)
 
-### [Terraform Syntax]()
+### [Terraform Syntax](https://app.pluralsight.com/course-player?clipId=910db9c4-3d6e-4db5-ac0f-dc2e98920cb5)
 
-### [Blocks]()
+- HashiCorp configuration language
+  - A domain specific language that HasiCorp designed for a number of products under its umbrella.
+  - Configuration syntax and expressions.
+  - Supports conditionals, functions, and templates (similar to Jinja templates).
 
-### [References]()
+### [Blocks](https://app.pluralsight.com/course-player?clipId=8ca5bdbf-16c0-4590-90a6-6f848df8f2cf)
 
-### [Updated Scenario]()
+```tf
+# Basic block
+block_type label_one label_two {
+  # Key-value pairs are based off of resource attributes.
+  key = value
 
-### [Provisioners]()
+  embedded_block {
+    key = value
+  }
+}
+```
 
-### [Variables and Tags]()
+```tf
+# Example block
+# Create a resource.
+# Of type aws_route_table.
+# And give it a label of route-table so we can use it elsewhere in the configuration.
+resource "aws_route_table" "route-table" {
+  vpc_id = "id928310928"
+  route {
+    cird_block = "0.0.0.0/0"
+    gateway_id = "id128073987"
+  }
+}
+```
 
-### [Instance Configuration]()
+```tf
+# Object types
+string = "taco"
+number = 5
+bool = true
+# Sometimes called a tuple. Referenced by position in list (0-referenced).
+list = ["bean-taco", "beef-taco"]
+map = { name = "Ned", age = 42, loves_tacos = true }
+```
 
-### [S3 Configuration]()
+### [References](https://app.pluralsight.com/course-player?clipId=ebd4b31b-9a86-432a-8cd5-c9ab6415debb)
 
-### [Configuration Deployment]()
+```tf
+# Keyword reference:
+# `var`
+var.taco_day
+# Resource:
+aws_instance.taco_truck.name
+# Locally-defined values in a configuration:
+local.taco_toppings.cheeses
+# A module we've instantiated:
+module.taco_hut.locations
 
-### [Summary]()
+# Interpolation (used more heavily before .12; now just used for concatenation):
+taco_name = "neds-${var.taco_type}"
+```
+
+```tf
+# Strings, numbers, and bools
+local.taco_count # Returns the number, string, or bool.
+
+# Lists and maps
+local.taco_toppings[2] # Returns element 3.
+local.taco_maps["likes-tacos"] # Returns value at keyname.
+
+# Resource values
+var.region # Returns us-east-1
+data.aws_availability_zones.azs.names[1] # Returns second AZ
+```
+
+### [Updated Scenario](https://app.pluralsight.com/course-player?clipId=b657306b-719f-4ff3-a857-37817b6fd9e5)
+
+- Previous:
+  - 2 EC2 instances in separate AZs with a load balancer that has a DNS record.
+- Updated:
+  - Host website files in S3 bucket. (Read permissions)
+  - Ship EC2 logs to S3 bucket. (Write permissions)
+  - Tag all resources.
+
+### [Provisioners](https://app.pluralsight.com/course-player?clipId=6df89869-59df-4020-ae61-82970536519e)
+
+- Provisioners: Used for post-deployment configuration.
+  - HasiCorp recommends using something else for post-deployment configuration (e.g., configuration management software such as Puppet or Chef).
+  - But provisioners are available as a last resort.
+    - Terraform doesn't have a way track the internal state of something like an EC2 instance - so, once it's deployed, it breaks the immutable deployment model that TF likes.
+- Provisioners can:
+  - Be:
+    - Local
+      - Executes on local machine
+    - Remote
+      - On the remote instance.
+  - Fire on:
+    - Creation
+    - Destruction
+      - E.g., gracefully remove an instance.
+- Multiple provisioners can be added to a resource.
+- What if it all goes wrong?
+  - TF will not destroy the resource if provisioners didn't execute properly, but it sill make a note that an error happened.
+- Example
+
+  - File provisioner:
+
+    ```tf
+    provisioner "file" {
+      connection {
+        type = "ssh" # Or winrm
+        user = "root"
+        private_key = var.private_key # Or PW.
+        host = var.hostname
+      }
+      source = "/local/path/to/file.txt"
+      destination = "/path/to-file.txt"
+    }
+    ```
+
+  - Local & remote exec provisioners:
+
+    ```tf
+    provisioner "local-exec" {
+      command = "local command here"
+    }
+
+    provisioner "remote-exec" {
+      # If a list, will be run in sequence.
+      scripts = ["list", "of", "local", "scripts"]
+    }
+    ```
+
+### [Variables and Tags](https://app.pluralsight.com/course-player?clipId=18af1c10-93b3-4c10-9291-2ddc989dcb69)
+
+- Website files:
+  - [index.html](demo/m5/index.html)
+  - [Globo_logo_Vert.png](demo/m5/Globo_logo_Vert.png)
+- Commands
+  - [m5_commands.txt](demo/m5/m5_commands.txt)
+- Terraform configuration
+  - [modulefive.tf](demo/m5/modulefive.tf)
+- Variables
+  - [terraform.tfvars.example](demo/m5/terraform.tfvars.example)
+
+### [Instance Configuration](https://app.pluralsight.com/course-player?clipId=ba2cfc8d-52c8-4611-ac3a-7bbf4f2e177d)
+
+### [S3 Configuration](https://app.pluralsight.com/course-player?clipId=7ac3eab0-69ee-4a0f-b9c6-b4a4de4764ab)
+
+### [Configuration Deployment](https://app.pluralsight.com/course-player?clipId=e9b09b57-8834-4adb-93bb-6b98b3f1a9aa)
+
+```sh
+terraform init
+# Pulls down plugins: providers.aws and providers.random.
+
+terraform plan -out m5.tfplan
+# Will create 19 resources.
+# Note that tags have been applied.
+
+terraform apply "m5.tfplan"
+# Provision the resources.
+
+# Navigate to DNS entry.
+```
+
+![](2020-11-13-14-01-13.png)
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=85b75d18-e2b3-43ad-b388-5b5dc4e8b682)
+
+- Remember, HashiCorp isn't a big fan of provisioners and would prefer you'd use something like Puppet or chef.
 
 ## Adding a New Provider to Your Configuration
 
