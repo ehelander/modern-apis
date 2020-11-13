@@ -577,15 +577,16 @@ data.aws_availability_zones.azs.names[1] # Returns second AZ
 
 ### [Variables and Tags](https://app.pluralsight.com/course-player?clipId=18af1c10-93b3-4c10-9291-2ddc989dcb69)
 
-- Website files:
-  - [index.html](demo/m5/index.html)
-  - [Globo_logo_Vert.png](demo/m5/Globo_logo_Vert.png)
-- Commands
-  - [m5_commands.txt](demo/m5/m5_commands.txt)
-- Terraform configuration
-  - [modulefive.tf](demo/m5/modulefive.tf)
-- Variables
-  - [terraform.tfvars.example](demo/m5/terraform.tfvars.example)
+- Module 5 files
+  - Website files:
+    - [index.html](demo/m5/index.html)
+    - [Globo_logo_Vert.png](demo/m5/Globo_logo_Vert.png)
+  - Commands
+    - [m5_commands.txt](demo/m5/m5_commands.txt)
+  - Terraform configuration
+    - [modulefive.tf](demo/m5/modulefive.tf)
+  - Variables
+    - [terraform.tfvars.example](demo/m5/terraform.tfvars.example)
 
 ### [Instance Configuration](https://app.pluralsight.com/course-player?clipId=ba2cfc8d-52c8-4611-ac3a-7bbf4f2e177d)
 
@@ -615,19 +616,174 @@ terraform apply "m5.tfplan"
 
 ## Adding a New Provider to Your Configuration
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/course-player?clipId=ba2743b7-8991-406b-a2d0-271365864e09)
 
-### [Sally Sue Strikes Again]()
+- One of the major strengths of Terraform is its support for multiple providers (AWS, Azure, GCP, etc.).
 
-### [Terraform Functions]()
+### [Sally Sue Strikes Again](https://app.pluralsight.com/course-player?clipId=5f31f041-8418-4119-ac67-b603966b4647)
 
-### [Function Examples]()
+- Updated scenario
+  - Increase the robustness of our deployment by adding EC2 instances.
+  - Use an official DNS entry.
+    - The zone happens to be hosted in Azure.
 
-### [Terraform Console]()
+### [Terraform Functions](https://app.pluralsight.com/course-player?clipId=982e5f69-91be-4715-8bb7-95468c1c883f)
 
-### [Terraform CLI]()
+- Support for inline functions was a primary driver of HCL.
+- Basic function syntax: `func_name(arg1, arg2, arg3, ...)`
+  - Arguments are positional.
+  - Arguments can be optional.
+- Functions (and other expressions) can be tested in terraform console - more efficient than doing everything in a configuration.
+- Several broad categories
+  - Common categories
+    - Numeric
+      - Functions to manipulate numbers
+      - Example
+        - `min(42, 13, 7)`
+    - String
+      - Example
+        - Force Azure storage account to lowercase (since uppercase letters are not supported):
+          - `lower("TACOS")`
+    - Collection
+      - Lists & maps
+      - Example
+        - Merge 2 maps into 1
+          - `merge(map1, map2)`
+    - Filesystem
+      - Deal with the filesystem.
+      - Example
+        - Read the contents of the file, returning a string.
+        - `file(path`)
+    - IP networking
+      - Standard numeric functions don't work very well for IP networking.
+      - Example
+        - Carve off a subnet in the provided range:
+          - `cidrsubnet()`
+    - Date & time
+      - Example
+        - `timestamp()`
 
-### [Terraform Providers]()
+### [Function Examples](https://app.pluralsight.com/course-player?clipId=e604b378-cd6c-49bb-a734-c251c1019e36)
+
+- Break a network range into subnets:
+
+  ```tf
+  # Configure networking
+  variable network_info {
+    default = "10.1.0.0/16"
+  }
+
+  # Arguments: Network range, number of bits to add to the mask, which number subnet we want
+  # Returns 10.1.0.0/24
+  cird_block = cidrsubnet(var.network_info, 8, 0)
+
+  # Takes a network range, and returns the 6th host IP in the network range of the first argument.
+  # Returns 10.1.0.5
+  host_ip = cidrhost(var.network_info, 5)
+  ```
+
+- Look up a value in a map
+
+  ```tf
+  # Create ami map
+  variable "amis" {
+    type = "map"
+    default = {
+      us-east-1 = "ami-1234"
+      us-west-1 = "ami-5678"
+    }
+  }
+
+  # Look up the key in the map.
+  # Could use var.amis["us-east-1"], but the lookup function provides safety if the key doesn't exist.
+  ami = lookup(var.amis, "us-east-1", "error")
+  ```
+
+### [Terraform Console](https://app.pluralsight.com/course-player?clipId=ba259a66-6562-4a88-a7ef-33348a319fd8)
+
+- Module 6 files
+  - Website files:
+    - [index.html](demo/m6/index.html)
+    - [Globo_logo_Vert.png](demo/m6/Globo_logo_Vert.png)
+  - Commands
+    - [m5_commands.txt](demo/m6/m6_commands.txt)
+  - Terraform configuration
+    - [modulefive.tf](demo/m6/modulesix.tf)
+  - Variables
+    - [terraform.tfvars.example](demo/m6/terraform.tfvars.example)
+- Open Terraform console:
+
+```sh
+# Need to run init before console.
+terraform init
+terraform console
+
+min(42,5,16)
+# 5
+
+cidrsubnet(var.network_address_space, 8, 0)
+# 10.1.0.0/24
+
+cidrhost(cidrsubnet(var.network_address_space, 8, 0),5)
+# 10.1.0.5
+
+lookup(local.common_tags, "BillingCode", "Unknown")
+lookup(local.common_tags, "Missing", "Unknown")
+
+local.s3_bucket_name
+# The random integer hasn't been generated yet, so we receive an error
+```
+
+### [Terraform CLI](https://app.pluralsight.com/course-player?clipId=d3057ec1-af50-4576-9941-38f0722811c8)
+
+- If we run `terraform`, we see a list of commands:
+  - `apply`
+  - `console`
+  - `destroy`
+  - `fmt`
+    - Formats .tf and .tfvars files in directory.
+  - `init`
+  - `output`
+    - Gives output of what's in the state file (such as after apply).
+  - `plan`
+  - `show`
+    - Shows current contents of TF state, or TF plan.
+  - `taint`
+    - Marks the resource to be recreated (such as if we know something is wrong with an instance).
+  - `untaint`
+    - Such as if TF has marked it as tainted, and we beg to differ.
+  - `validate`
+    - Validates the overall syntax of the file, but doesn't guarantee successful plan/apply.
+  - `workspace`
+    - Used for managing workspaces.
+
+### [Terraform Providers](https://app.pluralsight.com/course-player?clipId=159d815e-9452-4104-bb5e-204ce4fbd609)
+
+- Providers can be community- and HashiCorp-created.
+- All providers are open source.
+  - It's all written in Go.
+- Providers are a collection of defined resources and data sources.
+- Multiple instances can be created of the same provider.
+  - For instance, multiple AWS providers for multiple regions.
+- AzureRM (Resource Manager) Provider example:
+
+  ```tf
+  provider "asurerm" {
+    subscription_id = "subscription-id"
+    client_id = "principal-used-for-access"
+    client_secret = "password of principal"
+    tenant_id = "tenant-id"
+    # Useful when defining multiple azurerm providers.
+    alias = "arm-1"
+  }
+
+  resource "asurerm_resource_group" "azure_tacos" {
+    name = "resource-group-name"
+    location = "East US"
+    # If we want to specify a provider:
+    provider = azurerm.arm-1
+  }
+  ```
 
 ### [Adding the AzureRM Provider]()
 
