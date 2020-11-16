@@ -10,6 +10,7 @@ variable "region" {
   default = "us-east-1"
 }
 
+# We're no longer defining the subnets; we're just defining the network address space.
 variable "network_address_space" {
   default = "10.1.0.0/16"
 }
@@ -18,6 +19,7 @@ variable "billing_code_tag" {}
 variable "environment_tag" {}
 variable "bucket_name_prefix" {}
 
+# Some new Azure-related variables, with values that would be specified in terraform.tfvars:
 variable "arm_subscription_id" {}
 variable "arm_principal" {}
 variable "arm_password" {}
@@ -25,10 +27,11 @@ variable "tenant_id" {}
 variable "dns_zone_name" {}
 variable "dns_resource_group" {}
 
+# Create a default of 2 instances:
 variable "instance_count" {
   default = 2
 }
-
+# Create a default of 2 subnets in the address space defined above:
 variable "subnet_count" {
   default = 2
 }
@@ -43,6 +46,7 @@ provider "aws" {
   region     = var.region
 }
 
+# Pass variable values and add an alias.
 provider "azurerm" {
   version = "~> 1.0"
   subscription_id = var.arm_subscription_id
@@ -117,12 +121,17 @@ resource "aws_internet_gateway" "igw" {
 }
 
 resource "aws_subnet" "subnet" {
+  # Create 2 subnets (by default; environment-dependent).
   count                   = var.subnet_count
+  # Pass the network address space, add 8 bits to the address space, and get the first and second subnets.
   cidr_block              = cidrsubnet(var.network_address_space, 8, count.index)
   vpc_id                  = aws_vpc.vpc.id
   map_public_ip_on_launch = true
+  # Use the first and second AZs.
+  # But note that this only works if we have fewer subnets than AZs available.
   availability_zone       = data.aws_availability_zones.available.names[count.index]
 
+  # For readability, add 1 (to start at 1 instead of 0).
   tags = merge(local.common_tags, { Name = "${var.environment_tag}-subnet${count.index + 1}" })
 
 }
@@ -140,7 +149,9 @@ resource "aws_route_table" "rtb" {
 }
 
 resource "aws_route_table_association" "rta-subnet" {
+  # Associate a RT with each subnet.
   count          = var.subnet_count
+  # Get the ID for each subnet from the subnet list.
   subnet_id      = aws_subnet.subnet[count.index].id
   route_table_id = aws_route_table.rtb.id
 }
@@ -205,6 +216,8 @@ resource "aws_security_group" "nginx-sg" {
 resource "aws_elb" "web" {
   name = "nginx-elb"
 
+  # New syntax: [*] -> Return all list elements as a list. Sometimes called 'splat'.
+  # So this returns a list of subnet IDs.
   subnets         = aws_subnet.subnet[*].id
   security_groups = [aws_security_group.elb-sg.id]
   instances       = aws_instance.nginx[*].id
@@ -221,9 +234,12 @@ resource "aws_elb" "web" {
 
 # INSTANCES #
 resource "aws_instance" "nginx" {
+  # 2 by default.
   count                  = var.instance_count
   ami                    = data.aws_ami.aws-linux.id
   instance_type          = "t2.micro"
+  # Place instances in subnets.
+  # But to handle more instances than subnets, use modulo. Odd instances land in the first subnet; even in the second.
   subnet_id              = aws_subnet.subnet[count.index % var.subnet_count].id
   vpc_security_group_ids = [aws_security_group.nginx-sg.id]
   key_name               = var.key_name
@@ -287,6 +303,7 @@ EOF
     ]
   }
 
+  # E.g., dev-nginx1
   tags = merge(local.common_tags, { Name = "${var.environment_tag}-nginx${count.index + 1}" })
 }
 
@@ -363,13 +380,14 @@ EOF
 
   }
 
+  # Define the DNS record we want to add:
   # Azure RM DNS #
   resource "azurerm_dns_cname_record" "elb" {
     name                = "${var.environment_tag}-website"
     zone_name           = var.dns_zone_name
     resource_group_name = var.dns_resource_group
-    ttl                 = "30"
-    record              = aws_elb.web.dns_name
+    ttl                 = "30" # Seconds
+    record              = aws_elb.web.dns_name # Public name of ELB
     provider            = azurerm.arm-1
 
     tags = merge(local.common_tags, { Name = "${var.environment_tag}-website" })

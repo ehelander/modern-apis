@@ -708,7 +708,7 @@ terraform apply "m5.tfplan"
   - Commands
     - [m5_commands.txt](demo/m6/m6_commands.txt)
   - Terraform configuration
-    - [modulefive.tf](demo/m6/modulesix.tf)
+    - [modulesix.tf](demo/m6/modulesix.tf)
   - Variables
     - [terraform.tfvars.example](demo/m6/terraform.tfvars.example)
 - Open Terraform console:
@@ -771,7 +771,7 @@ local.s3_bucket_name
   provider "asurerm" {
     subscription_id = "subscription-id"
     client_id = "principal-used-for-access"
-    client_secret = "password of principal"
+    client_secret = "password-of-principal"
     tenant_id = "tenant-id"
     # Useful when defining multiple azurerm providers.
     alias = "arm-1"
@@ -780,20 +780,85 @@ local.s3_bucket_name
   resource "asurerm_resource_group" "azure_tacos" {
     name = "resource-group-name"
     location = "East US"
-    # If we want to specify a provider:
+    # If we want to specify a provider, use the alias defined above:
     provider = azurerm.arm-1
   }
   ```
 
-### [Adding the AzureRM Provider]()
+### [Adding the AzureRM Provider](https://app.pluralsight.com/course-player?clipId=4581b6f8-44f6-4114-a287-2b1fb17ea20c)
 
-### [Resource Arguments]()
+- [modulesix.tf](demo/m6/modulesix.tf)
 
-### [Using the Count Argument]()
+### [Resource Arguments](https://app.pluralsight.com/course-player?clipId=2f27379f-9258-4131-b6a0-632de3140f09)
 
-### [Deploying the Configuration]()
+- Arguments you can specify in a resource that help with more complex configurations
+- 4 common resource arguments
 
-### [Summary]()
+  - `depends_on`
+    - TF is pretty good at figuring out its own dependency mapping.
+    - Sometimes a relationship is not obvious.
+    - Takes a list of other resources.
+  - `count`
+
+    - A way to implement a resource loop.
+    - Example: Create 3 of a particular resource.
+    - Takes an integer.
+    - Can use `count.index` to access current iteration index (0-based).
+    - Example:
+
+      ```tf
+      resource "aws_instance" "taco_servers" {
+        count = 2
+        tags {
+          Name = "customer-${count.index}"
+        }
+        There's no direct dependency between these resources, so TF doesn't know the dependency.
+        depends_on = [aws_iam_role_policy.allow_s3]
+      }
+      ```
+
+  - `for_each`
+
+    - Similar to `count`.
+    - Takes a map with a list of key-value pairs.
+    - Creates a resource for each key-value pair.
+    - Example:
+
+      ```tf
+      resource "aws_s3_bucket" "taco_toppings" {
+        for_each = {
+          food = "public-read"
+          cash = "private"
+        }
+        bucket = "${each.key}-${var.bucket_suffix}"
+        acl = each.value
+      }
+      ```
+
+  - `provider`
+    - Specify which provider should be used for the creation of the resource (if it's not obvious to TF already).
+
+### [Using the Count Argument](https://app.pluralsight.com/course-player?clipId=d2dcebae-e44a-4c98-a113-05c700359d18)
+
+- [modulesix.tf](demo/m6/modulesix.tf)
+- A few notes
+  - `%`: Modulo operator
+  - `[*]`: Splat syntax
+
+### [Deploying the Configuration](https://app.pluralsight.com/course-player?clipId=a21ba0d2-c59f-4d20-a4bf-fe35603eebea)
+
+```sh
+# We already ran init earlier, so shouldn't need to run it again.
+terraform init
+# Plan. We'll be adding 20 resources.
+terraform plan -out m6.tfplan
+# terraform apply "m6.tfplan"
+```
+
+- Review subnets, instances, and ELB in AWS portal.
+- Change `default` `instance_count` from `2` to `3` in the configuration, save it, and re-plan/-apply.
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=64615ab3-db75-4b70-a304-b741f278a176)
 
 ## Using Variables and Functions
 
