@@ -706,7 +706,7 @@ terraform apply "m5.tfplan"
     - [index.html](demo/m6/index.html)
     - [Globo_logo_Vert.png](demo/m6/Globo_logo_Vert.png)
   - Commands
-    - [m5_commands.txt](demo/m6/m6_commands.txt)
+    - [m6_commands.txt](demo/m6/m6_commands.txt)
   - Terraform configuration
     - [modulesix.tf](demo/m6/modulesix.tf)
   - Variables
@@ -862,25 +862,220 @@ terraform plan -out m6.tfplan
 
 ## Using Variables and Functions
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/course-player?clipId=74331b60-c894-4abe-8823-aa93fdf8e295)
 
-### [Sally Sue Is Back, Again]()
+### [Sally Sue Is Back, Again](https://app.pluralsight.com/course-player?clipId=64d7e3be-da8a-48c4-8336-67930e4c3ac1)
 
-### [Working with Variables]()
+- Same configuration (with slight variations), across 3 environments:
+  - Development
+  - QA/UAT
+  - Production
 
-### [Updating the Configuration Variables]()
+### [Working with Variables](https://app.pluralsight.com/course-player?clipId=eca20de2-fea1-449e-98af-1b5d54ad260d)
 
-### [Adding Multiple Environments]()
+- Notes about variables
+  - Generally composed of a name, type, and default value
+    - Only name is required
+    - Type is recommended
+    - If no default value is specified (or provided via the command line), TF will ask for a value.
+  - Multiple sources
+    - File
+    - Environment variable
+    - At command line:
+      - `var` option
+      - `var-file`s option
+  - Overriding variables and precedence
+    - If the same variable is defined in multiple places, the value is set based on precedence (the last one wins):
+      - Environment
+      - File
+      - Command line
+  - Can select values based on environment
+    - E.g., in different files passed via command line or a variable.
+  - Can split Terraform configuration files into different environment-dependent directories.
+    - Facilitates more reuse
+- Examples
 
-### [Using Terraform Workspaces]()
+```tf
+# Specify default variable and type
+variable "environment_name" {
+  # If you try to submit some other type, TF will throw an error.
+  type = string
+  default = "development"
 
-### [Deploying the Lower Environments]()
+  # Specify variable in file
+}
+```
 
-### [Managing Secrets]()
+```tf
+# To specify the variable value in a file:
+environment_name = uat
+```
 
-### [Using Environment Variables in Production]()
+```sh
+# To specify the variable inline:
+terraform plan -var 'environment_name=production'
+```
 
-### [Summary]()
+```tf
+# Create variable map
+variable "cidr" {
+  # Specify that all keys in the map should be strings.
+  type = map(string)
+  default = {
+    development = "10.0.0.0/16"
+    uat = "10.0.0.1/16"
+    production = "10.0.0.2/16"
+  }
+}
+```
+
+```tf
+# Use map based on environment
+cidr_block = lookup(var.cidr, var.environment_name)
+```
+
+### [Updating the Configuration Variables](https://app.pluralsight.com/course-player?clipId=a7d95b3f-5748-4148-adc6-4c840576d407)
+
+- Module 7 files
+  - Website files:
+    - [index.html](demo/m7/index.html)
+    - [Globo_logo_Vert.png](demo/m7/Globo_logo_Vert.png)
+  - Commands
+    - [m7_commands.txt](demo/m7/m7_commands.txt)
+  - Terraform configuration (note splitting of files: remember that TF stitches together all .tf files in a directory)
+    - [outputs.tf](demo/m7/outputs.tf)
+    - [resources.tf](demo/m7/resources.tf)
+    - [variables.tf](demo/m7/variables.tf)
+  - Variables
+    - [terraform.tfvars.example](demo/m7/terraform.tfvars.example)
+
+### [Adding Multiple Environments](https://app.pluralsight.com/course-player?clipId=367a063e-d394-4dee-aabb-73c488939c5b)
+
+- Keep in mind
+  - Environments will tend to have more commonalities than differences.
+    - This is the whole point in having multiple environments...
+  - It's useful to have some abstractions in your configuration to facilitate reuse
+  - You likely won't have access to production.
+  - One way to create multiple environments: Workspaces
+    - HashiCorp recommended way of working with multiple environments
+- Decisions
+  - State management
+    - Where will state live?
+    - How will you manage state?
+    - Likely multiple state files.
+  - Variables data
+    - Where will you store variables data?
+      - Command line?
+      - File?
+      - Third-party tool?
+  - Credentials management
+  - Complexity and overhead
+- 2 examples for managing multiple environments
+  - Multiple state files
+    - Directory & file structure
+      - main_config.tf
+      - common.tfvars
+      - dev/
+        - dev.state
+        - dev.tfvars
+      - uat/
+        - uat.state
+        - uat.tfvars
+      - prod/
+        - prod.state
+        - prod.tfvars
+    - When running a plan, can store the state file in one of those directories:
+      - `terraform plan -state="./dev/dev.state" -var-file="common.tfvars" -var-file="./dev/dev.tfvars"`
+  - Workspaces
+    - Directory & file structure
+      - main_config.tf
+      - common.tfvars
+      - terraform.tfstate.d
+        - Created by TF.
+        - Workspace manages the state for you.
+    - Create a new workspace:
+      - `terraform workspace new dev`
+      - `terraform plan`
+
+### [Using Terraform Workspaces](https://app.pluralsight.com/course-player?clipId=6a60fbf3-2ced-4fe1-946b-5475dd3fbbb8)
+
+- We've defined out map variables such that a key corresponds to each environment.
+  - ![](2020-11-16-12-49-00.png)
+- Note locals:
+  - We can get the workspace's value via `terraform.workspace`
+  - ![](2020-11-16-12-49-32.png)
+- ![](2020-11-16-12-50-36.png)
+- ![](2020-11-16-12-51-30.png)
+- ![](2020-11-16-12-52-15.png)
+- ![](2020-11-16-12-52-31.png)
+- ![](2020-11-16-12-52-56.png)
+- ![](2020-11-16-12-54-03.png)
+
+### [Deploying the Lower Environments](https://app.pluralsight.com/course-player?clipId=60b9661c-c489-4130-a0a4-7a114c07654c)
+
+```sh
+terraform init
+terraform workspace new Development
+# Creates a new workspace and a `terraform.tfstate.d` directory with a `Development` directory beneath it.
+# Switches us to the Development workspace context.
+
+# Generate a plan
+terraform plan -out dev.tfplan
+
+terraform apply "dev.tfplan"
+# Creates a `terraform.tfstate` file in terraform.tfstate.d/Development (and a lock file while in-progress)
+```
+
+- If we wanted to deploy to our UAT environment:
+
+  ```tf
+  terraform workspace new UAT
+  terraform plan -out uat.tfplan
+  ```
+
+### [Managing Secrets](https://app.pluralsight.com/course-player?clipId=70b49e5c-ecfa-4dc9-a86a-eabef6a78e68)
+
+- Secret storage options
+  - Variables file
+    - Or -var command line option
+  - Environment variables
+    - Not stored in plain text in a file
+    - Can be dynamically allocated
+  - Some sort of secrets management solution
+    - AWS: KMS
+    - Azure: Keyvault
+    - HashiCorp: Vault
+- Environment Variables example:
+
+  ```sh
+  # AWS Environment Variables
+
+  # If you use these 2 variables, they don't need to be specified in the provider or variables.
+  AWS_ACCESS_KEY_ID
+  AWS_SECRET_ACCESS_KEY
+
+  AWS_SHARED_CREDENTIALS_FILE
+  AWS_PROFILE
+  # If working in Linux (note lack of spaces):
+  export AWS_ACCESS_KEY_ID="some-access-key-id"
+  ```
+
+- Secrets management solution (via Vault):
+  - Let's say we have Terraform, Vault, and AWS.
+  - Vault applies a 'lease' to the credentials from AWS and passes these to Terraform.
+  - At the end of the lease, Vault instructs AWS to delete the credentials.
+
+### [Using Environment Variables in Production](https://app.pluralsight.com/course-player?clipId=8741992a-ff6c-4929-b790-1e7950b529ad)
+
+- To switch to setting the AWS access key and secret key via environment variables instead of TF variables:
+  - Set the environment variables in the environment (e.g., `export ...`).
+  - Comment out `aws_access_key` and `aws_secret_key` in the `.tfvars` file.
+  - Comment out setting the `access_key` and `secret_key` in the AWS provider.
+  - Create production workspace.
+  - Plan
+  - Apply
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=c29e8224-0c6c-42e4-b531-3dcca93f87fd)
 
 ## Using a Module for Common Configurations
 
