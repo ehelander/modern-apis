@@ -16,7 +16,8 @@
   - [GraphQL: The Big Picture](frameworks/graphql-the-big-picture/)
   - [\*GraphQL](frameworks/graphql/graphql-org-learn/)
   - [Building Scalable APIs with GraphQL](frameworks/building-scalable-apis-with-graphql/)
-- \*Kubernetes -[Getting Started with Kubernetes](frameworks/kubernetes/getting-started-with-kubernetes/)
+- \*Kubernetes
+  - [Getting Started with Kubernetes](frameworks/kubernetes/getting-started-with-kubernetes/)
 - Serverless
   - [Serverless Computing: The Big Picture](frameworks/serverless-computing-the-big-picture/)
   - Using the Serverless Framework with Node.js on AWS
@@ -40,6 +41,7 @@
 
 ## \*Tools
 
+- [Elasticsearch](tools/elasticsearch/)
 - [Kibana](tools/kibana/)
 - Postman
   - [Postman](tools/postman/)
