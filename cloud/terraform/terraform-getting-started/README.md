@@ -1079,16 +1079,302 @@ terraform apply "dev.tfplan"
 
 ## Using a Module for Common Configurations
 
-### [Overview]()
+### [Overview](https://app.pluralsight.com/course-player?clipId=694f2109-1579-4d9c-9fb6-3e4f9e96a574)
 
-### [The Scenario Expands]()
+- Modules facilitate abstraction and reuse.
 
-### [Modules]()
+### [The Scenario Expands](https://app.pluralsight.com/course-player?clipId=53585557-5176-4006-a501-0c498c3c4ee2)
 
-### [Using the VPC Module]()
+- Scenario expansion:
+  - Build similar infrastructure for other teams.
+  - Commonality:
+    - VPC
+    - Subnets
+    - IG
+    - Routing
+  - So, we'll create a VPC module publicly available.
+  - We can also create an S3 module for ourselves.
 
-### [Using the S3 Module]()
+### [Modules](https://app.pluralsight.com/course-player?clipId=7a2f696e-6bad-4143-954f-a34dc58c1b01)
 
-### [Deploying the Configuration]()
+- Purpose of modules: Code reuse across configurations
+- Contents of module can be remote or stored locally.
+  - If remote:
+    - TF has a public registry of available modules
+  - By default: TF uses a root module (the root configuration you're working in).
+    - Root module can have child modules.
+- Modules support versioning.
+  - Facilitates tracking change (evolution) over time.
+- Provider inheritance
+  - TF makes a best guess at which provider you want to use with a module.
+    - For example, if you're using the VPC module and you have multiple AWS providers, you'll have to specify.
+- Supports multiple instances of a module (e.g., can invoke it for each region).
+  - But modules don't support the 'count' argument. You have to list it out N times in your configuration.
+- Components of a module
+  - It's basically a mini-TF configuration.
+  - Components
+    - Input variables
+    - Resources
+    - Output values
+      - Consumed by calling module
+- Example module:
 
-### [Summary]()
+  ```tf
+  # Intake a name from the calling module.
+  variable "name" {}
+
+  # Create a resource.
+  resource "aws_s3_bucket" "bucket" {
+    name = var.name
+    # Other settings
+  }
+
+  # Return the bucket ID to the calling module.
+  output "bucket_id" {
+    value = aws_s3_bucket.bucket.id
+  }
+  ```
+
+- From a calling module:
+
+  ```tf
+  # Create a module block with a module label.
+  module "bucket" {
+    # Supply module variables.
+    name = "taco-bucket"
+    # Include path to the source (local or remote).
+    source = "./Modules/s3"
+  }
+
+  # Use the module defined above.
+  resource "aws_s3_bucket_object" {
+    # Use the output from the module.
+    bucket = module.bucket.bucket_id
+    # Other resources
+  }
+  ```
+
+### [Using the VPC Module](https://app.pluralsight.com/course-player?clipId=dc890346-17fd-45a1-a62c-d78ad281dacc)
+
+- Module 8 files
+  - Website files:
+    - [index.html](demo/m8/index.html)
+    - [Globo_logo_Vert.png](demo/m8/Globo_logo_Vert.png)
+  - Commands
+    - [m8_commands.txt](demo/m8/m8_commands.txt)
+  - Terraform configuration:
+    - [outputs.tf](demo/m8/outputs.tf)
+    - [resources.tf](demo/m8/resources.tf)
+    - [variables.tf](demo/m8/variables.tf)
+    - Modules
+      - [s3/main.tf](demo/m8/Modules/s3/main.tf)
+      - [s3/outputs.tf](demo/m8/Modules/s3/outputs.tf)
+      - [s3/variables.tf](demo/m8/Modules/s3/variables.tf)
+  - Variables
+    - [terraform.tfvars.example](demo/m8/terraform.tfvars.example)
+- Terraform Module Registry: https://registry.terraform.io/
+- Check marks indicate the module has been verified:
+  - ![](2020-11-17-11-47-03.png)
+  - Shows current version, basic provisioning instructions, and usage instructions.
+    - ![](2020-11-17-11-48-09.png)
+- Consuming the module:
+
+  ```tf
+  data "template_file" "public_cidrsubnet" {
+    count = var.subnet_count[terraform.workspace]
+
+    template = "$${cidrsubnet(vpc_cidr,8,current_count)}"
+
+    vars = {
+      vpc_cidr      = var.network_address_space[terraform.workspace]
+      current_count = count.index
+    }
+  }
+
+  # ...
+
+  # NETWORKING #
+  module "vpc" {
+    # Module source
+    source = "terraform-aws-modules/vpc/aws"
+    name   = "${local.env_name}-vpc"
+    version = "2.15.0"
+
+    cidr            = var.network_address_space[terraform.workspace]
+    # Get a subset of the AZs as a list, starting with the first element up to the subnet count (not inclusive).
+    azs             = slice(data.aws_availability_zones.available.names, 0, var.subnet_count[terraform.workspace])
+    # List of public subnet IP ranges, using splat syntax.
+    # Template file (defined above) creates a text string based on the template we give it.
+    # Here, get a list of 2 public subnet IP address ranges.
+    public_subnets  = data.template_file.public_cidrsubnet[*].rendered
+    private_subnets = []
+
+    tags = local.common_tags
+  }
+
+  # ...
+
+  # SECURITY GROUPS #
+  resource "aws_security_group" "elb-sg" {
+    name   = "nginx_elb_sg"
+    # Get the module ID.
+    vpc_id = module.vpc.vpc_id
+
+    #Allow HTTP from anywhere
+    ingress {
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    #allow all outbound
+    egress {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    tags = merge(local.common_tags, { Name = "${local.env_name}-elb-sg" })
+
+  }
+
+  # ...
+
+  # LOAD BALANCER #
+  resource "aws_elb" "web" {
+    name = "${local.env_name}-nginx-elb"
+
+    # Get subnets.
+    subnets         = module.vpc.public_subnets
+    security_groups = [aws_security_group.elb-sg.id]
+    instances       = aws_instance.nginx[*].id
+
+    listener {
+      instance_port     = 80
+      instance_protocol = "http"
+      lb_port           = 80
+      lb_protocol       = "http"
+    }
+
+    tags = merge(local.common_tags, { Name = "${local.env_name}-elb" })
+
+  }
+
+  # ...
+
+  # INSTANCES #
+  resource "aws_instance" "nginx" {
+    count                  = var.instance_count[terraform.workspace]
+    ami                    = data.aws_ami.aws-linux.id
+    instance_type          = var.instance_size[terraform.workspace]
+    # Get subnet ID based on subnet count and instance count.
+    subnet_id              = module.vpc.public_subnets[count.index % var.subnet_count[terraform.workspace]]
+    vpc_security_group_ids = [aws_security_group.nginx-sg.id]
+    key_name               = var.key_name
+    # Referencing our S3 module.
+    iam_instance_profile   = module.bucket.instance_profile.name
+    depends_on             = [module.bucket]
+
+    connection {
+      type        = "ssh"
+      host        = self.public_ip
+      user        = "ec2-user"
+      private_key = file(var.private_key_path)
+
+    }
+
+    provisioner "file" {
+      content     = <<EOF
+  access_key =
+  secret_key =
+  security_token =
+  use_https = True
+  bucket_location = US
+
+  EOF
+      destination = "/home/ec2-user/.s3cfg"
+    }
+
+    provisioner "file" {
+      content = <<EOF
+  /var/log/nginx/*log {
+      daily
+      rotate 10
+      missingok
+      compress
+      sharedscripts
+      postrotate
+      endscript
+      lastaction
+          INSTANCE_ID=`curl --silent http://169.254.169.254/latest/meta-data/instance-id`
+          sudo /usr/local/bin/s3cmd sync --config=/home/ec2-user/.s3cfg /var/log/nginx/ s3://${module.bucket.bucket.id}/nginx/$INSTANCE_ID/
+      endscript
+  }
+
+  EOF
+
+      destination = "/home/ec2-user/nginx"
+    }
+
+    provisioner "remote-exec" {
+      inline = [
+        "sudo yum install nginx -y",
+        "sudo service nginx start",
+        "sudo cp /home/ec2-user/.s3cfg /root/.s3cfg",
+        "sudo cp /home/ec2-user/nginx /etc/logrotate.d/nginx",
+        "sudo pip install s3cmd",
+        "s3cmd get s3://${module.bucket.bucket.id}/website/index.html .",
+        "s3cmd get s3://${module.bucket.bucket.id}/website/Globo_logo_Vert.png .",
+        "sudo cp /home/ec2-user/index.html /usr/share/nginx/html/index.html",
+        "sudo cp /home/ec2-user/Globo_logo_Vert.png /usr/share/nginx/html/Globo_logo_Vert.png",
+        "sudo logrotate -f /etc/logrotate.conf"
+
+      ]
+    }
+
+    tags = merge(local.common_tags, { Name = "${local.env_name}-nginx${count.index + 1}" })
+  }
+  ```
+
+### [Using the S3 Module](https://app.pluralsight.com/course-player?clipId=18889c91-3dbc-408d-909c-896ac1054ec7)
+
+- S3 Module
+  - [s3/variables.tf](demo/m8/Modules/s3/variables.tf)
+  - [s3/main.tf](demo/m8/Modules/s3/main.tf)
+  - [s3/outputs.tf](demo/m8/Modules/s3/outputs.tf)
+- Invoking the module:
+  - [resources.tf](demo/m8/resources.tf) > `module "bucket"`, and in EC2 instance and provisioners.
+
+### [Deploying the Configuration](https://app.pluralsight.com/course-player?clipId=1f5e5323-1d87-494d-a8d5-ef46c49bc580)
+
+```sh
+terraform init
+# As part of its initialization process, note that it finds the custom S3 module and downloads the VPC module and provider plugins.
+# These files land in a `.terraform/` directory, with a `modules/` and a `plugins/` directory.
+
+terraform workspace new Development
+
+terraform plan -out dev.tfplan
+
+terraform apply "dev.tfplan"
+# Note URL output
+```
+
+- Note that it creates the VPC resource, with consistent CIDR block and tags:
+  - ![](2020-11-19-09-33-07.png)
+- Verify
+  - Website files were uploaded to S3
+  - VPC was created with proper address space
+    - According to module's own naming conventions
+  - EC2 instances with IP address ranges and IAM roles
+  - Web address output
+
+### [Summary](https://app.pluralsight.com/course-player?clipId=f1c439f6-7001-41e2-af19-8f271bfa1b81)
+
+- Build infrastructure automagically
+- Ensure consistent repeatable deployment
+- Reuse existing configurations
+- Increase your productivity by reducing manual processes and eliminating inconsistencies
+- Make your job better or find a better job

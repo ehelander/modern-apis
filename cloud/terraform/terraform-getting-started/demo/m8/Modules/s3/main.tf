@@ -1,4 +1,9 @@
-# S3 Bucket config#
+# S3 Bucket config
+# We basically extracted the S3-related resources:
+  # Role
+  # Instance profile
+  # Instance policy
+  # S3 bucket
 resource "aws_iam_role" "allow_instance_s3" {
   name = "${var.name}_allow_instance_s3"
 

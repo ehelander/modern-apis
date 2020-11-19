@@ -163,7 +163,9 @@ resource "aws_instance" "nginx" {
   subnet_id              = module.vpc.public_subnets[count.index % var.subnet_count[terraform.workspace]]
   vpc_security_group_ids = [aws_security_group.nginx-sg.id]
   key_name               = var.key_name
+  # Get the instance profile from our S3 bucket.
   iam_instance_profile   = module.bucket.instance_profile.name
+  # Assure that the creation of the bucket and IAM role are complete before creating the EC2 instance.
   depends_on             = [module.bucket]
 
   connection {
@@ -186,6 +188,7 @@ EOF
     destination = "/home/ec2-user/.s3cfg"
   }
 
+  # Note reference to S3 module.
   provisioner "file" {
     content = <<EOF
 /var/log/nginx/*log {
@@ -207,6 +210,7 @@ EOF
     destination = "/home/ec2-user/nginx"
   }
 
+  # Note reference to S3 module.
   provisioner "remote-exec" {
     inline = [
       "sudo yum install nginx -y",
@@ -226,15 +230,20 @@ EOF
   tags = merge(local.common_tags, { Name = "${local.env_name}-nginx${count.index + 1}" })
 }
 
-# S3 Bucket config#
+# S3 Bucket config
+# Invoke our S3 module
 module "bucket" {
+  # Supply the name varialbe, defined locally.
   name = local.s3_bucket_name
 
+  # Reference the local path to the file.
   source      = ".\\Modules\\s3"
+  # Supply the common_tags variable, defined locally.
   common_tags = local.common_tags
 }
 
 resource "aws_s3_bucket_object" "website" {
+  # Get the ID from the bucket output variable.
   bucket = module.bucket.bucket.id
   key    = "/website/index.html"
   source = "./index.html"
