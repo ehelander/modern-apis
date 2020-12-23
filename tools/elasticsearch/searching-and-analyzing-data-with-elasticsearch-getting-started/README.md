@@ -184,9 +184,51 @@
   brew services start elasticsearch
   ```
 
-### [Basic Concepts in Elasticsearch]()
+### [Basic Concepts in Elasticsearch](https://app.pluralsight.com/course-player?clipId=6bfdcef2-b012-40f4-b831-535c85b3ad12)
 
-### [Monitoring the Health of the Cluster]()
+- Near realtime search
+  - Very low latency: ~1 second from the time the document is indexed until it becomes searchable.
+- Distributed by nature
+  - Runs on multiple machines (nodes) within a cluster.
+  - Each node performs indexing.
+  - All nodes participate in search and analysis operations.
+  - Each node has a unique ID and name.
+- Cluster
+  - A collection of nodes that cooperate.
+  - holds the entire indexed data.
+  - Has a unique name.
+    - Default: `elasticsearch`
+- Nodes join a cluster using the cluster name.
+- Documents
+  - Divided into categories or types (logical groupings).
+  - These different types make up an index.
+- Index
+  - Collection of similar documents.
+    - Inverted index data structure.
+  - Identified by a name.
+  - Can have any number of indices.
+    - Design an index based on broad, top-level categories.
+  - Document types are user-defined grouping semantics
+  - Documents with the same fields belong to one type.
+- Document
+  - A container of text that needs to be searchable.
+  - Expressed in JSON.
+  - All documents reside within an index.
+  - All documents are assigned to a type within an index.
+  - Documents may be too large to store on a single node (or it may be too slow).
+  - Solution: Split documents across multiple machines.
+    - Sharding your data. Each node contains 1 shard of the data.
+    - Allows searching in parallel across multiple nodes.
+- Replicas
+  - Replicas enable high availability.
+  - Each shard has a corresponding replica.
+    - A shard can be replicated 0 or more times.
+  - Searching multiple replicas enable scaling search volume/throughput.
+  - By default: An index in Elasticsearch has 5 shards and 1 replica (so every shard has 1 backup copy).
+
+### [Monitoring the Health of the Cluster](https://app.pluralsight.com/course-player?clipId=58c3f752-3be8-4cfc-9f15-51500592891f)
+
+- localhost:9200
 
 ## Executing CRUD Operations Using the Elasticsearch APIs
 
