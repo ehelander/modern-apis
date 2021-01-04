@@ -37,6 +37,8 @@
   - [\*Introduction to Serverless on Azure](cloud/azure/introduction-to-serverless-on-azure/)
   - [Developing with Node.js on Microsoft Azure - Getting Started](cloud/azure/developing-with-nodejs-on-microsoft-azure-getting-started/)
   - [AZ-900 Microsoft Azure Fundamentals 2020](cloud/azure/az-900-microsoft-azure-fundamentals-2020/)
+- \*Google Cloud Platform
+  - [Google Cloud Platform Fundamentals](cloud/google-cloud-platform/google-cloud-platform-fundamentals/)
 - \*Terraform
   - [Terraform - Getting Started](cloud/terraform/terraform-getting-started)
 
