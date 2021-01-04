@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # Name registered with DNS.
+  name: ps-nodeport
+spec:
+  type: NodePort
+  ports:
+    # The port the services listens on inside the cluster.
+    - port: 80
+      # The port the app is listening on.
+      targetPort: 8080
+      # The external port that would be mapped on every cluster node.
+      nodePort: 31111
+      # Default is TCP, so we could omit this.
+      protocol: TCP
+  selector:
+    # The list of labels that has to match the labels on the pod we deployed earlier.
+    app: web

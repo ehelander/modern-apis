@@ -1,0 +1,32 @@
+# Older versions may have extensions/v1beta1 or extensions/v1beta2
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deploy
+  # This label isn't about selecting pods.
+  labels:
+    app: web
+# The spec for our deployment:
+spec:
+  # Create 5 pods running the image specified below.
+  replicas: 5
+  # This is how the deployment knows which pods to work on (e.g., rolling updates).
+  # This must match the labels in the template below. The deployment needs to know which pods it's managing.
+  selector:
+    matchLabels:
+      app: web
+  # The spec for our pod:
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      terminationGracePeriodSeconds: 1
+      # The spec for our container (our app):
+      containers:
+        - name: hello-pod
+          image: nigelpoulton/getting-started-k8s:1.0
+          # Always pull the image from the registry. E.g., Docker Deep Dive.
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080

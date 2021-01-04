@@ -16,6 +16,9 @@
   - [GraphQL: The Big Picture](frameworks/graphql-the-big-picture/)
   - [\*GraphQL](frameworks/graphql/graphql-org-learn/)
   - [Building Scalable APIs with GraphQL](frameworks/building-scalable-apis-with-graphql/)
+- \*Kubernetes
+  - [Getting Started with Kubernetes](frameworks/kubernetes/getting-started-with-kubernetes/)
+  - [Helm](frameworks/kubernetes/helm/)
 - Serverless
   - [Serverless Computing: The Big Picture](frameworks/serverless-computing-the-big-picture/)
   - Using the Serverless Framework with Node.js on AWS
@@ -34,9 +37,12 @@
   - [\*Introduction to Serverless on Azure](cloud/azure/introduction-to-serverless-on-azure/)
   - [Developing with Node.js on Microsoft Azure - Getting Started](cloud/azure/developing-with-nodejs-on-microsoft-azure-getting-started/)
   - [AZ-900 Microsoft Azure Fundamentals 2020](cloud/azure/az-900-microsoft-azure-fundamentals-2020/)
+- \*Terraform
+  - [Terraform - Getting Started](cloud/terraform/terraform-getting-started)
 
 ## \*Tools
 
+- [Elasticsearch](tools/elasticsearch/)
 - [Kibana](tools/kibana/)
 - Postman
   - [Postman](tools/postman/)

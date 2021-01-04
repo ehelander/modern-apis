@@ -553,11 +553,386 @@
 
 ## Storage
 
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/introduction/watch)
+
+- An Azure Storage Account: A unique Azure namespace
+  - Each object in Azure has its own web address
+    - E.g., `acloudguru.<storagetype>.core.windows.net`
+
+### [Blob](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/a221d327-720c-b36f-c3ab-7c6e44da8ed4/watch)
+
+- Blob: Binary Large Object
+  - Pretty much anything
+  - _Blobs_ are stored in _containers_ in a _storage account_.
+  - Use cases
+    - Images
+    - Files
+    - Streaming content
+    - Log files
+    - Data store
+  - 3 types of blobs
+    - Block
+      - Up to 4.7 TB
+      - Made up of blocks that can be managed individually
+    - Append
+      - Optimized for append operations (e.g., logs)
+    - Page
+      - Up to 8 TB
+      - Any part of the file can be accessed at any time (e.g., virtual hard drive)
+  - 3 pricing tears
+    - Hot
+      - For frequently-accessed files.
+      - Lowest access times.
+      - Highest access costs.
+    - Cool
+      - Intended for data that will remain in the cool tier for at least 30 days.
+      - Lower storage costs.
+      - Higher access times.
+    - Archive
+      - Lowest cost.
+      - Highest access times.
+
+### [Disk](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/e720bc20-99cb-e818-5c62-11e6cb38253d/watch)
+
+- A _managed_ disk is what you attach to your VMs.
+  - Azure manages backups and uptime
+  - Azure guarantees size and performance.
+  - Can easily upgrade disk size and disk type.
+  - 4 main disk types:
+    - HDD
+      - Old-school spinning hard drive.
+      - Low cost.
+      - Good for infrequent access.
+        - Backups, development.
+    - Standard SSD
+      - For production environments
+    - Premium SSD
+      - Super fast, high performance.
+      - Recommended for databases.
+    - Ultra Disk
+      - For the most demanding, data-intensive workloads.
+        - Transactions, analytics, gaming, rendering, etc.
+      - Up to 64 TB
+
+### [File](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/34b96e05-93e0-8ea6-6c31-31acb1e22e54/watch)
+
+- Typical issues with fileshares
+  - Constraints (e.g., size)
+  - Backups
+  - Security
+  - Extending access to other teams, etc.
+- Benefits with a File Storage Account on Azure
+  - Can share across multiple machines
+  - Fully-managed
+  - Resilient
+- Scenarios
+  - Hybrid with on-prem (such as to expand space, or replace on-prem)
+  - Lift & shift
+    - Move all infrastructure to Azure
+
+### [Archive](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/e003f503-30df-a142-73aa-376548a6242c/watch)
+
+- Use case: For policies, legislation, and recovery
+- Lowest-priced storage tier within Azure (e.g., TBs for a few dollars per month)
+- Azure Archive provides durable, encrypted, and stable data storage.
+- Can be used to free-up more valuable storage (e.g., on-prem).
+- Archive Storage is a blob storage tier.
+
+### [Lab: Creating a Storage Account](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/lab-creating-storage-account/watch)
+
+- Azure Portal &rarr; Storage Accounts &rarr; Add
+  - Choose a subscription
+  - Create (or select) a resource group
+  - Provide a `Storage account name`
+    - All lower-case, no special characters.
+  - Location
+  - Performance
+    - Standard or premium
+  - Defaults for others
+  - Create
+  - Go to resource
+    - ![](2020-10-13-16-10-27.png)
+    - Containers
+      - `+ Container`
+        - Name
+        - Public access level
+      - Upload a file
+      - If we change it to `Blob (anonymous read access for blobs only)`, the file is accessible on the Internet.
+        - ![](2020-10-13-16-12-23.png)
+        - ![](2020-10-13-16-12-59.png)
+          - storageacgtest.blog.core.windows.net/acgcontainer/Lars.png
+- Clean up resources (delete resource group)
+
+### [Summary](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/storage/d66b9bf1-2fc4-1120-be59-6a6491aa7be6/watch)
+
+- ![](2020-10-13-16-16-18.png)
+
 ## Database
+
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/introduction/watch)
+
+### [Cosmos DB](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/9a1b830a-ea75-00b4-e6cb-3023e92dccfb/watch)
+
+- Cosmos is global (from the start, with the click of a button)
+  - Traditional databases are notoriously bad at distribution and synchronization
+  - With Cosmos, it's one click to add a region. Azure takes care of the rest.
+- Cosmos DB promises single-digit millisecond latency anywhere in the world.
+- Cosmos DB can be set to automatically scale.
+- 'Infinite' resources.
+- You only pay for what you use.
+- Connectivity
+  - Cosmos supports a wide range of ways to work with it (SDKs and APIs).
+  - Support for most modern languages.
+  - Support for a variety of platforms
+    - SQL
+    - MongoDB
+    - Cassandra
+- Warning
+  - It can get quite expensive (as Cosmos scales up)
+
+### [Azure SQL](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/579b4230-fe11-3bc8-4115-0ba488607dac/watch)
+
+- Microsoft's SQL database was launched in 1989.
+- Azure SQL
+  - A database as a service
+    - Azure handles your hardware and IaaS needs.
+- On-prem SQL Server instances can be seamlessly migrated to Azure SQL.
+- Built-in machine learning
+  - Optimization
+  - Warnings (e.g., degradation or anomalies)
+- Cloud benefits
+  - Scalability
+  - Space
+    - Up to 100 TB
+  - Security
+    - Built-in Azure security
+
+### [Azure Database for MySQL](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/2fcd0912-e8c5-3649-11ee-bb2ada82ba92/watch)
+
+- Context
+  - Open source
+  - Relational
+  - Mature and stable
+- Azure advantages
+  - Paas: The infrastructure is managed by Azure
+  - Can focus on development (instead of managing servers and networks)
+  - Choice of language and framework (e.g., PHP and WordPress)
+  - High availability and scalability
+  - Azure security features
+    - Treat detection, identity management, monitoring
+  - Automatic patching, backups, etc.
+
+### [Azure Database for PostgreSQL](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/770ce200-697b-7a43-11b9-c57f6347867f/watch)
+
+- Name: Because the first version was based on Ingres.
+- Free & stable (since 1996).
+  - Default database for MacOS
+- Lots of extensions
+  - JSONB
+  - Geospatial functions
+  - Indexing
+  - Integration with VS Code
+- Horizontal scaling with hyperscale
+  - Can scale easily to hundreds of nodes
+- Performance recommendations based on usage
+- Fully-managed cloud capabilities
+- Use cases
+  - Financial applications
+    - Can be integrated with Matlab and R
+  - PostGIS
+  - Automated failover and full redundancy
+
+### [Database Migration Services](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/d19abb9b-9683-1cbe-e631-080b49d43838/watch)
+
+- One-step migration from Microsoft SQL to Azure SQL
+- Comprehensive guides
+  - Including for migrating from non-MS databases.
+
+### [Lab: Creating Cosmos DB](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/lab-creating-cosmos-db/watch)
+
+- Azure portal &rarr; Cosmos DB &rarr; Add
+  - Subscription & resource group
+  - Account name
+    - For the DB
+  - Location, etc.
+  - Create
+  - Go to resource
+    - Note URI
+      - ![](2020-10-13-16-58-24.png)
+    - Note: `Replicate Data Globally`
+      - Can enable more data centers with a click.
+        - ![](2020-10-13-16-59-03.png)
+- Clean up resources
+
+### [Summary](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/database/75aea0f1-552b-69b9-9630-3954ce4cae3f/watch)
+
+- ![](2020-10-13-17-02-48.png)
 
 ## Authentication and Authorization
 
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/introduction/watch)
+
+### [Identity Services](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/4ac19019-2948-808d-0fbc-d95f1ee15cb3/watch)
+
+- Authentication
+  - Confirming identity (e.g., via username and password)
+- Authorization
+  - Follows authentication
+  - Answers the question: Do you get access?
+  - The granular portion of identity services
+
+### [Azure Active Directory](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/55266f32-abe0-a704-a7a9-03c0f37027de/watch)
+
+- Active Directory (AD)
+  - Designed for a traditional office (on-preim users)
+    - Hosted by companies
+  - The 'web' wasn't in mind.
+  - AD is quite different from AAD
+- Azure Active Directory (AAD)
+  - You can't have an Azure account without an AAD service.
+    - Each account needs a first user in the initial AAD instance.
+  - Tenant
+    - Represents an organization.
+    - A dedicated instance of AAD that an organization receives when signing up for Azure.
+    - Each AAD tenant is completely distinct and separate.
+    - A user belongs to a single tenant (but can be guests of others).
+  - Subscription
+    - A billing entity.
+    - All resources within a subscription are billed together.
+      - Can be used to separate costs.
+      - If a payment isn't paid, the services stop working.
+- Hybrid cloud architecture
+  - AAD can help manage users both in the cloud and on-prem.
+
+### [Multi-Factor Authentication](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/a7e72f27-af51-8793-778a-c1a31fc460a6/watch)
+
+- A layered approach to authentication
+  - Usually at least 2 of the following:
+    - Something you know
+    - Something you have
+    - Something you are
+- Enabled through AAD
+
+### [Lab: Azure Active Directory](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/lab-azure-active-directory/watch)
+
+- Azure portal &rarr; Azure Active Directory
+  - ![](2020-10-13-17-33-33.png)
+  - ![](2020-10-13-17-33-49.png)
+  - Add a new user
+    - ![](2020-10-13-17-33-59.png)
+    - ![](2020-10-13-17-34-42.png)
+    - ![](2020-10-13-17-35-04.png)
+      - Can use this user to assign roles, etc.
+
+### [Summary](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/authentication-and-authorization/e3ca3d3d-d1de-dd17-f837-fdaa0db5e5eb/watch)
+
+- ![](2020-10-13-17-36-20.png)
+
 ## Azure Solutions
+
+### [Introduction](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/introduction/watch)
+
+### [Internet of Things](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/internet-of-things/watch)
+
+- Wikipedia: "A system of interrelated computing devices, mechanical and digital machines, objects, animals or people that are provided with unique identifiers and the ability to transfer data over a network without requiring human-to-human or human-to-computer interaction."
+- Azure IoT services
+  - IoT Hub
+    - A hub (backend) to collect data feeds from all your 'things'.
+      - Up to "billions" of devices.
+    - Ensures devices are managed and secure, new devices can be deployed with ease.
+    - PaaS
+      - More control over whole process.
+  - IoT Central
+    - The SaaS IoT offering on Azure.
+      - Simplifies IoT setup.
+      - No code needed.
+      - Receives feeds from devices; provides dashboards and metrics.
+      - Pre-made connectors.
+
+### [Big Data](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/big-data/watch)
+
+- Azure tools
+  - Azure Data Lake Analytics
+    - Includes parallel processing.
+  - Azure HDInsights
+    - Similar to Azure Data Lake Analytics, but uses entirely open source tools.
+    - Includes Apache Hadoop, Spark, and Kafka.
+  - Azure Databricks
+    - Based on Apache Spark.
+    - Provides the computing power and integration points with Azure storage services.
+  - Azure Synapse Analytics
+    - Azure's data warehouse offering
+    - Used to be called Azure SQL Data Warehouse
+    - Use the Synapse SQL language
+- Outcomes
+  - ![](2020-10-14-10-12-58.png)
+
+### [Artificial Intelligence](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/artificial-intelligence/watch)
+
+- Microsoft: "Artificial Intelligence is the capability of a machine to imitate intelligent human behavior. Through AI, machines can analyse, images, comprehend speech, interact in natural ways and make predictions using data."
+- On Azure, AI is often called Machine Learning
+- Azure focuses on 3 tasks:
+  - Models
+    - A set of rules of how to use the data provided. The model finds patterns.
+  - Knowledge Mining
+    - Using Azure Search to find relationships in your data.
+  - Built-in Apps
+    - Can be used out-of-the box.
+- Azure services
+  - Azure Cognitive Services
+    - Vision Service
+      - Recognize, identify, and caption videos and images.
+    - Decision Service
+      - Make informed decisions based on content.
+      - Detect potential offensive language, detect IoT anomalies, leverage data analytics.
+    - Speech Service
+      - Takes spoken stream and converts to transcript.
+      - Can track multiple voices and identify a speaker based on speech.
+  - Azure Machine Learning Studio
+    - A visual tool to manage ML needs.
+    - Supports all Azure ML tools.
+    - Includes pre-made modules.
+    - Use cases: tweet sentiment analysis, photo grouping, and movie recommendations.
+  - Azure Machine Learning Service
+    - End-to-end service for using ML almost anywhere on Azure.
+    - A range of tools for helping you build AI applications.
+    - Automatically recognizes trends in applications and creates models.
+
+### [Serverless](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/serverless/watch)
+
+- No management of servers.
+  - An extreme version of PaaS.
+- 3 serverless products from Azure
+  - Azure Functions
+    - Original 'serverless' service on Azure.
+    - Designed for a single task: a single function.
+    - Basic compute action.
+  - Logic Apps
+    - Connect systems inside and outside Azure.
+    - Integrate apps, data flows, services, and entire systems.
+    - Schedule, automate, and orchestrate tasks and processes.
+    - No coding required.
+    - Can use templates.
+    - Use cases
+      - When a new order is created, track how long it took, insert a record into a database, email a person conditionally.
+  - Event Grid
+    - Event: When an application or process wants the world to know that something happened.
+    - Most Azure products can be connected to Event Grid.
+    - A routing services for connecting applications for sending/receiving events.
+    - Serverless.
+    - Simplify complex cloud architecture.
+- Exam tips
+  - ![](2020-10-14-10-24-37.png)
+
+### [DevOps](https://learn.acloud.guru/course/az-900-microsoft-azure-fundamentals/learn/azure-solutions/f6a11fed-abab-aa9a-7e14-180214c8dc4e/watch)
+
+- DevOps: The work between development and production.
+- No official definition...
+  - Lars Klint: DevOps is at its core about people: how developers, engineers and system administratos organize themselves and work as a team to deliver better products faster.
+
+### [Lab: Using Azure AI]()
+
+### [Summary]()
 
 ## Security
 
