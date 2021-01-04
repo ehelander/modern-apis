@@ -592,23 +592,24 @@ public class KafkaProducerApp {
   /usr/local/Cellar/kafka/2.6.0/libexec/config
 
   # Create 2 new server.properties files:
+  cp libexec/config/server.properties libexec/config/server-0.properties
   cp libexec/config/server.properties libexec/config/server-1.properties
   cp libexec/config/server.properties libexec/config/server-2.properties
 
   # Second terminal - start broker:
   cd /usr/local/Cellar/kafka/2.6.0/
-  bin/kafka-server-start libexec/config/server.properties
+  bin/kafka-server-start libexec/config/server-0.properties
   # Third terminal - start broker:
   cd /usr/local/Cellar/kafka/2.6.0/
   bin/kafka-server-start libexec/config/server-1.properties
   # Fourth terminal - start broker:
   cd /usr/local/Cellar/kafka/2.6.0/
-  bin/kafka-server-start libexec/config/server.properties
+  bin/kafka-server-start libexec/config/server-2.properties
 
   # Create topic
   bin/kafka-topics --zookeeper localhost:2181 --create --topic my-topic --partitions 3 --replication-factor 3
   # View topics
-  bin/kafka-topics --describe --topic my_topic --zookeeper localhost:2181
+  bin/kafka-topics --describe --topic my-topic --zookeeper localhost:2181
   # Create consumer
   bin/kafka-console-consumer --bootstrap-server localhost:9092 --topic my-topic --from-beginning
   ```
@@ -627,33 +628,412 @@ public class KafkaProducerApp {
 
 ### Introduction and Apache Kafka Consumer Overview
 
+- ![](2020-10-08-08-53-10.png)
+- ![](2020-10-08-08-53-17.png)
+- ![](2020-10-08-08-53-51.png)
+  - The function of the initial required properties is closely related to the initial required producer properties.
+  - https://kafka.apache.org/documentation/#consumerconfigs
+- ![](2020-10-08-08-55-33.png)
+
 ### Subscribing and Unsubscribing to Topics
+
+- ![](2020-10-08-08-56-30.png)
+  - Note that the method signature of `subscribe()` takes in a collection of strings (topics).
+  - May not be a limit to the number of topics that can be subscribed to.
+- A nuance:
+  - Calls to `subscribe()` are _not_ incremental: A subsequent call overwrites the first.
+  - ![](2020-10-08-08-57-34.png)
+- You don't unsubscribe from individual topics; you simply unsubscribe:
+  - ![](2020-10-08-08-58-04.png)
 
 ### Comparing Subscribe and Assign APIs
 
+- `subscribe()` vs. `assign()`:
+  - With `subscribe()`, you're enlisting the consumer to poll from every partition within every topic.
+  - Another option: Subscribe to individual partitions (via `assign()`) - _regardless_ of topic.
+  - Both take lists, and neither can be added to incrementally.
+  - `assign()`: Advanced.
+  - ![](2020-10-08-09-00-26.png)
+- ![](2020-10-08-09-01-23.png)
+
 ### Single Consumer Subscriptions and Assignments
+
+- Benefit to using `subscribe()`: Partition management is managed for you.
+  - E.g., if a new partition is added to the topic, it's added automatically to the topic list polled by the consumer.
+  - ![](2020-10-08-09-06-22.png)
+- `assign()` is similar to hard-coding partition IDs.
+  - ![](2020-10-08-09-07-41.png)
 
 ### The Poll Loop
 
+- Polling within the consumer context.
+  - Primary function of the Kafka consumer.
+- ![](2020-10-08-09-09-01.png)
+- A poll loop must live within a loop - an infinite loop we'll only interrupt if needed.
+- Inside a try/catch: A good idea, due to potential network complications.
+  - And the poll operation opens network resources, so we need to close them.
+- ![](2020-10-08-09-28-37.png)
+
 ### Demo: Simple Kafka Consumer
+
+- Similar setup as before.
+- ![](2020-10-08-09-30-36.png)
+- Setup
+  - 1 broker
+  - 2 topics
+    - `my-topic`
+    - `my-other-topic`
+  - 3 partitions per topic
+- `bin/kafka-topics --zookeeper localhost:2181 --describe`
+  - ![](2020-10-08-09-32-36.png)
+- 2 sample Java applications
+  - KafkaConsumerSubscribeApp.java
+    - ![](2020-10-08-09-34-05.png)
+    - ![](2020-10-08-09-34-21.png)
+      - Timeout value: 10 milliseconds
+  - KafkaConsumerAssignApp.java
+    - Virtually identical.
+      - Except we have to create a TopicPartition collection, and invoking `.assign()`.
+    - ![](2020-10-08-09-35-30.png)
+    - ![](2020-10-08-09-41-37.png)
+    -
+
+```java
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+
+public class KafkaConsumerSubscribeApp {
+  public static void main(String[] args) {
+    Properties props = new Properties();
+    props.put("bootstrap.servers", "localhost:9092,localhost:9093");
+    props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+    props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+    props.put("group.id", "test");
+
+    KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+
+    // Subscribe to a list of topics.
+    List<String> topics = Arrays.asList("my-topic", "my-other-topic");
+    consumer.subscribe(topics);
+
+    try (consumer) {
+      while (true) {
+        ConsumerRecords<String, String> records = consumer.poll(10);
+        for (ConsumerRecord<String, String> record : records) {
+          System.out.println(
+              String.format(
+                  "Topic: %s, Partition: %d, Offset: %d, Key: %s, Value: %s",
+                  record.topic(),
+                  record.partition(),
+                  record.offset(),
+                  record.key(),
+                  record.value()));
+        }
+      }
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+  }
+}
+```
+
+```java
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+
+public class KafkaConsumerAssignApp {
+  public static void main(String[] args) {
+    Properties props = new Properties();
+    props.put("bootstrap.servers", "localhost:9092,localhost:9093");
+    props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+    props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+    props.put("group.id", "test");
+
+    KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+
+    // Assign a list of partitions.
+    TopicPartition myTopicPartition0 = new TopicPartition("my-topic", 0);
+    TopicPartition myOtherTopicPartition2 = new TopicPartition("my-other-topic", 2);
+    List<TopicPartition> partitions = Arrays.asList(myTopicPartition0, myOtherTopicPartition2);
+    consumer.assign(partitions);
+
+    try (consumer) {
+      while (true) {
+        ConsumerRecords<String, String> records = consumer.poll(10);
+        for (ConsumerRecord<String, String> record : records) {
+          System.out.println(
+              String.format(
+                  "Topic: %s, Partition: %d, Offset: %d, Key: %s, Value: %s",
+                  record.topic(),
+                  record.partition(),
+                  record.offset(),
+                  record.key(),
+                  record.value()));
+        }
+      }
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+  }
+}
+```
+
+- Handy tool for creating lots of messages: `kafka-producer-perf-test.sh`.
+  - ![](2020-10-08-10-31-43.png)
+  - ![](2020-10-08-10-45-45.png)
+    - Same configuration for both topics.
+  - ![](2020-10-08-10-47-56.png)
+    - Subscribing to all partitions by topic.
+  - ![](2020-10-08-10-46-50.png)
+    - We only see results from the partitions we passed to `assign()`.
+  - If we create another partition for one of those topics (via `kafka-topics.sh`, altering it to `4` instead of `3` partitions)...
+    - ![](2020-10-08-10-49-48.png)
+    - ![](2020-10-08-10-50-06.png)
+    - ...
+      - The `subscribe()` version picks up the new partition's messages (`3`):
+        - ![](2020-10-08-10-51-11.png)
+      - But the `assign()` didn't.
+        - ![](2020-10-08-10-51-44.png)
 
 ### Walkthrough: Consumer Polling
 
+- The `SubscriptionState` object is the source of truth for the topics of partitions the consumer is subscribed to, and works with the ConsumerCoordinator to manage offsets.
+  - Timeout: The minimum amount of time each message retrieval session will take.
+    - Upon timeout expiry, records are returned and added to an in-memory buffer, then processed.
+    - ![](2020-10-08-10-55-38.png)
+
 ### Walkthrough: Message Processing
 
-### The Consumer OFfset in Detail
+- Kafka consumers are essentially single-threaded: Just a single `poll()` loop.
+  - Goal: Keep it simple and force parallelism in different, more scalable manners.
+- After the `poll()` method has returned messages for processing:
+  - Careful consideration should be given to how each record is processed.
+    - Remember: A slow consumer doesn't impact the cluster's performance.
+  - ![](2020-10-08-10-57-58.png)
+
+### The Consumer Offset in Detail
+
+- The offset is the critical value that allows consumers to operate independently.
+  - ![](2020-10-08-10-58-28.png)
+- Terminology
+  - Last committed offset
+    - The last record the consumer has confirmed to have processed.
+    - This is within a _partition_. A consumer may have multiple offsets: one for each partition within a topic.
+  - Current position
+    - Advances as the consumer advances.
+    - Difference between 'last committed offset' and 'current position': Un-committed offsets
+  - Log-end offset
+- ![](2020-10-08-11-00-54.png)
+- 2 important configuration properties that govern the default behavior of the consumer offsets
+  - `enable.auto.commit`
+    - Manages when current position offsets are upgraded to full committed offsets.
+  - Based on a time: `auto.commit.interval`
+    - By default, set to 5000 milliseconds.
+    - Likely sufficient, but this depends on your processing speed. If processing takes longer than this interval, Kafka commits it.
+    - Generally, large-scale systems operate with _eventual_ consistency.
+      - The extent to which your system can be tolerant of eventual consistency is determined by its reliability.
+  - ![](2020-10-08-11-11-55.png)
+    - If an error occurs, the impact varies based on the consumer topology.
+      - Single consumer vs. multiple consumers in a consumer group.
 
 ### Offset Behavior and Management
 
+- Read != committed
+  - Depends on offset management mode.
+- Offset commit behavior is configurable.
+  - `enable.auto.commit`
+    - `true` by default
+    - Similar to garbage collection: Convenient, until it isn't.
+  - `auto.commit.interval.ms`
+    - `5000` by default
+    - As long as there is a gap, there is some risk of failure and a gap or record duplication.
+  - `auto.offset.rest`
+    - Strategy to use when a consumer starts reading from a new partition.
+    - `latest`: Default
+      - Starts from latest known committed offset.
+    - Could be `earliest`.
+    - Could be `none`: Throw an exception, and let the consumer decide what to do with it.
+- Kafka stores the committed consumer offsets in `__consumer_offsets`
+  - Defaults to 50 partitions.
+- ![](2020-10-08-11-18-15.png)
+- ![](2020-10-08-11-18-39.png)
+  - We would want a replication factor higher than 1.
+- How does the committed offset value get produced in the topic?
+  - The Consumer Coordinator
+    - So a consumer is also a producer (of sorts)
+    - ![](2020-10-08-11-19-35.png)
+- Offset management
+  - 2 modes
+    - Automatic
+      - `enable.auto.commit = true` (default
+    - Manual
+      - `enable.auto.commit = false`
+      - You take full control of when you want Kafka to consider a record to have been fully processed.
+      - Advanced, but not uncommon.
+      - The API for manual offset management consists of 2 methods:
+        - `commitSync()`
+        - `commitAsync()`
+
 ### CommitSync and CommitAsync for Manual Offset Management
+
+- `commitSync()`
+  - When you want precise control over when you want a record to be considered fully processed.
+  - Used when you need higher consistency for message processing (e.g., not processing new records until certain previously-committed records have been processed).
+  - Suggestion: Invoke this message after processing records in a `for` loop, not during.
+    - _Can_ invoke after every message, but this would likely just introduce latency.
+  - ![](2020-10-08-11-36-15.png)
+    - `retry.backoff.ms`: Default, `100` ms.
+- `commitAsync()`
+  - Due to the asynchronous nature of the call, you don't know exactly when the commit succeeded.
+    - Does _not_ automatically retry upon failure.
+    - But there _is_ a callback option: Will be triggered upon commit response from cluster.
+      - Can determine the status of the commit and act accordingly.
+  - Better throughput/performance.
+    - But only recommended when you register a callback and can handle the responses accordingly.
+  - ![](2020-10-08-11-38-05.png)
 
 ### When to Manager Your Own Offsets Altogether
 
+- ![](2020-10-08-11-41-04.png)
+- For advanced scenarios, you can handle offset management on your own.
+  - Common reasons for taking control of offsets:
+    - Consistency
+      - When a message is processed and ready to commit (vs. default: when auto commit interval expires)
+    - Atomicity
+      - Treating steps of message consumption/processing as an atomic operation.
+      - "Exactly-once" vs. "at-least-once" processing
+        - Most common scenario
+        - In order to get an exactly-once system, will likely need to handle manually.
+
 ### Scaling out with Consumer Groups
+
+- A scary reality may be required to consume from dozens or hundreds of topics, each with many partitions: Overwhelming for a single consumer with a single thread.
+- Solution: Scale out the number of consumers consuming messages, working in concert &rarr; consumer groups
+  - A group of independent consumers working as a team.
+  - Only requirement: `group.id` setting as a configuration property before starting the consumer.
+  - Enables evenly sharing message consumption/processing load
+    - Increased parallelism and higher throughput.
+    - Increased redundancy.
+    - Improved performance.
+- Consumer Group: Formed when individual consumers with a common group id invoke `subscribe()` and pass in a common topic list.
+  - Behind the scenes: A designated broker is elected to serve as GroupCoordinator, monitoring/maintaining the consumer group's membership and monitors specific partitions within a topic.
+  - Each consumer sends regular heartbeats (`heartbeat.interval.ms`, `session.timeout.ms`)
+    - Group Coordinator relies on these to determine consumer health.
+      - If an unhealthy consumer: A rebalance occurs.
+        - Needs to figure out where the failed consumer left off.
+          - Where offset management can make or break a consumer group (reprocessing, missing, etc.).
+      - And when a new consumer joins, a rebalance occurs.
+      - And when a new partition is added.
+- ![](2020-10-08-11-52-20.png)
 
 ### Consumer Group Coordinator
 
+- When a new consumer in the group is assigned a partition that was previously assigned to a different consumer:
+  - `auto.offset.reset` setting. Default: `latest`.
+    - Assumes the committed offset was accurately/completely committed prior to rebalance.
+  - ![](2020-10-08-11-54-06.png)
+- Group Coordinator duties
+  - Evenly balance available consumers to partitions
+    - Whenever possible: Assigns 1:1 consumer-to-partition ratio
+      - But if more consumers than partitions: over-provisioned
+  - Initiate rebalancing protocol
+    - Topic changes (partition added)
+    - Consumer failure
+
 ### Demo: Consumer Groups
+
+- 3 independent, identical (except for the class name) consumers, sharing a group ID.
+
+```java
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+
+public class KafkaConsumerGroupApp01 {
+  public static void main(String[] args) {
+    Properties props = new Properties();
+    props.put("bootstrap.servers", "localhost:9092,localhost:9093");
+    props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+    props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+    props.put("group.id", "test-group");
+
+    KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+
+    // Subscribe to a list of topics.
+    List<String> topics = Collections.singletonList("my-big-topic");
+    consumer.subscribe(topics);
+
+    try (consumer) {
+      while (true) {
+        ConsumerRecords<String, String> records = consumer.poll(10);
+        for (ConsumerRecord<String, String> record : records) {
+          System.out.println(
+              String.format(
+                  "Topic: %s, Partition: %d, Value: %s",
+                  record.topic(),
+                  record.partition(),
+                  record.value()).toUpperCase());
+        }
+      }
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+  }
+}
+```
+
+```java
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+
+import java.util.Properties;
+import java.util.stream.IntStream;
+
+public class KafkaGroupProducerApp {
+  public static void main(String[] args) {
+    Properties props = new Properties();
+    props.put("bootstrap.servers", "localhost:9092,localhost:9093");
+    props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+    props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+
+    KafkaProducer<String, String> producer = new KafkaProducer<>(props);
+
+    try (producer) {
+      String topic = "my-big-topic";
+      String value = "abcdefghijklmnopqrstuvwxyz";
+      IntStream.range(0, 150)
+          .forEachOrdered(
+                  i -> {
+                ProducerRecord<String, String> record = new ProducerRecord<>(topic, value);
+                producer.send(record);
+              });
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+}
+```
+
+- ![](2020-10-08-12-18-02.png)
+- ![](2020-10-08-12-18-12.png)
+- ![](2020-10-08-12-18-21.png)
+- But if we add a 4th consumer to this consumer group (an overprovisioned consumer group: only 3 partitions), one consumer doesn't get any messages.
 
 ### Configuration and Advanced Topics
 

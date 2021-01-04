@@ -13,8 +13,10 @@ public class KafkaProducerApp {
 
         // Important: Close resource to avoid memory leak.
         try (KafkaProducer<String, String> producer = new KafkaProducer<>(props)) {
+            String topic = "my-topic";
+            String value = "MyMessage: %i";
             IntStream.range(0, 150).forEachOrdered(i -> {
-                ProducerRecord<String, String> record = new ProducerRecord<>("my-topic", Integer.toString(i), "MyMessage: " + Integer.toString(i));
+                ProducerRecord<String, String> record = new ProducerRecord<>(topic, Integer.toString(i), String.format(value, i));
                 producer.send(record);
             });
         } catch (Exception e) {
